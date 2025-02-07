@@ -60,8 +60,6 @@ class PermissionRegistrar
 
     /**
      * PermissionRegistrar constructor.
-     *
-     * @param  \Illuminate\Cache\CacheManager  $cacheManager
      */
     public function __construct(CacheManager $cacheManager)
     {
@@ -130,8 +128,6 @@ class PermissionRegistrar
     /**
      * Register the permission check method on the gate.
      * We resolve the Gate fresh here, for benefit of long-running instances.
-     *
-     * @return bool
      */
     public function registerPermissions(): bool
     {
@@ -197,10 +193,6 @@ class PermissionRegistrar
 
     /**
      * Get the permissions based on the passed params.
-     *
-     * @param  array  $params
-     * @param  bool  $onlyOne
-     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getPermissions(array $params = [], bool $onlyOne = false): Collection
     {
@@ -227,8 +219,6 @@ class PermissionRegistrar
 
     /**
      * Get an instance of the permission class.
-     *
-     * @return \Spatie\Permission\Contracts\Permission
      */
     public function getPermissionClass(): Permission
     {
@@ -246,8 +236,6 @@ class PermissionRegistrar
 
     /**
      * Get an instance of the role class.
-     *
-     * @return \Spatie\Permission\Contracts\Role
      */
     public function getRoleClass(): Role
     {
@@ -280,8 +268,6 @@ class PermissionRegistrar
 
     /**
      * Changes array keys with alias
-     *
-     * @return array
      */
     private function aliasedArray($model): array
     {
@@ -358,8 +344,8 @@ class PermissionRegistrar
 
         return Collection::make(
             array_map(function ($item) use ($permissionInstance) {
-                return $permissionInstance
-                    ->newFromBuilder($this->aliasedArray(array_diff_key($item, ['r' => 0])))
+                return $permissionInstance->newInstance([], true)
+                    ->setRawAttributes($this->aliasedArray(array_diff_key($item, ['r' => 0])), true)
                     ->setRelation('roles', $this->getHydratedRoleCollection($item['r'] ?? []));
             }, $this->permissions['permissions'])
         );
@@ -378,7 +364,8 @@ class PermissionRegistrar
         $roleInstance = new $roleClass();
 
         array_map(function ($item) use ($roleInstance) {
-            $role = $roleInstance->newFromBuilder($this->aliasedArray($item));
+            $role = $roleInstance->newInstance([], true)
+                ->setRawAttributes($this->aliasedArray($item), true);
             $this->cachedRoles[$role->getKey()] = $role;
         }, $this->permissions['roles']);
 

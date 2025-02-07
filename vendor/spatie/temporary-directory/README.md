@@ -1,6 +1,3 @@
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/support-ukraine.svg?t=1" />](https://supportukrainenow.org)
-
 # Quickly create, use and delete temporary directories
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/temporary-directory.svg?style=flat-square)](https://packagist.org/packages/spatie/temporary-directory)
@@ -44,11 +41,19 @@ composer require spatie/temporary-directory
 
 ### Creating a temporary directory
 
-To create a temporary directory simply call the `create` method on a `TemporaryDirectory` object. By default the temporary directory will be created in a timestamped directory in your system's temporary directory (usually `/tmp`).
+To create a temporary directory simply call the `create` method on a `TemporaryDirectory` object.
 
 ```php
 (new TemporaryDirectory())->create();
 ```
+
+Alternatively, use the static `make` method on a `TemporaryDirectory` object.
+
+```php
+TemporaryDirectory::make();
+```
+
+By default, the temporary directory will be created in a timestamped directory in your system's temporary directory (usually `/tmp`).
 
 ### Naming your temporary directory
 
@@ -78,7 +83,13 @@ You can set a custom location in which your temporary directory will be created 
    ->create();
 ```
 
-Optionally you can call the `location` method with a `$location` argument.
+The `make` method also accepts a `$location` argument.
+
+```php
+TemporaryDirectory::make($location);
+```
+
+Finally, you can call the `location` method with a `$location` argument.
 
 ```php
 (new TemporaryDirectory())
@@ -110,6 +121,28 @@ Once you're done processing your temporary data you can delete the entire tempor
 ```php
 $temporaryDirectory->delete();
 ```
+
+### Deleting a temporary directory when the object is destroyed
+
+If you want to automatically have the filesystem directory deleted when the object instance has no more references in
+its defined scope, you can enable `deleteWhenDestroyed()` on the TemporaryDirectory object.
+
+```php
+function handleTemporaryFiles()
+{
+    $temporaryDirectory = (new TemporaryDirectory())
+        ->deleteWhenDestroyed()
+        ->create();
+
+    // ... use the temporary directory
+
+    return; // no need to manually call $temporaryDirectory->delete()!
+}
+
+handleTemporaryFiles();
+```
+
+You can also call `unset()` on an object instance.
 
 ## Testing
 
