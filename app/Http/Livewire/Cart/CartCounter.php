@@ -4,7 +4,7 @@ namespace App\Http\Livewire\Cart;
 
 use Livewire\Component;
 use App\Models\Cart;
-use Gloudemans\Shoppingcart\Facades\Cart as SessionCart;
+use App\Facades\SessionCart;
 use Illuminate\Support\Facades\Auth;
 
 class CartCounter extends Component

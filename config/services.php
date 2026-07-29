@@ -37,7 +37,4 @@ return [
         'redirect' => env('GOOGLE_REDIRECT'),
     ],
 
-    'mixpanel' => [
-        'token' => env('MIXPANEL_TOKEN'),
-    ]
 ];

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('category');
             $table->double('commission');
             $table->string('mockup_image');
+            $table->string('mockup_image_2')->nullable();
             $table->integer('status');
             $table->double('min');
             $table->string('color');

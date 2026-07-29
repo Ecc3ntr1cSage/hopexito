@@ -29,6 +29,7 @@ return new class extends Migration
             $table->string('address');
             $table->string('postcode');
             $table->string('state');
+            $table->string('phone')->nullable();
             $table->timestamps();
         });
     }

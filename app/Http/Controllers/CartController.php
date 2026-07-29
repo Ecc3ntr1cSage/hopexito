@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\AddedToCart;
 use App\Models\Product;
 use App\Models\Cart;
-use Gloudemans\Shoppingcart\Facades\Cart as SessionCart;
+use App\Facades\SessionCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

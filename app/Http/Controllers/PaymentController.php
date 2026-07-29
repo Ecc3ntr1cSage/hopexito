@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\PurchaseCompleted;
 use App\Events\UserHasCheckout;
-use Gloudemans\Shoppingcart\Facades\Cart as SessionCart;
+use App\Facades\SessionCart;
 use App\Models\Cart;
 use Illuminate\Http\Request;
 use App\Models\Order;

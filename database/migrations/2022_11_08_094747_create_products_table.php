@@ -28,12 +28,16 @@ return new class extends Migration
             $table->string('color');
             $table->string('category');
             $table->string('image_front');
+            $table->string('image_back')->nullable();
             $table->integer('status')->default(1);
             $table->integer('sold')->default(0);
+            $table->text('product_image')->nullable();
+            $table->string('product_image_path')->nullable();
+            $table->text('product_image_2')->nullable();
+            $table->string('product_image_2_path')->nullable();
+            $table->boolean('preview')->default(false);
             $table->timestamps();
         });
-        DB::statement("ALTER TABLE products ADD 
-        (product_image MEDIUMBLOB)");
     }
 
     /**
