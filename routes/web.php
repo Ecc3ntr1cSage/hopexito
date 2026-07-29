@@ -11,17 +11,6 @@ use App\Http\Controllers\UploadController;
 use App\Http\Livewire\Manage\ManageProduct;
 use App\Http\Livewire\Manage\ManageOrder;
 use Illuminate\Support\Facades\Route;
-use App\Http\Livewire\Admin\AdminAnalytics;
-use App\Http\Livewire\Admin\AdminOrder;
-use App\Http\Livewire\Admin\AdminCarts;
-use App\Http\Livewire\Admin\AdminDashboard;
-use App\Http\Livewire\Admin\AdminInventory;
-use App\Http\Livewire\Admin\AdminWallet;
-use App\Http\Livewire\Admin\AdminProduct;
-use App\Http\Livewire\Admin\AdminTemplate;
-use App\Http\Livewire\Admin\AdminStorage;
-use App\Http\Livewire\Admin\GodMode;
-use App\Http\Livewire\Admin\AdminSession;
 use App\Http\Livewire\DeliveryInformation;
 use App\Http\Livewire\Manage\ManageSales;
 
@@ -31,21 +20,6 @@ Route::get('billplz', [PaymentController::class, 'createBill'])->name('billplz-c
 Route::post('billplz', [PaymentController::class, 'storeBill'])->name('billplz-store');
 Route::get('billplz-callback', [PaymentController::class, 'callback'])->name('billplz-callback');
 Route::get('billplz-redirect', [PaymentController::class, 'redirect'])->name('billplz-redirect');
-// admin middleware
-Route::middleware(['auth', 'verified', 'admin'])->group(function () {
-    // admin controller
-    Route::get('admin/dashboard', AdminDashboard::class)->name('admin.dashboard');
-    Route::get('admin/analytics', AdminAnalytics::class)->name('admin.analytics');
-    Route::get('admin/orders', AdminOrder::class)->name('admin.orders');
-    Route::get('admin/carts', AdminCarts::class)->name('admin.carts');
-    Route::get('admin/wallets', AdminWallet::class)->name('admin.wallets');
-    Route::get('admin/products', AdminProduct::class)->name('admin.products');
-    Route::get('admin/templates', AdminTemplate::class)->name('admin.templates');
-    Route::get('admin/inventory', AdminInventory::class)->name('admin.inventory');
-    Route::get('admin/storage', AdminStorage::class)->name('admin.storage');
-    Route::get('admin/session', AdminSession::class)->name('admin.session');
-    Route::get('godmode', GodMode::class)->name('godmode');
-});
 // artist middleware
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [Controller::class, 'redirectUser'])->name('dashboard');

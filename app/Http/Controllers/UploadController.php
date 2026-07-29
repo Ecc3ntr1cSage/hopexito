@@ -166,7 +166,7 @@ class UploadController extends Controller
         ]);
 
         session()->flash('message', 'Product Template Created');
-        return redirect()->route('admin.templates');
+        return redirect()->route('explore');
     }
     // upload collection image
     public function uploadCollection(Request $request)

@@ -55,7 +55,7 @@
                         </div>
                     </div>
                     <div class="max-w-5xl mx-auto md:-translate-y-60 -translate-y-72 -mb-28">
-                        <x-jet-admin-card>
+                        <div class="p-4 rounded-xl shadow-lg bg-clip-padding backdrop-filter backdrop-blur-md bg-gradient-to-r from-rose-400/10 via-fuchsia-500/10 to-indigo-500/10 shadow-violet-500/50">
                             <div class="grid grid-cols-2 gap-2 mx-auto mt-6 sm:grid-cols-3 lg:grid-cols-4">
                                 @foreach ($item->product as $product)
                                     <a href="{{ route('product.show', $product->slug) }}" x-data="{ open: false }">
@@ -97,7 +97,7 @@
                                     </a>
                                 @endforeach
                             </div>
-                        </x-jet-admin-card>
+                        </div>
                     </div>
                 @endforeach
             </div>

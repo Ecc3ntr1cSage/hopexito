@@ -21,15 +21,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $admin_role = Role::firstOrCreate(['name'=> 'admin']);
-        $admin = User::updateOrCreate(['email' => 'admin@hopexito.com'], [
-            'name' => 'Admin',
-            'password' => bcrypt('181d12b7a9A'),
-            'email_verified_at' => now(),
-            'role_id' => 1
-        ]);
-        $admin->assignRole($admin_role);
-
         $artist_role = Role::firstOrCreate(['name'=> 'artist']);
         $artist = User::updateOrCreate(['email' => 'supatee@gmail.com'], [
             'name' => 'SupaTee',

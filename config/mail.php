@@ -85,7 +85,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'admin@hopexito.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'noreply@hopexito.com'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME')),
     ],
 

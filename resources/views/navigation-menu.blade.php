@@ -88,8 +88,10 @@
                                                  <span class="mx-auto">Sell your art</span>
                                              </x-jet-button>
 
-                                         @endif
-                                         <div class="border-t border-indigo-500 border-1"></div>
+                          @endif
+                          @if (Auth::user()->role_id == 2 || Auth::user()->role_id == 3)
+                          <div class="border-t border-indigo-500 border-1"></div>
+                          @endif
                                          <form method="POST" action="{{ route('logout') }}" x-data>
                                              @csrf
                                              <x-jet-dropdown-link href="{{ route('logout') }}"
@@ -100,12 +102,8 @@
                                      </div>
                                  </x-slot>
                              </x-jet-dropdown>
-                             @livewire('cart.cart-counter')
-                             @else
-                             <x-jet-button-custom onclick="window.location.href='{{ route('admin.dashboard') }}'">
-                                Admin Dashboard
-                             </x-jet-button-custom>
-                         @endif
+                              @livewire('cart.cart-counter')
+                          @endif
                      @else
                          <x-jet-nav-link href="{{ route('login') }}" :active="request()->routeIs('login')">
                              Login
