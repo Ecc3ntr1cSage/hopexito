@@ -8,10 +8,9 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\TemporaryFile;
 use App\Models\ProductTemplate;
+use App\Services\MockupGenerator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
 
 class ProductsController extends Controller
 {
@@ -28,41 +27,77 @@ class ProductsController extends Controller
     }
     
     // store products into database
-    public function store(Request $request)
+    public function store(Request $request, MockupGenerator $mockups)
     {
         $minimum_price = $request->input('min');
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|max:255',
             'tags' => 'required|max:255',
             'price' => 'required|numeric|min:' . $minimum_price,
             'commission' => 'required|numeric',
-            'color' => 'required',
+            'color' => 'required|array',
+            'preview_color' => 'required|string',
+            'category' => 'required|string',
+            'image_front' => 'required|image|max:8192',
+            'image_back' => 'nullable|image|max:8192',
+            'template_front' => 'required|string',
+            'template_back' => 'nullable|string',
+            'front_x' => 'required|integer',
+            'front_y' => 'required|integer',
+            'front_w' => 'required|integer',
+            'front_h' => 'required|integer',
+            'back_x' => 'nullable|integer',
+            'back_y' => 'nullable|integer',
+            'back_w' => 'nullable|integer',
+            'back_h' => 'nullable|integer',
         ]);
-        $temporaryFile = TemporaryFile::where('filename', $request->image_front)->first();
-        if ($temporaryFile) {
-            $temporaryFile->delete();
+
+        $frontDesignPath = $request->file('image_front')->store('image-front', 'public');
+        $backDesignPath = $request->file('image_back')?->store('image-back', 'public');
+
+        $frontMockupPath = $mockups->generate(
+            $request->file('image_front'),
+            $validated['template_front'],
+            ['x' => $validated['front_x'], 'y' => $validated['front_y'], 'w' => $validated['front_w'], 'h' => $validated['front_h']],
+            $validated['preview_color']
+        );
+
+        $backMockupPath = null;
+        if ($request->hasFile('image_back') && $request->filled('template_back')) {
+            $backMockupPath = $mockups->generate(
+                $request->file('image_back'),
+                $validated['template_back'],
+                [
+                    'x' => $validated['back_x'] ?? $validated['front_x'],
+                    'y' => $validated['back_y'] ?? $validated['front_y'],
+                    'w' => $validated['back_w'] ?? $validated['front_w'],
+                    'h' => $validated['back_h'] ?? $validated['front_h'],
+                ],
+                $validated['preview_color']
+            );
         }
-        $temporaryFile_2 = TemporaryFile::where('filename', $request->image_back)->first();
-        if ($temporaryFile_2) {
-            $temporaryFile_2->delete();
-        }
-        $input = $request->all();
-        $dataUrl = $input['product_image'];
-        $image = Image::make($dataUrl);
-        $image->encode('jpg', 90);
-        $optimizedImageUrl = 'data:image/jpeg;base64,' . base64_encode($image->__toString());
-        $input['product_image'] = $optimizedImageUrl;
-        $dataUrl2 = $input['product_image_2'];
-        $image2 = Image::make($dataUrl2);
-        $image2->encode('jpg', 90);
-        $optimizedImageUrl2 = 'data:image/jpeg;base64,' . base64_encode($image2->__toString());
-        $input['product_image_2'] = $optimizedImageUrl2;
-        $input['preview'] = intval($request->input('preview'));
-        $input['color'] = implode(',', $request->input('color'));
-        $input['artist_id'] = Auth::user()->id;
-        $input['shopname'] = Auth::user()->name;
-        $input['slug'] = Str::random(30);
-        Product::create($input);
+
+        Product::create([
+            'title' => $validated['title'],
+            'slug' => Str::random(30),
+            'tags' => $validated['tags'],
+            'artist_id' => Auth::id(),
+            'shopname' => Auth::user()->name,
+            'collection_id' => $request->input('collection_id'),
+            'price' => $validated['price'],
+            'discount' => $request->input('discount', 1),
+            'commission' => $validated['commission'],
+            'color' => implode(',', $validated['color']),
+            'category' => $validated['category'],
+            'image_front' => basename($frontDesignPath),
+            'image_front_path' => $frontMockupPath,
+            'image_back' => $backDesignPath ? basename($backDesignPath) : null,
+            'image_back_path' => $backMockupPath,
+            'product_image_path' => $frontMockupPath,
+            'product_image_2_path' => $backMockupPath,
+            'preview' => intval($request->input('preview', 0)),
+        ]);
+
         session()->flash('message', 'Product Created');
         return redirect()->route('product.create');
     }

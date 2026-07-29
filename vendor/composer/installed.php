@@ -3,7 +3,7 @@
         'name' => 'hopexito/hopexito',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '9cb1b1d7b91fd8aab8911099863a0ebc0eebfb2b',
+        'reference' => 'a30a426a05557958fba4f76bd6a55d50e9d9b2cd',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -205,7 +205,7 @@
         'hopexito/hopexito' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '9cb1b1d7b91fd8aab8911099863a0ebc0eebfb2b',
+            'reference' => 'a30a426a05557958fba4f76bd6a55d50e9d9b2cd',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

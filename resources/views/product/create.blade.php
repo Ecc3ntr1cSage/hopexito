@@ -22,7 +22,7 @@
                         </p>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 gap-4 py-16 mx-auto text-white md:grid-cols-3">
+                <div class="grid grid-cols-1 gap-4 py-16 mx-auto text-white md:grid-cols-2">
                     <div class="block h-48 mx-2 group sm:mx-0">
                         <a href="{{ route('mockup.shirt') }}"
                             class=" relative flex flex-col items-center h-full rounded-3xl border-4 border-indigo-500 bg-black/40 p-8 transition group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:shadow-[8px_8px_0_0_#ec4899]">
@@ -38,42 +38,6 @@
                             <img src="../image/product-selection/oversized.png"
                                 class="w-16 h-16 p-2 bg-indigo-500 rounded-full" />
                         </a>
-                    </div>
-                    <div class="block h-48 mx-2 group sm:mx-0">
-                        <div
-                            class=" relative flex flex-col items-center h-full rounded-3xl border-4 border-indigo-500 bg-black/40 p-8 transition group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:shadow-[8px_8px_0_0_#ec4899]">
-                            <p class="my-3 text-lg text-indigo-400">Totebag</p>
-                            <img src="../image/product-selection/totebag.png"
-                                class="w-16 h-16 p-2 bg-indigo-500 rounded-full" />
-                            <p class="absolute px-2 uppercase rounded-md bg-rose-500/90 bottom-14">Coming Soon</p>
-                        </div>
-                    </div>
-                    <div class="block h-48 mx-2 group sm:mx-0">
-                        <div
-                            class=" relative flex flex-col items-center h-full rounded-3xl border-4 border-indigo-500 bg-black/40 p-8 transition group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:shadow-[8px_8px_0_0_#ec4899]">
-                            <p class="my-3 text-lg text-indigo-400">Hoodie</p>
-                            <img src="../image/product-selection/hoodie.png"
-                                class="w-16 h-16 p-2 bg-indigo-500 rounded-full" />
-                            <p class="absolute px-2 uppercase rounded-md bg-rose-500/90 bottom-14">Coming Soon</p>
-                        </div>
-                    </div>
-                    <div class="block h-48 mx-2 group sm:mx-0">
-                        <div
-                            class=" relative flex flex-col items-center h-full rounded-3xl border-4 border-indigo-500 bg-black/40 p-8 transition group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:shadow-[8px_8px_0_0_#ec4899]">
-                            <p class="my-3 text-lg text-indigo-400">Sweater</p>
-                            <img src="../image/product-selection/sweater.png"
-                                class="w-16 h-16 p-2 bg-indigo-500 rounded-full" />
-                            <p class="absolute px-2 uppercase rounded-md bg-rose-500/90 bottom-14">Coming Soon</p>
-                        </div>
-                    </div>
-                    <div class="block h-48 mx-2 group sm:mx-0">
-                        <div
-                            class=" relative flex flex-col items-center h-full rounded-3xl border-4 border-indigo-500 bg-black/40 p-8 transition group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:shadow-[8px_8px_0_0_#ec4899]">
-                            <p class="my-3 text-lg text-indigo-400">Sublimation</p>
-                            <img src="../image/product-selection/jersey.png"
-                                class="w-16 h-16 p-2 bg-indigo-500 rounded-full" />
-                            <p class="absolute px-2 uppercase rounded-md bg-rose-500/90 bottom-14">Coming Soon</p>
-                        </div>
                     </div>
                 </div>
             </div>

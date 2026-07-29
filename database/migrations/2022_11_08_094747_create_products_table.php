@@ -28,7 +28,9 @@ return new class extends Migration
             $table->string('color');
             $table->string('category');
             $table->string('image_front');
+            $table->string('image_front_path')->nullable();
             $table->string('image_back')->nullable();
+            $table->string('image_back_path')->nullable();
             $table->integer('status')->default(1);
             $table->integer('sold')->default(0);
             $table->text('product_image')->nullable();

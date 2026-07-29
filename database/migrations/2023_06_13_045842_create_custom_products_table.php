@@ -21,9 +21,9 @@ return new class extends Migration
             $table->string('size');
             $table->integer('quantity');
             $table->string('custom_image_front');
-            $table->string('custom_image_back');
+            $table->string('custom_image_back')->nullable();
             $table->string('custom_product_image');
-            $table->string('custom_product_image_2');
+            $table->string('custom_product_image_2')->nullable();
             $table->timestamps();
         });
     }

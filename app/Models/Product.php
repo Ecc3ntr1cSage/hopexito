@@ -24,13 +24,27 @@ class Product extends Model
         'color',
         'category',
         'image_front',
+        'image_front_path',
         'image_back',
+        'image_back_path',
         'status',
         'sold',
         'product_image',
+        'product_image_path',
         'product_image_2',
+        'product_image_2_path',
         'preview'
     ];
+
+    public function getProductImageAttribute($value)
+    {
+        return $this->image_front_path ? asset('storage/'.$this->image_front_path) : $value;
+    }
+
+    public function getProductImage2Attribute($value)
+    {
+        return $this->image_back_path ? asset('storage/'.$this->image_back_path) : $value;
+    }
 
     public function productUser(){
         return $this->hasOne(User::class,'id','artist_id');

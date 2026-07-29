@@ -15,32 +15,13 @@ class JetstreamServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->registerComponent('button-utility');
-        $this->registerComponent('button-custom');
-        $this->registerComponent('searchbar');
-        $this->registerComponent('footer');
-        $this->registerComponent('admin-sidebar');
-        $this->registerComponent('session-message');
-        $this->registerComponent('admin-card');
-        $this->registerComponent('admin-layout');
-        $this->registerComponent('modal-custom');
-        $this->registerComponent('modal-custom-2');
-        $this->registerComponent('modal-custom-3');
-        $this->registerComponent('admin-nav');
-        $this->registerComponent('header');
-        $this->registerComponent('carousel');
-        $this->registerComponent('wallet-card');
-        $this->registerComponent('lightning');
-        $this->registerComponent('gradient-card');
-        $this->registerComponent('title');
-        $this->registerComponent('admin-header');
-        $this->registerComponent('glitch-text');
-        $this->registerComponent('title-small');
-        $this->registerComponent('whatsapp-contact');
+        foreach (glob(resource_path('views/vendor/jetstream/components/*.blade.php')) as $component) {
+            $this->registerComponent(basename($component, '.blade.php'));
+        }
     }
     protected function registerComponent(string $component)
     {
-        Blade::component('jetstream::components.'.$component, 'jet-'.$component);
+        Blade::component('vendor.jetstream.components.'.$component, 'jet-'.$component);
     }
     /**
      * Bootstrap any application services.

@@ -7,10 +7,9 @@ use App\Models\CustomProduct;
 use App\Models\ProductCollection;
 use App\Models\ProductTemplate;
 use App\Models\TemporaryFile;
+use App\Services\MockupGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Storage;
 
 class UploadController extends Controller
 {
@@ -193,40 +192,66 @@ class UploadController extends Controller
         return redirect()->route('product.manage');
     }
 
-    public function uploadCustom(Request $request)
+    public function uploadCustom(Request $request, MockupGenerator $mockups)
     {
-        $request->validate([
+        $validated = $request->validate([
             'size' => 'required',
             'color' => 'required',
+            'quantity' => 'required|integer|min:1',
+            'custom_image_front' => 'required|image|max:8192',
+            'custom_image_back' => 'nullable|image|max:8192',
+            'template_front' => 'required|string',
+            'template_back' => 'nullable|string',
+            'front_x' => 'required|integer',
+            'front_y' => 'required|integer',
+            'front_w' => 'required|integer',
+            'front_h' => 'required|integer',
+            'back_x' => 'nullable|integer',
+            'back_y' => 'nullable|integer',
+            'back_w' => 'nullable|integer',
+            'back_h' => 'nullable|integer',
         ]);
-        $temporaryFile = TemporaryFile::where('filename', $request->custom_image_front)->first();
-        if ($temporaryFile) {
-            $temporaryFile->delete();
+
+        $frontDesignPath = $request->file('custom_image_front')->store('custom-image-front', 'public');
+        $backDesignPath = $request->file('custom_image_back')?->store('custom-image-back', 'public');
+
+        $frontMockupPath = $mockups->generate(
+            $request->file('custom_image_front'),
+            $validated['template_front'],
+            ['x' => $validated['front_x'], 'y' => $validated['front_y'], 'w' => $validated['front_w'], 'h' => $validated['front_h']],
+            $validated['color'],
+            'custom-product-front/'.uniqid('custom-', true).'.png'
+        );
+
+        $backMockupPath = null;
+        if ($request->hasFile('custom_image_back') && $request->filled('template_back')) {
+            $backMockupPath = $mockups->generate(
+                $request->file('custom_image_back'),
+                $validated['template_back'],
+                [
+                    'x' => $validated['back_x'] ?? $validated['front_x'],
+                    'y' => $validated['back_y'] ?? $validated['front_y'],
+                    'w' => $validated['back_w'] ?? $validated['front_w'],
+                    'h' => $validated['back_h'] ?? $validated['front_h'],
+                ],
+                $validated['color'],
+                'custom-product-back/'.uniqid('custom-', true).'.png'
+            );
         }
-        $temporaryFile_2 = TemporaryFile::where('filename', $request->custom_image_back)->first();
-        if ($temporaryFile_2) {
-            $temporaryFile_2->delete();
-        }
-        $input = $request->all();
-        $dataUrl = $input['custom_product_image'];
-        $image = Image::make($dataUrl);
-        $image->encode('png');
-        $filename = uniqid() . '-' . Auth::user()->name . '.png';
-        Storage::disk('public')->put('custom-product-front/' . $filename, $image->stream());
-        $input['custom_product_image'] = $filename;
-        $dataUrl2 = $input['custom_product_image_2'];
-        $image2 = Image::make($dataUrl2);
-        $image2->encode('png');
-        $filename2 = uniqid() . '-' . Auth::user()->name . '.png';
-        Storage::disk('public')->put('custom-product-back/' . $filename2, $image2->stream());
-        $input['custom_product_image_2'] = $filename2;
-        $input['user_id'] = Auth::user()->id;
-        $input['price'] = 35;
-        $product = CustomProduct::create($input);
-        if($product){
-            $id = $product->id;
-        }
-        dd($product);
-        return redirect()->route('');
+
+        CustomProduct::create([
+            'user_id' => Auth::id(),
+            'price' => 35,
+            'color' => $validated['color'],
+            'size' => $validated['size'],
+            'quantity' => $validated['quantity'],
+            'custom_image_front' => basename($frontDesignPath),
+            'custom_image_back' => $backDesignPath ? basename($backDesignPath) : null,
+            'custom_product_image' => $frontMockupPath,
+            'custom_product_image_2' => $backMockupPath ?? $frontMockupPath,
+        ]);
+
+        session()->flash('message', 'Custom product saved for demo review.');
+        return redirect()->route('cart.index');
     }
 }

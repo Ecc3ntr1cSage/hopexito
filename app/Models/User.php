@@ -4,9 +4,11 @@ namespace App\Models;
 
 use App\Notifications\CustomResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -17,7 +19,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasApiTokens;
     use HasFactory;
     use HasProfilePhoto {
-        getProfilePhotoUrlAttribute as getPhotoUrl;
+        profilePhotoUrl as protected jetstreamProfilePhotoUrl;
     }
     use Notifiable;
     use TwoFactorAuthenticatable;
@@ -67,13 +69,17 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @return string
      */
-    public function getProfilePhotoUrlAttribute()
+    protected function profilePhotoUrl(): Attribute
     {
-        if (filter_var($this->profile_photo_path, FILTER_VALIDATE_URL)) {
-            return $this->profile_photo_path;
-        }
+        return Attribute::get(function (): string {
+            if (filter_var($this->profile_photo_path, FILTER_VALIDATE_URL)) {
+                return $this->profile_photo_path;
+            }
 
-        return $this->getPhotoUrl();
+            return $this->profile_photo_path
+                ? Storage::disk($this->profilePhotoDisk())->url($this->profile_photo_path)
+                : $this->defaultProfilePhotoUrl();
+        });
     }
 
     public function sendPasswordResetNotification($token)

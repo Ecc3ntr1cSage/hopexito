@@ -10,6 +10,7 @@ use App\Models\Search;
 use App\Models\User;
 use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ExploreController extends Controller
 {
@@ -18,12 +19,8 @@ class ExploreController extends Controller
     public function sellyourart()
     {
         $sellers = User::where('role_id', 2)
-            ->whereNotNull('profile_photo_path')
-            ->whereHas('artist', function ($query) {
-                $query->whereNotNull('cover_image');
-            })
             ->withCount('products')
-            ->having('products_count', '>', 9)
+            ->has('products', '>', 0)
             ->inRandomOrder()
             ->take(5)
             ->get();
@@ -34,12 +31,8 @@ class ExploreController extends Controller
     public function explore()
     {
         $users = User::where('role_id', 2)
-            ->whereNotNull('profile_photo_path')
-            ->whereHas('artist', function ($query) {
-                $query->whereNotNull('cover_image');
-            })
             ->withCount('products')
-            ->having('products_count', '>', 9)
+            ->has('products', '>', 0)
             ->inRandomOrder()
             ->take(5)
             ->get();
@@ -50,6 +43,10 @@ class ExploreController extends Controller
             ->inRandomOrder()
             ->take(8)
             ->get();
+
+        if ($products->isEmpty()) {
+            $products = Product::where('status', 1)->inRandomOrder()->take(8)->get();
+        }
 
         $collections = ProductCollection::inRandomOrder()
             ->whereHas('product', function ($query) {
@@ -150,7 +147,7 @@ class ExploreController extends Controller
             'id' => Auth::user()->id
         ]);
         Wallet::create([
-            'id' => uniqid(8),
+            'id' => (string) Str::uuid(),
             'user_id' => Auth::user()->id,
             'name' => Auth::user()->name,
             'commission' => 0,
