@@ -54,25 +54,27 @@ class CheckoutFlowTest extends TestCase
         $this->assertDatabaseCount('orders', 0);
     }
 
-    public function test_guest_success_redirects_to_the_order_receipt(): void
+    public function test_guest_checkout_requires_authentication(): void
     {
         $owner = User::factory()->create();
         $product = $this->makeProduct($owner);
 
-        $this->withSession([
-            'delivery_info' => [
-                'name' => 'Guest Buyer', 'email' => 'guest@example.com', 'phone' => '0123456789',
-                'address' => '2 Hope Street', 'postcode' => '50100', 'state' => 'Kuala Lumpur',
-            ],
-        ])->post(route('cart.store'), [
+        $this->post(route('cart.store'), [
             'product_id' => $product->id, 'size' => 'L', 'color' => 'White', 'quantity' => 1,
         ])->assertRedirect(route('cart.index'));
 
-        $this->followingRedirects()->post(route('billplz-store'), ['payment_result' => 'success'])
+        $this->get(route('cart.index'))
             ->assertOk()
-            ->assertSee('2 Hope Street')
-            ->assertSee('Your Orders');
-        $this->assertDatabaseCount('orders', 1);
+            ->assertSee('Log in to continue')
+            ->assertSee('open-auth');
+
+        $this->get(route('guest.checkout'))
+            ->assertRedirect(route('login'));
+
+        $this->post(route('billplz-store'), ['payment_result' => 'success'])
+            ->assertRedirect(route('login'));
+
+        $this->assertDatabaseCount('orders', 0);
     }
 
     private function makeProduct(User $owner): Product

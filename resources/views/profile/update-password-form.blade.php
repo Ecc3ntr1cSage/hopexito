@@ -1,40 +1,35 @@
-<x-jet-form-section submit="updatePassword">
-    <x-slot name="title">
-        {{ __('Update Password') }}
-    </x-slot>
-
-    <x-slot name="description">
-        {{ __('Ensure your account is using a long, random password to stay secure.') }}
-    </x-slot>
-
-    <x-slot name="form">
-        @if(!is_null(Auth::user()->password))
-        <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="current_password" value="{{ __('Current Password') }}" />
-            <x-jet-input id="current_password" type="password" class="mt-1 block w-full" wire:model.defer="state.current_password" autocomplete="current-password" />
-            <x-jet-input-error for="current_password" class="mt-2" />
-        </div>
-        @endif
-        <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="password" value="{{ __('New Password') }}" />
-            <x-jet-input id="password" type="password" class="mt-1 block w-full" wire:model.defer="state.password" autocomplete="new-password" />
-            <x-jet-input-error for="password" class="mt-2" />
+<div class="settings-panel settings-panel-compact">
+    <form wire:submit.prevent="updatePassword" class="settings-form">
+        <div class="settings-form-intro">
+            <span class="settings-form-kicker">Password control</span>
+            <span class="settings-form-status"><i></i> Protected</span>
         </div>
 
-        <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
-            <x-jet-input id="password_confirmation" type="password" class="mt-1 block w-full" wire:model.defer="state.password_confirmation" autocomplete="new-password" />
-            <x-jet-input-error for="password_confirmation" class="mt-2" />
+        <div class="settings-fields-grid settings-fields-security">
+            @if (!is_null(Auth::user()->password))
+                <label class="settings-field settings-field-wide">
+                    <span class="settings-field-label">Current password</span>
+                    <x-jet-input id="current_password" type="password" wire:model.defer="state.current_password" autocomplete="current-password" />
+                    <x-jet-input-error for="current_password" />
+                </label>
+            @endif
+            <label class="settings-field">
+                <span class="settings-field-label">New password</span>
+                <x-jet-input id="password" type="password" wire:model.defer="state.password" autocomplete="new-password" />
+                <x-jet-input-error for="password" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">Confirm password</span>
+                <x-jet-input id="password_confirmation" type="password" wire:model.defer="state.password_confirmation" autocomplete="new-password" />
+                <x-jet-input-error for="password_confirmation" />
+            </label>
         </div>
-    </x-slot>
 
-    <x-slot name="actions">
-        <x-jet-action-message class="mr-3" on="saved">
-            {{ __('Saved.') }}
-        </x-jet-action-message>
-
-        <x-jet-button>
-            {{ __('Save') }}
-        </x-jet-button>
-    </x-slot>
-</x-jet-form-section>
+        <div class="settings-form-footer">
+            <x-jet-action-message on="saved">Password updated.</x-jet-action-message>
+            <button class="settings-button settings-button-primary" wire:loading.attr="disabled" type="submit">
+                <span>Update password</span><b aria-hidden="true">&rarr;</b>
+            </button>
+        </div>
+    </form>
+</div>

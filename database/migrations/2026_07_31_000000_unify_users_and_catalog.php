@@ -136,6 +136,10 @@ return new class extends Migration
                     DB::table('products_collection')->where('id', $collection->id)->update(['user_id' => $userId]);
                 }
             }
+
+            if (Schema::hasColumn('products_collection', 'name')) {
+                Schema::table('products_collection', fn (Blueprint $table) => $table->dropColumn('name'));
+            }
         }
 
         if (Schema::hasTable('product_orders')) {
@@ -162,6 +166,9 @@ return new class extends Migration
         Schema::dropIfExists('artists');
         Schema::dropIfExists('products_template');
         Schema::dropIfExists('custom_products');
+        Schema::dropIfExists('inventories');
+        Schema::dropIfExists('wishlists');
+        Schema::dropIfExists('products_metadata');
 
         if (Schema::hasTable('products')) {
             Schema::table('products', function (Blueprint $table) {

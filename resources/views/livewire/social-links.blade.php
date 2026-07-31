@@ -1,54 +1,54 @@
-<x-jet-session-message/>
-<x-jet-form-section submit="store">
-    <x-slot name="title">
-        {{ __('Link to other sites') }}
-    </x-slot>
-    <x-slot name="description">
-        {{ __('Fill in links to your other sites to display and share it on your profile.') }}
-    </x-slot>
-    <x-slot name="form">
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="facebook" value="{{ __('Facebook') }}" />
-            <x-jet-input id="facebook" type="text" class="block w-full mt-1" wire:model.defer="facebook" placeholder="facebook.com/" />
-        </div>
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="twitter" value="{{ __('Twitter') }}" />
-            <x-jet-input id="twitter" type="text" class="block w-full mt-1" wire:model.defer="twitter" placeholder="twitter.com/"/>
-        </div>
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="instagram" value="{{ __('Instagram') }}" />
-            <x-jet-input id="instagram" type="text" class="block w-full mt-1" wire:model.defer="instagram" placeholder="instagram.com/" />
-        </div>
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="dribble" value="{{ __('Dribbble') }}" />
-            <x-jet-input id="dribble" type="text" class="block w-full mt-1" wire:model.defer="dribble" placeholder="dribbble.com/" />
-        </div>
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="behance" value="{{ __('Behance') }}" />
-            <x-jet-input id="behance" type="text" class="block w-full mt-1" wire:model.defer="behance" placeholder="behance.net/" />
-        </div>
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="pinterest" value="{{ __('Pinterest') }}" />
-            <x-jet-input id="pinterest" type="text" class="block w-full mt-1" wire:model.defer="pinterest" placeholder="pinterest.com/" />
-        </div>
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="deviantart" value="{{ __('DeviantArt') }}" />
-            <x-jet-input id="deviantart" type="text" class="block w-full mt-1" wire:model.defer="deviantart" placeholder="deviantart.com/" />
-        </div>
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="tiktok" value="{{ __('Tiktok') }}" />
-            <x-jet-input id="tiktok" type="text" class="block w-full mt-1" wire:model.defer="tiktok" placeholder="tiktok.com/"/>
+<div class="settings-panel">
+    <form wire:submit.prevent="store" class="settings-form">
+        <div class="settings-form-intro">
+            <span class="settings-form-kicker">Signal directory</span>
+            <span class="settings-form-status"><i></i> Public when linked</span>
         </div>
 
-        <div class="col-span-6 md:col-span-3">
-            <x-jet-label for="website" value="{{ __('Personal Website') }}" />
-            <x-jet-input id="website" type="text" class="block w-full mt-1" wire:model.defer="website"/>
+        <div class="settings-fields-grid settings-fields-links">
+            <label class="settings-field">
+                <span class="settings-field-label">Instagram</span>
+                <x-jet-input type="text" wire:model.defer="instagram" placeholder="instagram.com/" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">Behance</span>
+                <x-jet-input type="text" wire:model.defer="behance" placeholder="behance.net/" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">Website</span>
+                <x-jet-input type="text" wire:model.defer="website" placeholder="yourstudio.com" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">TikTok</span>
+                <x-jet-input type="text" wire:model.defer="tiktok" placeholder="tiktok.com/" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">Twitter / X</span>
+                <x-jet-input type="text" wire:model.defer="twitter" placeholder="x.com/" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">Dribbble</span>
+                <x-jet-input type="text" wire:model.defer="dribble" placeholder="dribbble.com/" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">Pinterest</span>
+                <x-jet-input type="text" wire:model.defer="pinterest" placeholder="pinterest.com/" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">DeviantArt</span>
+                <x-jet-input type="text" wire:model.defer="deviantart" placeholder="deviantart.com/" />
+            </label>
+            <label class="settings-field">
+                <span class="settings-field-label">Facebook</span>
+                <x-jet-input type="text" wire:model.defer="facebook" placeholder="facebook.com/" />
+            </label>
         </div>
-    </x-slot>
-    <x-slot name="actions">
-        <x-jet-button>
-            {{ __('Save') }}
-        </x-jet-button>
-    </x-slot>
-   
-</x-jet-form-section>
+
+        <div class="settings-form-footer">
+            <x-jet-action-message on="saved">Links updated.</x-jet-action-message>
+            <button class="settings-button settings-button-primary" wire:loading.attr="disabled" type="submit">
+                <span>Save links</span><b aria-hidden="true">&rarr;</b>
+            </button>
+        </div>
+    </form>
+</div>

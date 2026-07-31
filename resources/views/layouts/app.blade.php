@@ -88,22 +88,22 @@
         }
     </style>
     @livewireStyles
-    {{-- Global Nav Menu --}}
-    @livewire('navigation-menu')
 </head>
 
 @php($isStudio = request()->routeIs('product.create'))
 <body
-    class="overflow-x-hidden text-xs antialiased leading-6 text-gray-200 select-none sm:text-sm font-poppins bg-zinc-900 border-box {{ $isStudio ? 'studio-page' : '' }}">
+    class="site-body overflow-x-hidden text-xs antialiased leading-6 text-gray-200 select-none sm:text-sm font-poppins bg-zinc-900 border-box {{ $isStudio ? 'studio-page' : '' }}">
+    {{-- Global Nav Menu --}}
+    @livewire('navigation-menu')
     {{ $slot }}
-    @unless(request()->routeIs('login'))
+    @unless(request()->routeIs('login') || request()->routeIs('register'))
         <x-auth-modal :initial-mode="request()->query('auth', 'login')" />
     @endunless
     @stack('modals')
     @livewireScripts
+    {{-- Global Footer --}}
+    @unless($isStudio)
+        <x-jet-footer></x-jet-footer>
+    @endunless
 </body>
-{{-- Global Footer --}}
-@unless($isStudio)
-    <x-jet-footer></x-jet-footer>
-@endunless
 </html>

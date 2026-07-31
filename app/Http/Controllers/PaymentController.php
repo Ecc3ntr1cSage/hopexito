@@ -51,37 +51,27 @@ class PaymentController extends Controller
 
     public function createBill()
     {
-        if (Auth::check()) {
-            $user = User::findOrFail(Auth::id());
-            if (! $user->state || ! $user->phone || ! $user->address) {
-                session()->flash('message', 'Please complete delivery address');
-                return redirect()->route('profile.show');
-            }
+        abort_unless(Auth::check(), 403);
 
-            $cart = Cart::where('email', $user->email)->orderBy('created_at')->get();
-            abort_if($cart->isEmpty(), 404);
-            $delivery = $this->delivery();
-            $subtotal = $this->subtotal();
-            $total = $this->total();
-            $state = $user->state;
-            return view('cart.show', compact('cart', 'delivery', 'state', 'subtotal', 'total'));
+        $user = User::findOrFail(Auth::id());
+        if (! $user->state || ! $user->phone || ! $user->address) {
+            session()->flash('message', 'Please complete delivery address');
+            return redirect()->route('profile.show');
         }
 
-        $cart = SessionCart::instance('cart')->content();
-        $details = session('delivery_info');
-        if (! $details) {
-            session()->flash('message', 'Please fill in delivery information');
-            return redirect()->route('guest.checkout');
-        }
-        $state = $details['state'];
-        $subtotal = SessionCart::instance('cart')->subtotal();
-        $delivery = Config::get('shipping.price')[$state] ?? 10;
-        $total = $subtotal + $delivery;
-        return view('cart.show', compact('cart', 'delivery', 'state', 'subtotal', 'total', 'details'));
+        $cart = Cart::where('email', $user->email)->orderBy('created_at')->get();
+        abort_if($cart->isEmpty(), 404);
+        $delivery = $this->delivery();
+        $subtotal = $this->subtotal();
+        $total = $this->total();
+        $state = $user->state;
+        return view('cart.show', compact('cart', 'delivery', 'state', 'subtotal', 'total'));
     }
 
     public function storeBill(Request $request)
     {
+        abort_unless(Auth::check(), 403);
+
         $paymentResult = $request->input('payment_result', 'success');
         abort_unless(in_array($paymentResult, ['success', 'failed'], true), 422);
 
@@ -90,7 +80,7 @@ class PaymentController extends Controller
             return redirect()->route('guest.checkout');
         }
 
-        $order = Auth::check() ? $this->completeAuthenticatedOrder() : $this->completeGuestOrder();
+        $order = $this->completeAuthenticatedOrder();
         session()->put('last_order_id', $order->id);
         session()->flash('message', 'Demo payment successful. Order '.$order->id.' is paid.');
         return redirect()->route('order.index');

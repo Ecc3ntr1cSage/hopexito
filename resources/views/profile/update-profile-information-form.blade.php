@@ -1,152 +1,111 @@
-<x-jet-form-section submit="updateProfileInformation">
-    <x-slot name="title">
-        {{ __('Profile Information') }}
-    </x-slot>
-    <x-slot name="description">
-        {{ __('Update your account\'s profile information and email address.') }}
-    </x-slot>
-    <x-slot name="form">
-        <!-- Profile Photo -->
+<div class="settings-panel">
+    <form wire:submit.prevent="updateProfileInformation" enctype="multipart/form-data" class="settings-form">
+        <div class="settings-form-intro">
+            <span class="settings-form-kicker">Account details</span>
+            <span class="settings-form-status"><i></i> Synced profile</span>
+        </div>
+
         @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-            <div x-data="{ photoName: null, photoPreview: null }" class="col-span-6 sm:col-span-4">
-                <!-- Profile Photo File Input -->
+            <div x-data="{ photoName: null, photoPreview: null }" class="settings-avatar-editor">
                 <input type="file" class="hidden" wire:model="photo" x-ref="photo"
                     x-on:change="
-                                    photoName = $refs.photo.files[0].name;
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => {
-                                        photoPreview = e.target.result;
-                                    };
-                                    reader.readAsDataURL($refs.photo.files[0]);
-                            " />
-
-                <!-- Current Profile Photo -->
-                <div class="mt-2" x-show="! photoPreview"">
-                    <img src="{{ $this->user->profile_photo_url }}" alt="{{ $this->user->name }}"
-                        class="object-cover w-20 h-20 rounded-full">
+                        photoName = $refs.photo.files[0].name;
+                        const reader = new FileReader();
+                        reader.onload = (e) => { photoPreview = e.target.result; };
+                        reader.readAsDataURL($refs.photo.files[0]);
+                    " />
+                <div class="settings-avatar-preview" x-show="! photoPreview">
+                    <img src="{{ $this->user->profile_photo_url }}" alt="{{ $this->user->name }}">
                 </div>
-
-                <!-- New Profile Photo Preview -->
-                <div class="mt-2" x-show="photoPreview" style="display: none;">
-                    <span class="block w-20 h-20 bg-center bg-no-repeat bg-cover rounded-full"
-                        x-bind:style="'background-image: url(\'' + photoPreview + '\');'">
-                    </span>
+                <div class="settings-avatar-preview" x-show="photoPreview" x-cloak>
+                    <span x-bind:style="'background-image: url(\'' + photoPreview + '\');'"></span>
                 </div>
-                {{-- Delete Existing Profile Photo --}}
-                <div class="flex mt-4">
-                    <x-jet-button-utility class="mr-2" type="button" x-on:click.prevent="$refs.photo.click()">
-                        {{ __('Change Avatar') }}
-                    </x-jet-button-utility>
-                    @if ($this->user->profile_photo_path)
-                        <div type="button"
-                            class="inline-flex items-center p-2 rounded-md cursor-pointer hover:bg-rose-500 text-rose-500 hover:text-white"
-                            wire:click="deleteProfilePhoto">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </div>
-                    @endif
+                <div class="settings-avatar-copy">
+                    <span class="settings-field-label">Profile image</span>
+                    <p>Use a clear mark that feels like you.</p>
+                    <div class="settings-avatar-actions">
+                        <button type="button" class="settings-button settings-button-quiet" x-on:click.prevent="$refs.photo.click()">Change image</button>
+                        @if ($this->user->profile_photo_path)
+                            <button type="button" class="settings-text-button" wire:click="deleteProfilePhoto">Remove</button>
+                        @endif
+                    </div>
+                    <x-jet-input-error for="photo" />
                 </div>
-                <x-jet-input-error for="photo" class="mt-2" />
             </div>
         @endif
 
-        <!-- Name -->
-        <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="name" value="{{ __('Name') }}" />
-            <x-jet-input id="name" type="text" class="block w-full mt-1" wire:model.defer="state.name"
-                autocomplete="name" />
-            <x-jet-input-error for="name" class="mt-2" />
-        </div>
+        <div class="settings-fields-grid">
+            <label class="settings-field settings-field-wide">
+                <span class="settings-field-label">Display name</span>
+                <x-jet-input id="name" type="text" wire:model.defer="state.name" autocomplete="name" />
+                <x-jet-input-error for="name" />
+            </label>
 
-        <!-- Email -->
-        <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="email" value="{{ __('Email') }}" />
-            <x-jet-input id="email" type="email" class="block w-full mt-1 cursor-no-drop"
-                wire:model.defer="state.email" disabled />
-            <x-jet-input-error for="email" class="mt-2" />
-
-            @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()) &&
-                $this->user->hasVerifiedEmail())
-                <p class="inline-flex mt-2 text-sm text-lime-400">
-                    {{ __('Your email address is verified.') }}
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                </p>
-            @else
-                <p class="mt-2 text-sm text-rose-500">
-                    {{ __('Your email address is unverified.') }}
-                    <button type="button" class="text-sm text-indigo-500 hover:text-indigo-400 hover:underline"
-                        wire:click.prevent="sendEmailVerification">
-                        {{ __('Click here to send the verification email.') }}
-                    </button>
-                </p>
-                @if ($this->verificationLinkSent)
-                    <p v-show="verificationLinkSent" class="mt-1 text-sm font-medium text-lime-400">
-                        {{ __('A new verification link has been sent to your email address.') }}
-                    </p>
+            <label class="settings-field settings-field-wide">
+                <span class="settings-field-label">Email address</span>
+                <x-jet-input id="email" type="email" wire:model.defer="state.email" disabled autocomplete="email" />
+                <x-jet-input-error for="email" />
+                @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()) && $this->user->hasVerifiedEmail())
+                    <span class="settings-field-hint settings-hint-success">Email address verified.</span>
+                @else
+                    <span class="settings-field-hint settings-hint-warning">
+                        Email address unverified.
+                        <button type="button" wire:click.prevent="sendEmailVerification">Send verification email</button>
+                    </span>
+                    @if ($this->verificationLinkSent)
+                        <span class="settings-field-hint settings-hint-success">A new verification link has been sent.</span>
+                    @endif
                 @endif
-            @endif
-        </div>
-        <div class="flex flex-col col-span-6 sm:col-span-4">
-            <x-jet-label for="phone" value="{{ __('Phone Number') }}" />
-            <div class="flex gap-2">
-                <x-jet-input type="text" class="w-16 mt-1" readonly value="+60" />
-                <x-jet-input id="phone" type="text" class="block w-full mt-1" wire:model.defer="state.phone"
-                    autocomplete="phone" />
-            </div>
-            <x-jet-input-error for="phone" class="mt-2" />
-        </div>
-        <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="address" value="{{ __('Address') }}" />
-            <x-jet-input id="address" type="text" class="block w-full mt-1" wire:model.defer="state.address"
-                autocomplete="address" />
-            <x-jet-input-error for="address" class="mt-2" />
+            </label>
+
+            <label class="settings-field">
+                <span class="settings-field-label">Phone number</span>
+                <span class="settings-phone-field"><b>+60</b><x-jet-input id="phone" type="text" wire:model.defer="state.phone" autocomplete="tel" /></span>
+                <x-jet-input-error for="phone" />
+            </label>
+
+            <label class="settings-field">
+                <span class="settings-field-label">Postcode</span>
+                <x-jet-input id="postcode" type="text" wire:model.defer="state.postcode" autocomplete="postal-code" />
+                <x-jet-input-error for="postcode" />
+            </label>
+
+            <label class="settings-field settings-field-wide">
+                <span class="settings-field-label">Address</span>
+                <x-jet-input id="address" type="text" wire:model.defer="state.address" autocomplete="street-address" />
+                <x-jet-input-error for="address" />
+            </label>
+
+            <label class="settings-field settings-field-wide">
+                <span class="settings-field-label">State</span>
+                <select id="state" wire:model.defer="state.state" class="settings-select">
+                    <option value="">Choose a state</option>
+                    <option value="Johor">Johor</option>
+                    <option value="Kedah">Kedah</option>
+                    <option value="Kelantan">Kelantan</option>
+                    <option value="Melaka">Melaka</option>
+                    <option value="Negeri Sembilan">Negeri Sembilan</option>
+                    <option value="Pahang">Pahang</option>
+                    <option value="Perak">Perak</option>
+                    <option value="Perlis">Perlis</option>
+                    <option value="Pulau Pinang">Pulau Pinang</option>
+                    <option value="Selangor">Selangor</option>
+                    <option value="Terengganu">Terengganu</option>
+                    <option value="Kuala Lumpur">Kuala Lumpur</option>
+                    <option value="Putrajaya">Putrajaya</option>
+                    <option value="Sarawak">Sarawak</option>
+                    <option value="Sabah">Sabah</option>
+                    <option value="Labuan">Labuan</option>
+                </select>
+                <x-jet-input-error for="state" />
+            </label>
         </div>
 
-        <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="postcode" value="{{ __('Postcode') }}" />
-            <x-jet-input id="postcode" type="text" class="block w-full mt-1" wire:model.defer="state.postcode" />
-            <x-jet-input-error for="postcode" class="mt-2" />
+        <div class="settings-form-footer">
+            <x-jet-action-message on="saved">Saved to your account.</x-jet-action-message>
+            <button class="settings-button settings-button-primary" wire:loading.attr="disabled" wire:target="photo" type="submit">
+                <span>Save identity</span><b aria-hidden="true">&rarr;</b>
+            </button>
         </div>
-        <div class="col-span-6 sm:col-span-4">
-            <x-jet-label for="state" value="{{ __('State') }}" />
-            <select id="state" wire:model.defer="state.state" class="text-white block w-full p-2.5 bg-neutral-800 border border-neutral-500 rounded-md focus:ring-indigo-500" >
-                <option selected class="">Choose a state</option>
-                <option value="Johor">Johor</option>
-                <option value="Kedah">Kedah</option>
-                <option value="Kelantan">Kelantan</option>
-                <option value="Melaka">Melaka</option>
-                <option value="Negeri Sembilan">Negeri Sembilan</option>
-                <option value="Pahang">Pahang</option>
-                <option value="Perak">Perak</option>
-                <option value="Perlis">Perlis</option>
-                <option value="Pulau Pinang">Pulau Pinang</option>
-                <option value="Selangor">Selangor</option>
-                <option value="Terengganu">Terengganu</option>
-                <option value="Kuala Lumpur">Kuala Lumpur</option>
-                <option value="Putrajaya">Putrajaya</option>
-                <option value="Sarawak">Sarawak</option>
-                <option value="Sabah">Sabah</option>
-                <option value="Labuan">Labuan</option>
-              </select>
-            <x-jet-input-error for="state" class="mt-2" />
-        </div>
-    </x-slot>
-
-    <x-slot name="actions">
-        <div class="flex items-center">
-            <x-jet-action-message class="mr-3" on="saved">
-                {{ __('Saved.') }}
-            </x-jet-action-message>
-    
-            <x-jet-button wire:loading.attr="disabled" wire:target="photo">
-                {{ __('Save') }}
-            </x-jet-button>
-        </div>
-    </x-slot>
-</x-jet-form-section>
+    </form>
+</div>

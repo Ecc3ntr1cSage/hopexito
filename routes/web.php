@@ -16,10 +16,7 @@ use App\Http\Livewire\Manage\ManageSales;
 
 Route::get('/', [ExploreController::class, 'explore']);
 // billplz controller
-Route::get('billplz', [PaymentController::class, 'createBill'])->name('billplz-create');
-Route::post('billplz', [PaymentController::class, 'storeBill'])->name('billplz-store');
 Route::get('billplz-callback', [PaymentController::class, 'callback'])->name('billplz-callback');
-Route::get('billplz-redirect', [PaymentController::class, 'redirect'])->name('billplz-redirect');
 Route::get('order/index', ManageOrder::class)->name('order.index');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [Controller::class, 'redirectUser'])->name('dashboard');
@@ -41,7 +38,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('product/{product}', [ProductsController::class, 'show'])->name('product.show');
 // cart controller
 Route::resource('cart', CartController::class);
-Route::get('checkout', DeliveryInformation::class)->name('guest.checkout');
+Route::middleware('auth')->group(function () {
+    Route::get('checkout', DeliveryInformation::class)->name('guest.checkout');
+    Route::get('billplz', [PaymentController::class, 'createBill'])->name('billplz-create');
+    Route::post('billplz', [PaymentController::class, 'storeBill'])->name('billplz-store');
+    Route::get('billplz-redirect', [PaymentController::class, 'redirect'])->name('billplz-redirect');
+});
 // explore controller
 Route::get('explore', [ExploreController::class, 'explore'])->name('explore');
 Route::get('shop', [ExploreController::class, 'search'])->name('search');

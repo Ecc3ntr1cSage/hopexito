@@ -12,6 +12,16 @@ class ProfileInformationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_profile_settings_page_renders_the_new_workspace(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get(route('profile.show'))
+            ->assertOk()
+            ->assertSee('Shape the way')
+            ->assertSee('Save identity')
+            ->assertSee('See the work move.');
+    }
+
     public function test_current_profile_information_is_available()
     {
         $this->actingAs($user = User::factory()->create());

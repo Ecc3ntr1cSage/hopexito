@@ -1,5 +1,5 @@
 @section('title', 'Log in | HopeXito')
 
-<x-app-layout>
+<x-guest-layout>
     <x-auth-modal initial-mode="login" :force-open="true" />
-</x-app-layout>
+</x-guest-layout>

@@ -4,7 +4,7 @@
     <x-jet-session-message />
     <x-jet-whatsapp-contact />
 
-    @if ($cart->count() === 0)
+    @if (count($cart) === 0)
         <section class="cart-empty-shell">
             <div class="cart-kicker">Your selection</div>
             <div class="cart-empty-mark" aria-hidden="true">+</div>
@@ -20,7 +20,7 @@
             <div>
                 <div class="cart-kicker">HopeXito / bag</div>
                 <h1>Your selections, considered.</h1>
-                <p>{{ $cart->count() }} {{ $cart->count() === 1 ? 'piece' : 'pieces' }} ready for their next chapter.</p>
+                <p>{{ count($cart) }} {{ count($cart) === 1 ? 'piece' : 'pieces' }} ready for their next chapter.</p>
             </div>
             <a class="cart-text-link" href="{{ route('shop.all') }}">
                 Continue shopping <span aria-hidden="true">&rarr;</span>
@@ -31,7 +31,7 @@
             <section class="cart-items-panel">
                 <div class="cart-panel-heading">
                     <span>In your bag</span>
-                    <span class="cart-panel-count">{{ str_pad($cart->count(), 2, '0', STR_PAD_LEFT) }}</span>
+                    <span class="cart-panel-count">{{ str_pad(count($cart), 2, '0', STR_PAD_LEFT) }}</span>
                 </div>
 
                 <div class="cart-item-list">
@@ -97,11 +97,19 @@
                     <span>Estimated total</span>
                     <strong>RM {{ number_format($total, 2) }}</strong>
                 </div>
-                <a class="cart-primary-action cart-checkout-action" href="{{ route('guest.checkout') }}">
-                    Continue to delivery
-                    <span aria-hidden="true">&rarr;</span>
-                </a>
-                <p class="cart-summary-note">Secure demo checkout. You will choose a simulated payment result on the next step.</p>
+                @auth
+                    <a class="cart-primary-action cart-checkout-action" href="{{ route('guest.checkout') }}">
+                        Continue to delivery
+                        <span aria-hidden="true">&rarr;</span>
+                    </a>
+                    <p class="cart-summary-note">Secure demo checkout. You will choose a simulated payment result on the next step.</p>
+                @else
+                    <button class="cart-primary-action cart-checkout-action" type="button" @click="$dispatch('open-auth', { mode: 'login' })" aria-haspopup="dialog">
+                        Log in to continue
+                        <span aria-hidden="true">&rarr;</span>
+                    </button>
+                    <p class="cart-summary-note">Log in or create an account before continuing to checkout.</p>
+                @endauth
                 <div class="cart-trust-row">
                     <span>01</span><span>Small-batch pieces</span>
                 </div>

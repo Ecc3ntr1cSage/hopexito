@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Models\Wallet as UserWallet;
 use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
 // use Illuminate\Support\Facades\Crypt;
@@ -69,7 +70,10 @@ class Wallet extends Component
 
     public function render()
     {
-        $wallet = UserWallet::where('user_id', Auth::user()->id)->first();
+        $wallet = UserWallet::firstOrCreate(
+            ['user_id' => Auth::id()],
+            ['id' => (string) Str::uuid(), 'name' => Auth::user()->name, 'commission' => 0, 'balance' => 0, 'status' => 1]
+        );
         $withdrawal = $wallet->walletTransaction()
             ->where('user_id', Auth::user()->id)
             ->where(function ($query) {
