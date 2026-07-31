@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Artist;
+use App\Models\Profile;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
@@ -29,10 +30,15 @@ class GoogleAuthController extends Controller
                     'name' => $user->getName(),
                     'email' => $user->getEmail(),
                     'google_id' => $user->getId(),
-                    'role_id' => 3,
                 ]);
-                $artist = Artist::create([
-                    'id' => $user->id
+                Profile::create(['user_id' => $user->id]);
+                Wallet::create([
+                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                    'name' => $user->name,
+                    'commission' => 0,
+                    'balance' => 0,
+                    'status' => 1,
+                    'user_id' => $user->id,
                 ]);
                 Auth::login($user);
                 return redirect()->intended('explore');

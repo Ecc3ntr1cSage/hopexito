@@ -34,10 +34,10 @@ class Searchbar extends Component
         } else {
             $keywords = "Trending Search";
         }
-        $top_artists = Wallet::orderBy('commission', 'desc')
+        $top_users = Wallet::orderBy('commission', 'desc')
             ->pluck('user_id')
             ->take(4);
-        $users = User::whereIn('id', $top_artists)
+        $users = User::whereIn('id', $top_users)
             ->with('wallet')
             ->get(['name', 'profile_photo_path']);
 

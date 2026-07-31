@@ -14,7 +14,6 @@ class Cart extends Model
         'id',
         'product_id',
         'email',
-        'shopname',
         'title',
         'quantity',
         'price',
@@ -22,7 +21,6 @@ class Cart extends Model
         'weight',
         'size',
         'color',
-        'discount'
     ];
 
     public function cartProduct(){

@@ -26,13 +26,13 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
             </svg>
             <a href="{{ route('shop.shirt') }}"
-                class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Standard Tee</a>
+                class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Shirt</a>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
             </svg>
-            <a href="{{ route('shop.oversized') }}"
-                class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Oversized Tee</a>
+            <a href="{{ route('shop.sweat') }}"
+                class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Sweatshirt</a>
         </div>
         <div>
             <div class="relative flex flex-col gap-4 my-4 mt-12">

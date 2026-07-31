@@ -2,7 +2,7 @@
 @section('thumbnail', $product->product_image)
 <x-app-layout>
     <x-jet-whatsapp-contact />
-    <section class="min-h-screen pb-12 text-gray-700 bg-neutral-900" x-data="{ preview: 1 }">
+    <section class="min-h-screen pb-12 text-gray-700 bg-neutral-900" x-data="{ preview: 1, size: '', color: '{{ $colors->first() ?? 'White' }}', variants: @js($variantData) }">
         <x-jet-session-message />
         <div class="py-4 mx-auto">
             <div class="flex flex-wrap gap-3 mx-auto lg:w-4/5">
@@ -31,12 +31,12 @@
                         <div class="col-span-4 md:col-span-2">
                             <div class="relative" x-show="preview == 1" x-transition:enter.duration.500ms>
                                 <div class="w-full overflow-hidden rounded-lg" id="product-image">
-                                    <img class="h-full sm:w-full w-96" src="{{ $product->product_image }}">
+                                    <img class="h-full sm:w-full w-96" x-bind:src="variants[color]?.front || '{{ $product->product_image }}'">
                                 </div>
                             </div>
                             <div x-cloak class="relative" x-show="preview == 2" x-transition:enter.duration.500ms>
                                 <div class="w-full overflow-hidden rounded-lg">
-                                    <img class="h-full sm:w-full w-96" src="{{ $product->product_image_2 }}">
+                                    <img class="h-full sm:w-full w-96" x-bind:src="variants[color]?.back || '{{ $product->product_image_2 }}'">
                                 </div>
                             </div>
                             <div class="flex gap-3 px-2 mt-3 cursor-pointer">
@@ -116,7 +116,7 @@
                                             </div>
                                         </x-jet-modal-custom>
                                     </div>
-                                @elseif($product->category == 'Oversized')
+                                @elseif(in_array($product->category, ['Sweatshirt', 'Hoodie']))
                                     <div class="flex flex-col gap-2 ml-auto text-white" x-data="{ modal: false }">
                                         <p class="flex items-center gap-2">
                                             <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
@@ -179,9 +179,12 @@
                                     @endforeach
                                 </div>
                                 <h1 class="my-2 text-2xl font-medium tracking-wider text-violet-400">
-                                    RM{{ number_format($product->price, 2) }}</h1>
-                                <form action="{{ route('cart.store') }}" method="POST" class="mt-6"
-                                    x-data="{ size: '', color: '' }">
+                                    RM{{ number_format($product->price, 2) }}
+                                    @if (Auth::check() && $product->isOwnedBy(Auth::user()))
+                                        <span class="text-sm text-lime-400">(RM{{ number_format($product->price * .85, 2) }} for you)</span>
+                                    @endif
+                                </h1>
+                                <form action="{{ route('cart.store') }}" method="POST" class="mt-6">
                                     @csrf
                                     <div class="flex items-center gap-2">
                                         <input type="hidden" name="product_id" value="{{ $product->id }}" />
@@ -287,8 +290,7 @@
                                         <x-jet-button name="add_to_cart" class="py-4 mt-3 w-80 md:mt-0">
                                             <span class="mx-auto">Add to Cart</span>
                                         </x-jet-button>
-                                        @if (!Auth::check())
-                                            <button type="submit" name="buy_now" class="relative group w-80">
+                                        <button type="submit" name="buy_now" class="relative group w-80">
                                                 <div
                                                     class="absolute transition duration-1000 rounded-lg opacity-25 -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 blur group-hover:opacity-100 group-hover:duration-200">
                                                 </div>
@@ -298,8 +300,7 @@
                                                         class="mx-auto font-sans text-xs font-semibold tracking-widest uppercase">Buy
                                                         Now</span>
                                                 </div>
-                                            </button>
-                                        @endif
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -337,10 +338,10 @@
                                 </div>
                                 <div class="flex flex-col justify-between px-2 py-1 tracking-wider md:px-4 md:py-2">
                                     @if ($product->category == 'Shirt')
-                                        <p class="px-3 py-0.5 bg-fuchsia-700/80 rounded-md w-fit text-xs">Standard Tee
+                                        <p class="px-3 py-0.5 bg-fuchsia-700/80 rounded-md w-fit text-xs">Shirt
                                         </p>
-                                    @elseif($product->category == 'Oversized')
-                                        <p class="px-3 py-0.5 rounded-md bg-indigo-700/80 w-fit text-xs">Oversized Tee
+                                    @elseif(in_array($product->category, ['Sweatshirt', 'Hoodie']))
+                                        <p class="px-3 py-0.5 rounded-md bg-indigo-700/80 w-fit text-xs">{{ $product->category }}
                                         </p>
                                     @else
                                         <p></p>
@@ -386,10 +387,10 @@
                                 </div>
                                 <div class="flex flex-col justify-between px-2 py-1 tracking-wider md:px-4 md:py-2">
                                     @if ($product->category == 'Shirt')
-                                        <p class="px-3 py-0.5 bg-fuchsia-700/80 rounded-md w-fit text-xs">Standard Tee
+                                        <p class="px-3 py-0.5 bg-fuchsia-700/80 rounded-md w-fit text-xs">Shirt
                                         </p>
-                                    @elseif($product->category == 'Oversized')
-                                        <p class="px-3 py-0.5 rounded-md bg-indigo-700/80 w-fit text-xs">Oversized Tee
+                                    @elseif(in_array($product->category, ['Sweatshirt', 'Hoodie']))
+                                        <p class="px-3 py-0.5 rounded-md bg-indigo-700/80 w-fit text-xs">{{ $product->category }}
                                         </p>
                                     @else
                                         <p></p>

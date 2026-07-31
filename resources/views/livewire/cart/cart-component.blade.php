@@ -213,7 +213,7 @@
     </div>
     {{-- @if (Auth::check())
         <div class="max-w-5xl mx-auto mt-8">
-            <x-jet-admin-card>
+            <x-jet-gradient-card>
                 <div class="p-6">
                     <div class="w-full lg:px-6">
                         <div
@@ -310,7 +310,7 @@
                                 @endif
                             </div>
                         </div>
-            </x-jet-admin-card>
+            </x-jet-gradient-card>
         </div>
     @endif --}}
 </div>
@@ -359,9 +359,9 @@
                                                 <p class="px-3 py-0.5 mt-1 bg-fuchsia-700/80 rounded-md w-fit text-xs">
                                                     Standard
                                                     Tee</p>
-                                            @elseif($product->category == 'Oversized')
+                                            @elseif(in_array($product->category, ['Sweatshirt', 'Hoodie']))
                                                 <p class="px-3 py-0.5 mt-1 rounded-md bg-indigo-700/80 w-fit text-xs">
-                                                    Oversized
+                                                    {{ $product->category }}
                                                     Tee</p>
                                             @else
                                                 <p></p>

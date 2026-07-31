@@ -2,161 +2,114 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Product;
-use App\Models\Artist;
 use App\Models\ProductCollection;
 use App\Models\Search;
 use App\Models\User;
-use App\Models\Wallet;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class ExploreController extends Controller
 {
-
-    // views/sellyourart
-    public function sellyourart()
-    {
-        $sellers = User::where('role_id', 2)
-            ->withCount('products')
-            ->has('products', '>', 0)
-            ->inRandomOrder()
-            ->take(5)
-            ->get();
-
-        return view('sellyourart', compact('sellers'));
-    }
-    // views/explore
     public function explore()
     {
-        $users = User::where('role_id', 2)
-            ->withCount('products')
-            ->has('products', '>', 0)
+        $users = User::whereHas('products', fn ($query) => $query->available())
+            ->withCount(['products' => fn ($query) => $query->available()])
             ->inRandomOrder()
             ->take(5)
             ->get();
 
-        $featured = $users->pluck('id');
-        $products = Product::where('status', 1)
-            ->whereIn('artist_id', $featured)
+        $products = Product::available()->inRandomOrder()->take(8)->get();
+        $collections = ProductCollection::with('product')
+            ->whereHas('product', fn ($query) => $query->available())
             ->inRandomOrder()
-            ->take(8)
-            ->get();
-
-        if ($products->isEmpty()) {
-            $products = Product::where('status', 1)->inRandomOrder()->take(8)->get();
-        }
-
-        $collections = ProductCollection::inRandomOrder()
-            ->whereHas('product', function ($query) {
-                $query->select('collection_id')
-                    ->groupBy('collection_id')
-                    ->havingRaw('COUNT(*) > 1');
-            })
             ->take(2)
             ->get();
+
         return view('explore', compact('users', 'products', 'collections'));
     }
-    // return search results and track search history
+
     public function search(Request $request)
     {
-        if ($request->has('search') && !empty($request->input('search'))) {
-            $search = $request->input('search');
-        } else {
+        $search = trim((string) $request->input('search'));
+        if ($search === '') {
             return redirect()->route('shop.all');
         }
 
-        $artists = User::where('role_id', 2)
-            ->where('name', 'LIKE', "%{$search}%")
+        $users = User::where('name', 'LIKE', "%{$search}%")
+            ->whereHas('products', fn ($query) => $query->available())
             ->get();
-
-        $products = Product::where('status', '!=', 2)
+        $products = Product::available()
             ->where(function ($query) use ($search) {
                 $query->where('title', 'LIKE', "%{$search}%")
-                    ->orWhere('shopname', 'LIKE', "%{$search}%")
-                    ->orWhere('category', 'LIKE', "%{$search}%")
-                    ->orWhere('tags', 'LIKE', "%{$search}%");
+                    ->orWhere('tags', 'LIKE', "%{$search}%")
+                    ->orWhere('product_type', 'LIKE', "%{$search}%")
+                    ->orWhereHas('owner', fn ($owner) => $owner->where('name', 'LIKE', "%{$search}%"));
             })
-            ->paginate(40);
+            ->paginate(40)
+            ->withQueryString();
 
         if (Auth::check()) {
-            Search::create([
-                'user_id' => Auth::user()->id,
-                'keyword' => $search
-            ]);
+            Search::create(['user_id' => Auth::id(), 'keyword' => $search]);
         }
-        $product_count = $products->total();
-        $user_count = $artists->count();
 
-        return view('shop/search', compact('artists', 'products', 'search', 'product_count', 'user_count'));
+        $product_count = $products->total();
+        $user_count = $users->count();
+        return view('shop/search', compact('users', 'products', 'search', 'product_count', 'user_count'));
     }
 
     public function collection()
     {
-        $productsCollection = ProductCollection::with('product:slug,collection_id,product_image,product_image_2,title,price,shopname')
-            ->whereHas('product', function ($query) {
-                $query->select('collection_id')
-                    ->groupBy('collection_id')
-                    ->havingRaw('COUNT(*) > 1');
-            })
+        $productsCollection = ProductCollection::with(['product' => fn ($query) => $query->available()])
+            ->whereHas('product', fn ($query) => $query->available())
             ->inRandomOrder()
             ->paginate(5);
+
         return view('shop/collection', compact('productsCollection'));
     }
 
     public function shop()
     {
-        $products = Product::where('status', '!=', 2)->inrandomOrder()->paginate(100);
+        $products = Product::available()->inRandomOrder()->paginate(100);
         return view('shop/all', compact('products'));
     }
 
     public function shirt()
     {
-        $products = Product::where('status', '!=', 2)->where('category', 'shirt')->inrandomOrder()->paginate(100);
-        return view('shop/standard-tee', compact('products'));
+        return $this->type('shirt', 'shop/standard-tee');
     }
 
-    public function oversized()
+    public function sweat()
     {
-        $products = Product::where('status', '!=', 2)->where('category', 'oversized')->inrandomOrder()->paginate(100);
-        return view('shop/oversized', compact('products'));
+        return $this->type('sweat', 'shop/oversized');
     }
-    // return seller profile, views/people
-    public function people($shopname)
+
+    public function hoodie()
     {
-        $user = User::where('name', $shopname)->first();
-        $productsQuery = Product::where('artist_id', $user->id)->where('status', '!=', 2);
-        $productsCount = $productsQuery->count();
-        $products = $productsQuery->orderBy('status', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(16);
-        $productsCollection = ProductCollection::where('name', $shopname)->get();
-        $totalSold = Product::where('artist_id', $user->id)->sum('sold');
+        return $this->type('hoodie', 'shop/oversized');
+    }
+
+    public function people(string $name)
+    {
+        $user = User::where('name', $name)->firstOrFail();
+        $isOwner = Auth::check() && Auth::id() === $user->id;
+        $productsQuery = Product::where('user_id', $user->id)->where('status', '!=', 2);
+        if (! $isOwner) {
+            $productsQuery->public();
+        }
+
+        $productsCount = (clone $productsQuery)->count();
+        $products = $productsQuery->orderByDesc('status')->orderByDesc('created_at')->paginate(16);
+        $productsCollection = ProductCollection::where('user_id', $user->id)->get();
+        $totalSold = Product::where('user_id', $user->id)->sum('sold');
 
         return view('people', compact('user', 'products', 'productsCount', 'productsCollection', 'totalSold'));
     }
-    // upgrade user from customer to seller
-    public function upgrade($id)
-    {
-        $user = User::findOrFail($id);
-        $user->update([
-            'role_id' => 2
-        ]);
-        Artist::create([
-            'id' => Auth::user()->id
-        ]);
-        Wallet::create([
-            'id' => (string) Str::uuid(),
-            'user_id' => Auth::user()->id,
-            'name' => Auth::user()->name,
-            'commission' => 0,
-            'balance' => 0,
-            'status' => 1
-        ]);
 
-        $user->assignRole('artist');
-        session()->flash('message', 'You have been upgraded');
-        return redirect()->route('dashboard');
+    private function type(string $type, string $view)
+    {
+        $products = Product::available()->where('product_type', $type)->inRandomOrder()->paginate(100);
+        $productType = config('catalog.types.'.$type.'.label');
+        return view($view, compact('products', 'productType'));
     }
 }

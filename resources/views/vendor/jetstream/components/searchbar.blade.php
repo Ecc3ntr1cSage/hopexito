@@ -36,7 +36,7 @@
     <div class="relative z-0 p-0.5 overflow-hidden rounded-lg gradient-border">
         <form action="{{ route('search') }}" class="relative z-50 flex rounded-md" method="GET">
             <x-jet-input type="text" class="block w-full" autocomplete="off" name="search" x-on:click="open = true"
-                x-ref="searchInput" placeholder="Search for designs or artists" />
+                x-ref="searchInput" placeholder="Search for designs or users" />
             <button type="submit">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
                     stroke="currentColor"

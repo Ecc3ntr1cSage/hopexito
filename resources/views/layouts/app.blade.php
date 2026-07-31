@@ -99,7 +99,5 @@
     @livewireScripts
 </body>
 {{-- Global Footer --}}
-@unless(Auth::check() && Auth::user()->role_id == 1)
 <x-jet-footer></x-jet-footer>
-@endunless
 </html>

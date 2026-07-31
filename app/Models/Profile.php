@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Artist extends Model
+class Profile extends Model
 {
     use HasFactory;
-    protected $table = 'artists';
+
     protected $fillable = [
-        'id',
+        'user_id',
         'bio',
         'cover_image',
         'facebook',
@@ -21,6 +21,11 @@ class Artist extends Model
         'pinterest',
         'deviantart',
         'tiktok',
-        'website'
+        'website',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

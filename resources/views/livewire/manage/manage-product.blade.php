@@ -90,6 +90,13 @@
                                 class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
                                 Archive
                             </button>
+                            @if ($product->visibility === 'public')
+                                <button wire:click="setVisibility('{{ $product->id }}', 'private')"
+                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">Make private</button>
+                            @else
+                                <button wire:click="setVisibility('{{ $product->id }}', 'public')"
+                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">Make public</button>
+                            @endif
                             <x-jet-modal-custom>
                                 <form class="flex-col w-full space-y-4">
                                     <h2>Edit product</h2>
@@ -105,21 +112,7 @@
                                     @error('tags')
                                         <p class="text-rose-500">{{ $message }}</p>
                                     @enderror
-                                    <div class="flex gap-4 w-52">
-                                        <div>
-                                            <x-jet-label for="price" value="{{ __('Price') }}" />
-                                            <x-jet-input id="price" class="block w-full mt-1" type="text"
-                                                wire:model.defer="price" />
-                                            @error('price')
-                                                <p class="text-rose-500">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-                                        <div>
-                                            <x-jet-label for="commission" value="{{ __('Commission') }}" /><br>
-                                            <x-jet-input type="text" id="commission" class="block w-full mt-1"
-                                                placeholder="15%" disabled />
-                                        </div>
-                                    </div>
+                                    <p class="text-sm text-indigo-300">Price and commission are fixed by product type.</p>
                                     <x-jet-button type="button" wire:click="editProduct('{{ $product->id }}')"
                                         class="float-right">
                                         Save</x-jet-button>

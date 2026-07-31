@@ -14,6 +14,7 @@ class ProductCollection extends Model
     protected $casts = ['id' => 'string'];
     protected $fillable = [
         'id',
+        'user_id',
         'name',
         'title',
         'collection_image'
@@ -21,5 +22,10 @@ class ProductCollection extends Model
 
     public function product(){
         return $this->hasMany(Product::class, 'collection_id','id');
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

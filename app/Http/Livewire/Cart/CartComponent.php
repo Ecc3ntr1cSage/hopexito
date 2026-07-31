@@ -10,8 +10,6 @@ use App\Models\Product;
 
 class CartComponent extends Component
 {
-    public $coupon;
-
     // increase cart quantity by 1
     public function increaseQuantity($rowId)
     {
@@ -77,7 +75,9 @@ class CartComponent extends Component
         $total = 0;
         if (Auth::check()) {
             foreach (Cart::where('email', Auth::user()->email)->get() as $cart) {
-                $total += $cart->subtotal * $cart->discount;
+                $product = $cart->cartProduct;
+                $multiplier = $product && $product->isOwnedBy(Auth::user()) ? 0.85 : 1;
+                $total += (float) $product->price * $cart->quantity * $multiplier;
             }
             return $total;
         } else {
@@ -85,37 +85,18 @@ class CartComponent extends Component
         }
     }
 
-    public function discount($x)
-    {
-        $carts = Cart::where('email', Auth::user()->email)->get();
-        foreach ($carts as $cart) {
-            $cart->update([
-                'discount' => $x
-            ]);
-        }
-    }
-
-    public function removeDiscount($x)
-    {
-        $carts = Cart::where('email', Auth::user()->email)->get();
-        foreach ($carts as $cart) {
-            $cart->update([
-                'discount' => $x
-            ]);
-        }
-    }
-
     public function render()
     {
         if (Auth::check()) {
             $cart = Cart::where('email', Auth::user()->email)->orderBy('created_at')->get();
-            $discount = Cart::where('email', Auth::user()->email)->value('discount');
-            $products = Product::where('status', 3)->inRandomOrder()->take(4)->get();
+            // The only discount is the server-calculated owner discount per line.
+            $discount = 1;
+            $products = Product::available()->where('status', 3)->inRandomOrder()->take(4)->get();
             $total = $this->total();
         } else {
             $cart = SessionCart::instance('cart')->content();
             $discount = 1;
-            $products = Product::where('status', 3)->inRandomOrder()->take(4)->get();
+            $products = Product::available()->where('status', 3)->inRandomOrder()->take(4)->get();
             $total = $this->total();
         }
         return view('livewire.cart.cart-component', compact('cart', 'total', 'discount', 'products'));

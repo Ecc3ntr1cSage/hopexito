@@ -2,15 +2,13 @@
 
 namespace App\Actions\Fortify;
 
-use App\Models\Artist;
+use App\Models\Profile;
 use App\Models\User;
 use App\Models\Wallet;
-use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 use Laravel\Jetstream\Jetstream;
-use Spatie\Permission\Models\Role;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -31,36 +29,22 @@ class CreateNewUser implements CreatesNewUsers
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
-        if ($input['role_id'] == 2) {
-            $artist =  User::create([
-                'name' => $input['name'],
-                'email' => $input['email'],
-                'role_id' => $input['role_id'],
-                'password' => Hash::make($input['password']),
-            ]);
+        $user = User::create([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'password' => Hash::make($input['password']),
+        ]);
 
-            Wallet::create([
-                'id' => uniqid(8),
-                'user_id' => $artist->id,
-                'name' => $artist->name,
-                'commission' => 0,
-                'balance' => 0,
-                'status' => 1
-            ]);
+        Profile::create(['user_id' => $user->id]);
+        Wallet::create([
+            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'commission' => 0,
+            'balance' => 0,
+            'status' => 1,
+        ]);
 
-            Artist::create([
-                'id' => $artist->id
-            ]);
-
-            return $artist->assignRole('artist');
-        } else {
-            $customer =  User::create([
-                'name' => $input['name'],
-                'email' => $input['email'],
-                'role_id' => $input['role_id'],
-                'password' => Hash::make($input['password']),
-            ]);
-            return $customer->assignRole('customer');
-        }
+        return $user;
     }
 }

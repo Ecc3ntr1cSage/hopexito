@@ -9,7 +9,6 @@ class ProductOrder extends Model
 {
     use HasFactory;
     protected $table = 'product_orders';
-    protected $casts = ['id' => 'string'];
     protected $fillable = [
         'id',
         'billplz_id',
@@ -19,13 +18,13 @@ class ProductOrder extends Model
         'quantity',
         'size',
         'color',
+        'is_owner_purchase',
     ];
+
+    protected $casts = ['id' => 'string', 'is_owner_purchase' => 'boolean'];
 
     public function product(){
         return $this->hasOne(Product::class, 'id', 'product_id');
-    }
-    public function customProduct(){
-        return $this->hasOne(CustomProduct::class, 'id', 'product_id');
     }
     public function order(){
         return $this->hasOne(Order::class, 'id', 'billplz_id');

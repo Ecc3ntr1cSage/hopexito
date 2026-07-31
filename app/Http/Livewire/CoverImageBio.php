@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire;
 
-use App\Models\Artist;
+use App\Models\Profile;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -11,8 +11,8 @@ class CoverImageBio extends Component
     public $cover_image, $bio;
 
     public function updateBio(){
-        $artist = Artist::find(Auth::user()->id);
-        $artist->update([
+        $profile = Profile::firstOrCreate(['user_id' => Auth::id()]);
+        $profile->update([
             'bio' => $this->bio
         ]);
 
@@ -22,13 +22,13 @@ class CoverImageBio extends Component
 
     private function forceFill()
     {
-        if (Artist::find(Auth::user()->id)) {
-            $artist = Artist::findOrFail(Auth::user()->id);
-            if($artist->cover_image){
-                $this->cover_image = $artist->cover_image;
+        if (Profile::where('user_id', Auth::id())->exists()) {
+            $profile = Profile::where('user_id', Auth::id())->firstOrFail();
+            if($profile->cover_image){
+                $this->cover_image = $profile->cover_image;
             }
-            if($artist->bio){
-                $this->bio = $artist->bio;
+            if($profile->bio){
+                $this->bio = $profile->bio;
             }
         }
     }

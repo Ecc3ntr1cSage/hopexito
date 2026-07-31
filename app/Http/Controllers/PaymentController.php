@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -26,244 +27,150 @@ class PaymentController extends Controller
 
     private function delivery(): float
     {
-        $state = Auth::user()->state;
-        $delivery = Config::get('shipping.price')[$state] ?? 10;
+        $delivery = Config::get('shipping.price')[Auth::user()->state] ?? 10;
         $weight = $this->weight();
+        return $weight > 8000 ? $delivery + 8 : ($weight > 1500 ? $delivery + 6 : ($weight > 1000 ? $delivery + 3 : $delivery));
+    }
 
-        if ($weight > 1000 && $weight < 1500) {
-            return $delivery + 3;
-        }
-
-        if ($weight > 1500 && $weight < 8000) {
-            return $delivery + 6;
-        }
-
-        if ($weight > 8000) {
-            return $delivery + 8;
-        }
-
-        return $delivery;
+    private function authenticatedLineTotal(Cart $cart): float
+    {
+        $product = Product::find($cart->product_id);
+        $multiplier = $product && $product->isOwnedBy(Auth::user()) ? 0.85 : 1;
+        return round((float) $product->price * $cart->quantity * $multiplier, 2);
     }
 
     private function subtotal(): float
     {
-        return Cart::where('email', Auth::user()->email)->get()->sum(fn ($cart) => $cart->subtotal * ($cart->discount ?? 1));
+        return Cart::where('email', Auth::user()->email)->get()->sum(fn (Cart $cart) => $this->authenticatedLineTotal($cart));
     }
 
     private function total(): float
     {
-        return $this->subtotal() + $this->delivery();
+        return round($this->subtotal() + $this->delivery(), 2);
     }
 
     public function createBill()
     {
         if (Auth::check()) {
             $user = User::findOrFail(Auth::id());
-
             if (! $user->state || ! $user->phone || ! $user->address) {
                 session()->flash('message', 'Please complete delivery address');
                 return redirect()->route('profile.show');
             }
 
             $cart = Cart::where('email', $user->email)->orderBy('created_at')->get();
+            abort_if($cart->isEmpty(), 404);
             $delivery = $this->delivery();
             $subtotal = $this->subtotal();
             $total = $this->total();
             $state = $user->state;
-
             return view('cart.show', compact('cart', 'delivery', 'state', 'subtotal', 'total'));
         }
 
         $cart = SessionCart::instance('cart')->content();
         $details = session('delivery_info');
-
         if (! $details) {
             session()->flash('message', 'Please fill in delivery information');
             return redirect()->route('guest.checkout');
         }
-
         $state = $details['state'];
         $subtotal = SessionCart::instance('cart')->subtotal();
         $delivery = Config::get('shipping.price')[$state] ?? 10;
         $total = $subtotal + $delivery;
-
         return view('cart.show', compact('cart', 'delivery', 'state', 'subtotal', 'total', 'details'));
     }
 
     public function storeBill(Request $request)
     {
         $order = Auth::check() ? $this->completeAuthenticatedOrder() : $this->completeGuestOrder();
-
         session()->flash('message', 'Demo payment successful. Order '.$order->id.' is paid.');
-
-        return Auth::check()
-            ? redirect()->route('order.index')
-            : redirect()->route('cart.index');
+        return Auth::check() ? redirect()->route('order.index') : redirect()->route('cart.index');
     }
 
-    public function callback(Request $request)
-    {
-        return response()->json(['status' => 'demo-payment']);
-    }
-
-    public function redirect(Request $request)
-    {
-        return redirect()->route('billplz-create');
-    }
+    public function callback(Request $request) { return response()->json(['status' => 'demo-payment']); }
+    public function redirect(Request $request) { return redirect()->route('billplz-create'); }
 
     private function completeAuthenticatedOrder(): Order
     {
         $user = Auth::user();
         $carts = Cart::where('email', $user->email)->orderBy('created_at')->get();
+        abort_if($carts->isEmpty(), 404);
 
-        $order = Order::create([
-            'id' => (string) Str::uuid(),
-            'collection_id' => 'demo',
-            'email' => $user->email,
-            'name' => $user->name,
-            'description' => 'Demo payment completed',
-            'delivery' => $this->delivery(),
-            'status' => 1,
-            'amount' => $this->total(),
-            'paid' => 'true',
-            'paid_at' => Carbon::now(),
-            'address' => $user->address,
-            'postcode' => $user->postcode,
-            'state' => $user->state,
-            'phone' => $user->phone,
-        ]);
-
-        foreach ($carts as $cart) {
-            ProductOrder::create([
-                'id' => (string) Str::uuid(),
-                'billplz_id' => $order->id,
-                'product_id' => $cart->product_id,
-                'title' => $cart->title,
-                'price' => $cart->price,
-                'quantity' => $cart->quantity,
-                'size' => $cart->size,
-                'color' => $cart->color,
+        return DB::transaction(function () use ($user, $carts) {
+            $order = Order::create([
+                'id' => (string) Str::uuid(), 'collection_id' => 'demo', 'email' => $user->email,
+                'name' => $user->name, 'description' => 'Demo payment completed', 'delivery' => $this->delivery(),
+                'status' => 1, 'amount' => $this->total(), 'paid' => 'true', 'paid_at' => Carbon::now(),
+                'address' => $user->address, 'postcode' => $user->postcode, 'state' => $user->state, 'phone' => $user->phone,
             ]);
 
-            $this->updateCommission($cart);
-            $cart->delete();
-        }
-
-        event(new PurchaseCompleted($order));
-
-        return $order;
+            foreach ($carts as $cart) {
+                $product = Product::findOrFail($cart->product_id);
+                abort_unless($product->status !== 2 && $product->canBeViewedBy($user), 404);
+                $ownerPurchase = $product->isOwnedBy($user);
+                $unitPrice = round((float) $product->price * ($ownerPurchase ? 0.85 : 1), 2);
+                ProductOrder::create([
+                    'id' => (string) Str::uuid(), 'billplz_id' => $order->id, 'product_id' => $product->id,
+                    'title' => $product->title, 'price' => $unitPrice, 'quantity' => $cart->quantity,
+                    'size' => $cart->size, 'color' => $cart->color, 'is_owner_purchase' => $ownerPurchase,
+                ]);
+                $this->recordSale($product, $cart->quantity, $ownerPurchase);
+                $cart->delete();
+            }
+            event(new PurchaseCompleted($order));
+            return $order;
+        });
     }
 
     private function completeGuestOrder(): Order
     {
         $details = session('delivery_info');
+        $contents = SessionCart::instance('cart')->content();
         $state = $details['state'];
-        $subtotal = SessionCart::instance('cart')->subtotal();
         $delivery = Config::get('shipping.price')[$state] ?? 10;
-        $total = $subtotal + $delivery;
-
+        $subtotal = SessionCart::instance('cart')->subtotal();
         $order = Order::create([
-            'id' => (string) Str::uuid(),
-            'collection_id' => 'demo',
-            'email' => $details['email'],
-            'name' => $details['name'].' (G)',
-            'description' => 'Demo payment completed',
-            'delivery' => $delivery,
-            'status' => 1,
-            'amount' => $total,
-            'paid' => 'true',
-            'paid_at' => Carbon::now(),
-            'address' => $details['address'],
-            'postcode' => $details['postcode'],
-            'state' => $details['state'],
-            'phone' => $details['phone'],
+            'id' => (string) Str::uuid(), 'collection_id' => 'demo', 'email' => $details['email'],
+            'name' => $details['name'].' (G)', 'description' => 'Demo payment completed', 'delivery' => $delivery,
+            'status' => 1, 'amount' => $subtotal + $delivery, 'paid' => 'true', 'paid_at' => Carbon::now(),
+            'address' => $details['address'], 'postcode' => $details['postcode'], 'state' => $state, 'phone' => $details['phone'],
         ]);
 
-        foreach (SessionCart::instance('cart')->content() as $cart) {
+        foreach ($contents as $cart) {
+            $product = Product::findOrFail($cart->id);
+            abort_unless($product->status !== 2 && $product->canBeViewedBy(null), 404);
             ProductOrder::create([
-                'id' => (string) Str::uuid(),
-                'billplz_id' => $order->id,
-                'product_id' => $cart->id,
-                'title' => $cart->name,
-                'price' => $cart->price,
-                'quantity' => $cart->qty,
-                'size' => $cart->options['size'],
-                'color' => $cart->options['color'],
+                'id' => (string) Str::uuid(), 'billplz_id' => $order->id, 'product_id' => $product->id,
+                'title' => $product->title, 'price' => $product->price, 'quantity' => $cart->qty,
+                'size' => $cart->options['size'], 'color' => $cart->options['color'], 'is_owner_purchase' => false,
             ]);
-
-            $this->updateCommissionGuest($cart);
+            $this->recordSale($product, $cart->qty, false);
         }
-
         SessionCart::instance('cart')->destroy();
-
         return $order;
     }
 
-    private function updateCommission(Cart $cart): void
+    private function recordSale(Product $product, int $quantity, bool $ownerPurchase): void
     {
-        $product = Product::find($cart->product_id);
-        $user = User::where('name', $cart->shopname)->first();
-
-        if (! $product || ! $user) {
+        $product->increment('sold', $quantity);
+        if ($ownerPurchase) {
             return;
         }
 
+        $user = $product->owner;
+        if (! $user) {
+            return;
+        }
         $wallet = Wallet::firstOrCreate(
             ['user_id' => $user->id],
             ['id' => (string) Str::uuid(), 'name' => $user->name, 'commission' => 0, 'balance' => 0, 'status' => 1]
         );
-
-        $income = $product->commission * $cart->quantity;
+        $income = round((float) $product->price * (float) $product->commission_rate * $quantity, 2);
         $oldBalance = $wallet->balance;
-
-        $wallet->update([
-            'commission' => $wallet->commission + $income,
-            'balance' => $wallet->balance + $income,
-        ]);
-
+        $wallet->update(['commission' => $wallet->commission + $income, 'balance' => $wallet->balance + $income]);
         WalletTransaction::create([
-            'user_id' => $user->id,
-            'wallet_id' => $wallet->id,
-            'balance' => $oldBalance,
-            'income' => $income,
-            'new_balance' => $wallet->balance,
-            'status' => 3,
+            'user_id' => $user->id, 'wallet_id' => $wallet->id, 'balance' => $oldBalance,
+            'income' => $income, 'new_balance' => $wallet->balance, 'status' => 3,
         ]);
-
-        $product->increment('sold', $cart->quantity);
-    }
-
-    private function updateCommissionGuest($cart): void
-    {
-        $product = Product::find($cart->id);
-        $user = $product ? User::where('name', $cart->options['shopname'])->first() : null;
-
-        if (! $product || ! $user) {
-            return;
-        }
-
-        $wallet = Wallet::firstOrCreate(
-            ['user_id' => $user->id],
-            ['id' => (string) Str::uuid(), 'name' => $user->name, 'commission' => 0, 'balance' => 0, 'status' => 1]
-        );
-
-        $income = $product->commission * $cart->qty;
-        $oldBalance = $wallet->balance;
-
-        $wallet->update([
-            'commission' => $wallet->commission + $income,
-            'balance' => $wallet->balance + $income,
-        ]);
-
-        WalletTransaction::create([
-            'user_id' => $user->id,
-            'wallet_id' => $wallet->id,
-            'balance' => $oldBalance,
-            'income' => $income,
-            'new_balance' => $wallet->balance,
-            'status' => 3,
-        ]);
-
-        $product->increment('sold', $cart->qty);
     }
 }

@@ -22,21 +22,28 @@
                         </p>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 gap-4 py-16 mx-auto text-white md:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 py-16 mx-auto text-white md:grid-cols-3">
                     <div class="block h-48 mx-2 group sm:mx-0">
                         <a href="{{ route('mockup.shirt') }}"
                             class=" relative flex flex-col items-center h-full rounded-3xl border-4 border-indigo-500 bg-black/40 p-8 transition group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:shadow-[8px_8px_0_0_#ec4899]">
-                            <p class="my-3 text-lg text-indigo-400">Standard Tee</p>
+                            <p class="my-3 text-lg text-indigo-400">Shirt · RM35</p>
                             <img src="../image/product-selection/tshirt.png"
                                 class="w-16 h-16 p-2 bg-indigo-500 rounded-full" />
                         </a>
                     </div>
                     <div class="block h-48 mx-2 group sm:mx-0">
-                        <a href="{{ route('mockup.oversized') }}"
+                        <a href="{{ route('mockup.sweat') }}"
                             class="relative flex flex-col items-center h-full rounded-3xl border-4 border-indigo-500 bg-black/40 p-8 transition group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:shadow-[8px_8px_0_0_#ec4899]">
-                            <p class="my-3 text-lg text-indigo-400">Oversized Tee</p>
-                            <img src="../image/product-selection/oversized.png"
+                            <p class="my-3 text-lg text-indigo-400">Sweatshirt · RM50</p>
+                            <img src="../image/product-selection/sweater.png"
                                 class="w-16 h-16 p-2 bg-indigo-500 rounded-full" />
+                        </a>
+                    </div>
+                    <div class="block h-48 mx-2 group sm:mx-0">
+                        <a href="{{ route('mockup.hoodie') }}"
+                            class="relative flex flex-col items-center h-full rounded-3xl border-4 border-indigo-500 bg-black/40 p-8 transition group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:shadow-[8px_8px_0_0_#ec4899]">
+                            <p class="my-3 text-lg text-indigo-400">Hoodie · RM70</p>
+                            <span class="grid w-16 h-16 p-2 text-2xl bg-indigo-500 rounded-full place-items-center">✦</span>
                         </a>
                     </div>
                 </div>

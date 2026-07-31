@@ -15,6 +15,6 @@ trait PasswordValidationRules
 
     protected function passwordRules()
     {
-        return ['required', 'string', (new Password) -> requireNumeric(), 'confirmed'];
+        return ['required', 'string', 'confirmed'];
     }
 }

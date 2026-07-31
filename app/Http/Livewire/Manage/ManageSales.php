@@ -15,10 +15,10 @@ class ManageSales extends Component
     {
         $totalCommission = 0;
         $commission = 0;
-        $products = Product::where('shopname', Auth::user()->name)->get();
+        $products = Product::where('user_id', Auth::id())->get();
         foreach ($products as $product) {
-            $commission = $product->commission;
-            foreach ($product->productOrder as $item) {
+            $commission = (float) $product->price * (float) $product->commission_rate;
+            foreach ($product->productOrder->where('is_owner_purchase', false) as $item) {
                 $totalCommission += $commission * $item->quantity;
             }
         }
@@ -28,12 +28,13 @@ class ManageSales extends Component
     public function render()
     {
         $products = Product::with('productOrder')
-            ->where('artist_id', Auth::user()->id)
+            ->where('user_id', Auth::id())
             ->get();
         $productOrders = ProductOrder::with('order')
             ->whereIn('product_id', $products->pluck('id'))
+            ->where('is_owner_purchase', false)
             ->get();
-        $totalItem = Product::where('shopname', Auth::user()->name)->sum('sold');
+        $totalItem = Product::where('user_id', Auth::id())->sum('sold');
         $totalCommission = $this->totalCommission();
 
         return view('livewire.manage.manage-sales', compact('productOrders','totalItem', 'totalCommission'));

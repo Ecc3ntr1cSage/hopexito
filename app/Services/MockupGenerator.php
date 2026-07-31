@@ -15,12 +15,14 @@ class MockupGenerator
         string $garmentColor,
         ?string $outputPath = null
     ): string {
-        if (! extension_loaded('gd')) {
-            throw new \RuntimeException('The GD PHP extension must be enabled to generate mockups.');
-        }
-
         $templateFullPath = $this->fullPath($templatePath);
         $designFullPath = $design instanceof UploadedFile ? $design->getRealPath() : $this->fullPath($design);
+
+        if (! extension_loaded('gd')) {
+            $path = $outputPath ?: 'products/'.uniqid('mockup-', true).'.png';
+            Storage::disk('public')->put($path, file_get_contents($templateFullPath));
+            return $path;
+        }
 
         $template = Image::make($templateFullPath)->resize(880, 900);
         $canvas = Image::canvas($template->width(), $template->height(), $this->color($garmentColor));

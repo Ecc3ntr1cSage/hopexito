@@ -12,11 +12,6 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     public function redirectUser(){
-        if(auth()->user()->hasRole('artist')){
-            return view('dashboard');
-        }
-        if(auth()->user()->hasRole('customer')){
-            return redirect()->route('explore');
-        }
+        return view('dashboard');
     }
 }

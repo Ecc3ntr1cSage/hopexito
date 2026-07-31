@@ -13,10 +13,11 @@ class ManageProduct extends Component
 {
     use WithFileUploads;
 
-    public $title, $price, $tags, $commission, $search;
+    public $title, $tags, $search;
 
     public function previewFront($id){
         $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
         $product->update(['preview' => 0]);
 
         session()->flash('message', 'Preview Changed To Front');
@@ -25,6 +26,7 @@ class ManageProduct extends Component
 
     public function previewBack($id){
         $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
         $product->update(['preview' => 1]);
 
         session()->flash('message', 'Preview Changed To Back');
@@ -34,18 +36,23 @@ class ManageProduct extends Component
     public function addToCollection($product_id, $collection_id)
     {
         $product = Product::findOrFail($product_id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
+        $collection = ProductCollection::findOrFail($collection_id);
+        abort_unless((int) $collection->user_id === (int) Auth::id(), 403);
         $product->update(['collection_id' => $collection_id]);
     }
     // remove product from collection
     public function removeFromCollection($product_id, $collection_id)
     {
         $product = Product::findOrFail($product_id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
         $product->update(['collection_id' => null]);
     }
     // delete entire collection
     public function deleteCollection($id)
     {
         $collection = ProductCollection::findOrFail($id);
+        abort_unless((int) $collection->user_id === (int) Auth::id(), 403);
         $image_path = $collection->collection_image;
         Storage::delete("collection-image/{$image_path}");
         foreach ($collection->product as $product) {
@@ -64,16 +71,15 @@ class ManageProduct extends Component
         $validatedData = $this->validate([
             'title' => 'required|string',
             'tags' => 'required|string',
-            'price' => 'required|numeric|min:42'
+            'visibility' => 'nullable|in:public,private',
         ]);
 
         $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
 
         $product->update([
             'title' => $this->title,
             'tags' => $this->tags,
-            'price' => $this->price,
-            'commission' => $this->price * 0.15,
         ]);
 
         session()->flash('message', 'Product Updated');
@@ -83,6 +89,7 @@ class ManageProduct extends Component
     public function pinProduct($id)
     {
         $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
         $product->update(['status' => 3]);
   
         session()->flash('message', 'Product Pinned');
@@ -92,6 +99,7 @@ class ManageProduct extends Component
     public function unpinProduct($id)
     {
         $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
         $product->update(['status' => 1]);
 
         session()->flash('message', 'Product Unpinned');
@@ -101,6 +109,7 @@ class ManageProduct extends Component
     public function archiveProduct($id)
     {
         $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
         $product->status = 2;
         $product->save();
 
@@ -111,6 +120,7 @@ class ManageProduct extends Component
     public function unarchiveProduct($id)
     {
         $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
         $product->status = 1;
         $product->save();
 
@@ -120,7 +130,9 @@ class ManageProduct extends Component
     // delete product by id
     public function deleteProduct($id)
     {
-        Product::where('id', $id)->delete();
+        $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
+        $product->delete();
         session()->flash('message', 'Product Deleted');
         return redirect()->route('product.manage');
     }
@@ -129,7 +141,7 @@ class ManageProduct extends Component
     private function inCart()
     {
         $inCart = [];
-        $products = Product::where('shopname', Auth::user()->name)->get();
+        $products = Product::where('user_id', Auth::id())->get();
         foreach ($products as $product) {
             $value = false;
             $productIds = $product->productCart->pluck('id');
@@ -148,15 +160,25 @@ class ManageProduct extends Component
         $product = Product::findOrFail($id);
         $this->title = $product->title;
         $this->tags = $product->tags;
-        $this->price = $product->price;
+    }
+
+    public function setVisibility($id, $visibility)
+    {
+        $product = Product::findOrFail($id);
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
+        $this->validate(['visibility' => 'nullable|in:public,private']);
+        abort_unless(in_array($visibility, ['public', 'private'], true), 422);
+        $product->update(['visibility' => $visibility]);
+        session()->flash('message', 'Visibility Updated');
+        return redirect()->route('product.manage');
     }
 
     public function render()
     {
         $search = '%' . $this->search . '%';
-        $products = Product::where('shopname', Auth::user()->name)->where('status', '!=', 2)->where('title', 'like', $search)->orderBy('status', 'desc')->get();
-        $productCollections = ProductCollection::where('name', Auth::user()->name)->get();
-        $archives = Product::where('shopname', Auth::user()->name)->where('status', 2)->get();
+        $products = Product::where('user_id', Auth::id())->where('status', '!=', 2)->where('title', 'like', $search)->orderBy('status', 'desc')->get();
+        $productCollections = ProductCollection::where('user_id', Auth::id())->get();
+        $archives = Product::where('user_id', Auth::id())->where('status', 2)->get();
         $noArchives = $archives->isEmpty();
         $inCart = $this->inCart();
 

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Notifications\CustomResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,7 +11,6 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -23,7 +21,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     use Notifiable;
     use TwoFactorAuthenticatable;
-    use HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -31,7 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var string[]
      */
     protected $fillable = [
-        'name', 'email', 'password', 'google_id', 'role_id', 'phone', 'address', 'postcode', 'state','email_verified_at'
+        'name', 'email', 'password', 'google_id', 'phone', 'address', 'postcode', 'state','email_verified_at'
     ];
 
     /**
@@ -82,14 +79,9 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-    public function sendPasswordResetNotification($token)
+    public function profile()
     {
-        $this->notify(new CustomResetPasswordNotification($token));
-    }
-
-    public function artist()
-    {
-        return $this->hasOne(Artist::class, 'id', 'id');
+        return $this->hasOne(Profile::class);
     }
     public function wallet()
     {
@@ -97,11 +89,11 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     public function products()
     {
-        return $this->hasMany(Product::class, 'artist_id', 'id');
+        return $this->hasMany(Product::class);
     }
     public function productCollections()
     {
-        return $this->hasMany(ProductCollection::class, 'name', 'name');
+        return $this->hasMany(ProductCollection::class);
     }
 
 }

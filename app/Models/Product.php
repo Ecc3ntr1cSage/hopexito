@@ -12,43 +12,87 @@ class Product extends Model
     
     protected $table = 'products';
     protected $fillable = [
+        'user_id',
         'title',
         'slug',
+        'product_type',
+        'visibility',
         'tags',
-        'artist_id',
-        'shopname',
         'collection_id',
         'price',
-        'discount',
-        'commission',
-        'color',
-        'category',
-        'image_front',
-        'image_front_path',
-        'image_back',
-        'image_back_path',
+        'commission_rate',
         'status',
         'sold',
-        'product_image',
-        'product_image_path',
-        'product_image_2',
-        'product_image_2_path',
-        'preview'
+        'preview',
     ];
 
-    public function getProductImageAttribute($value)
+    protected $casts = [
+        'price' => 'decimal:2',
+        'commission_rate' => 'decimal:4',
+    ];
+
+    protected $appends = ['shopname', 'category', 'color', 'product_image', 'product_image_2'];
+
+    public function owner()
     {
-        return $this->image_front_path ? asset('storage/'.$this->image_front_path) : $value;
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function getProductImage2Attribute($value)
+    public function variants()
     {
-        return $this->image_back_path ? asset('storage/'.$this->image_back_path) : $value;
+        return $this->hasMany(ProductVariant::class);
     }
 
-    public function productUser(){
-        return $this->hasOne(User::class,'id','artist_id');
+    public function getProductImageAttribute(): ?string
+    {
+        return $this->variants->first()?->image_front_url;
     }
+
+    public function getProductImage2Attribute(): ?string
+    {
+        return $this->variants->first()?->image_back_url;
+    }
+
+    public function getShopnameAttribute(): ?string
+    {
+        return $this->owner?->name;
+    }
+
+    public function getCategoryAttribute(): string
+    {
+        return config('catalog.types.'.$this->product_type.'.label', ucfirst((string) $this->product_type));
+    }
+
+    public function getColorAttribute(): string
+    {
+        return $this->variants->pluck('color')->implode(',');
+    }
+
+    public function getCommissionAttribute(): float
+    {
+        return round((float) $this->price * (float) $this->commission_rate, 2);
+    }
+
+    public function scopePublic($query)
+    {
+        return $query->where('visibility', 'public');
+    }
+
+    public function scopeAvailable($query)
+    {
+        return $query->where('status', '!=', 2)->public();
+    }
+
+    public function isOwnedBy(?User $user): bool
+    {
+        return $user && (int) $this->user_id === (int) $user->id;
+    }
+
+    public function canBeViewedBy(?User $user): bool
+    {
+        return $this->visibility === 'public' || $this->isOwnedBy($user);
+    }
+
     public function productOrder()
     {
         return $this->hasMany(ProductOrder::class, 'product_id', 'id')->orderByDesc('created_at');

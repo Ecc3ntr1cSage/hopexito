@@ -2,128 +2,140 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Artist;
 use App\Models\Product;
-use Illuminate\Http\Request;
-use App\Models\TemporaryFile;
-use App\Models\ProductTemplate;
+use App\Models\ProductVariant;
+use App\Models\User;
 use App\Services\MockupGenerator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ProductsController extends Controller
 {
-    public function index()
-    {
-        $template = ProductTemplate::all();
-        return view('product.custom', compact('template'));
-    }
-    // product template selection page
     public function create()
     {
-        $template = ProductTemplate::all();
-        return view('product.create', compact('template'));
+        return view('product.create', ['catalog' => config('catalog.types')]);
     }
-    
-    // store products into database
+
     public function store(Request $request, MockupGenerator $mockups)
     {
-        $minimum_price = $request->input('min');
         $validated = $request->validate([
-            'title' => 'required|max:255',
-            'tags' => 'required|max:255',
-            'price' => 'required|numeric|min:' . $minimum_price,
-            'commission' => 'required|numeric',
-            'color' => 'required|array',
-            'preview_color' => 'required|string',
-            'category' => 'required|string',
-            'image_front' => 'required|image|max:8192',
-            'image_back' => 'nullable|image|max:8192',
-            'template_front' => 'required|string',
-            'template_back' => 'nullable|string',
-            'front_x' => 'required|integer',
-            'front_y' => 'required|integer',
-            'front_w' => 'required|integer',
-            'front_h' => 'required|integer',
-            'back_x' => 'nullable|integer',
-            'back_y' => 'nullable|integer',
-            'back_w' => 'nullable|integer',
-            'back_h' => 'nullable|integer',
+            'product_type' => ['required', 'string', 'in:shirt,sweat,hoodie'],
+            'title' => ['required', 'string', 'max:255'],
+            'tags' => ['required', 'string', 'max:255'],
+            'visibility' => ['nullable', 'in:public,private'],
+            'image_front' => ['required', 'image', 'max:8192'],
+            'image_back' => ['nullable', 'image', 'max:8192'],
+            'preview_color' => ['nullable', 'string', 'in:White,Black,Gray'],
+            'preview' => ['nullable', 'boolean'],
         ]);
 
-        $frontDesignPath = $request->file('image_front')->store('image-front', 'public');
-        $backDesignPath = $request->file('image_back')?->store('image-back', 'public');
+        $catalog = config('catalog.types.'.$validated['product_type']);
+        abort_unless($catalog, 422, 'Unknown product type.');
 
-        $frontMockupPath = $mockups->generate(
-            $request->file('image_front'),
-            $validated['template_front'],
-            ['x' => $validated['front_x'], 'y' => $validated['front_y'], 'w' => $validated['front_w'], 'h' => $validated['front_h']],
-            $validated['preview_color']
-        );
+        $frontDesignPath = $request->file('image_front')->store('designs/front', 'public');
+        $backDesignPath = $request->file('image_back')?->store('designs/back', 'public');
 
-        $backMockupPath = null;
-        if ($request->hasFile('image_back') && $request->filled('template_back')) {
-            $backMockupPath = $mockups->generate(
-                $request->file('image_back'),
-                $validated['template_back'],
-                [
-                    'x' => $validated['back_x'] ?? $validated['front_x'],
-                    'y' => $validated['back_y'] ?? $validated['front_y'],
-                    'w' => $validated['back_w'] ?? $validated['front_w'],
-                    'h' => $validated['back_h'] ?? $validated['front_h'],
-                ],
-                $validated['preview_color']
-            );
-        }
+        DB::transaction(function () use ($request, $validated, $catalog, $mockups, $frontDesignPath, $backDesignPath) {
+            $product = Product::create([
+                'user_id' => Auth::id(),
+                'title' => $validated['title'],
+                'slug' => Str::random(30),
+                'product_type' => $validated['product_type'],
+                'visibility' => $validated['visibility'] ?? 'public',
+                'tags' => $validated['tags'],
+                'price' => $catalog['price'],
+                'commission_rate' => config('catalog.commission_rate'),
+                'collection_id' => $request->input('collection_id'),
+                'status' => 1,
+                'sold' => 0,
+                'preview' => (int) $request->input('preview', 0),
+            ]);
 
-        Product::create([
-            'title' => $validated['title'],
-            'slug' => Str::random(30),
-            'tags' => $validated['tags'],
-            'artist_id' => Auth::id(),
-            'shopname' => Auth::user()->name,
-            'collection_id' => $request->input('collection_id'),
-            'price' => $validated['price'],
-            'discount' => $request->input('discount', 1),
-            'commission' => $validated['commission'],
-            'color' => implode(',', $validated['color']),
-            'category' => $validated['category'],
-            'image_front' => basename($frontDesignPath),
-            'image_front_path' => $frontMockupPath,
-            'image_back' => $backDesignPath ? basename($backDesignPath) : null,
-            'image_back_path' => $backMockupPath,
-            'product_image_path' => $frontMockupPath,
-            'product_image_2_path' => $backMockupPath,
-            'preview' => intval($request->input('preview', 0)),
-        ]);
+            foreach (config('catalog.colors') as $color) {
+                $frontPath = $mockups->generate(
+                    $request->file('image_front'),
+                    'mockups/'.strtolower($color).'-'.$validated['product_type'].'-front.png',
+                    $catalog['front_position'],
+                    $color,
+                    'products/'.$product->id.'/'.$color.'-front.png'
+                );
+
+                $backPath = null;
+                if ($request->hasFile('image_back')) {
+                    $backPath = $mockups->generate(
+                        $request->file('image_back'),
+                        'mockups/'.strtolower($color).'-'.$validated['product_type'].'-back.png',
+                        $catalog['back_position'],
+                        $color,
+                        'products/'.$product->id.'/'.$color.'-back.png'
+                    );
+                }
+
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'color' => $color,
+                    'image_front_path' => $frontPath,
+                    'image_back_path' => $backPath,
+                ]);
+            }
+        });
 
         session()->flash('message', 'Product Created');
-        return redirect()->route('product.create');
+        return redirect()->route('product.manage');
     }
-    // display product page, views/product/show
+
     public function show(Product $product)
     {
-        $user = User::where('name', $product->shopname)->first();
-        $products = Product::where('shopname', $product->shopname)->inRandomOrder()->take(8)->get();
-        $discover = Product::where('shopname', '!=', $product->shopname)->inRandomOrder()->take(8)->get();
-        $totalDesigns = Product::where('shopname', $product->shopname)->count();
-        $colors = explode(',', $product->color);
-        return view('product.show', compact('product', 'products', 'user', 'colors', 'totalDesigns', 'discover'));
+        abort_unless($product->canBeViewedBy(Auth::user()), 404);
+
+        $product->load('variants', 'owner.profile');
+        $user = $product->owner;
+        $products = Product::available()
+            ->where('user_id', $product->user_id)
+            ->where('id', '!=', $product->id)
+            ->inRandomOrder()
+            ->take(8)
+            ->get();
+        $discover = Product::available()
+            ->where('user_id', '!=', $product->user_id)
+            ->inRandomOrder()
+            ->take(8)
+            ->get();
+        $totalDesigns = Product::where('user_id', $product->user_id)->count();
+        $colors = $product->variants->pluck('color')->values();
+        $variantData = $product->variants->mapWithKeys(fn ($variant) => [
+            $variant->color => ['front' => $variant->image_front_url, 'back' => $variant->image_back_url],
+        ]);
+
+        return view('product.show', compact('product', 'products', 'user', 'colors', 'totalDesigns', 'discover', 'variantData'));
     }
 
     public function edit(Product $product)
     {
-        //
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
+        return redirect()->route('product.manage');
     }
 
     public function update(Request $request, Product $product)
     {
-        //
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
+
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'tags' => ['required', 'string', 'max:255'],
+            'visibility' => ['required', 'in:public,private'],
+        ]);
+
+        $product->update($validated);
+        return redirect()->route('product.manage')->with('message', 'Product Updated');
     }
 
     public function destroy(Product $product)
     {
-        //
+        abort_unless($product->isOwnedBy(Auth::user()), 403);
+        $product->delete();
+        return redirect()->route('product.manage')->with('message', 'Product Deleted');
     }
 }

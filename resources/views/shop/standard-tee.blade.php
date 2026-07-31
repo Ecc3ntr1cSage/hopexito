@@ -1,4 +1,4 @@
-@section('title', 'Shop Standard Tee | HopeXito')
+@section('title', 'Shop Shirt | HopeXito')
 <x-app-layout>
     <x-jet-whatsapp-contact />
     <div class="mx-auto mt-8 max-w-7xl">
@@ -27,13 +27,13 @@
                 stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
             </svg>
-            <p class="text-indigo-400">Standard Tee</p>
+            <p class="text-indigo-400">Shirt</p>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
             </svg>
-            <a href="{{ route('shop.oversized') }}"
-                class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Oversized Tee</a>
+            <a href="{{ route('shop.sweat') }}"
+                class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Sweatshirt</a>
         </div>
     </div>
     <div
@@ -62,9 +62,9 @@
                     </div>
                     <div class="flex flex-col justify-between gap-1 px-2 py-1 tracking-wider md:px-4 md:py-2">
                         @if ($product->category == 'Shirt')
-                            <p class="px-3 py-0.5 bg-fuchsia-700/80 rounded-md w-fit text-xs">Standard Tee</p>
-                        @elseif($product->category == 'Oversized')
-                            <p class="px-3 py-0.5 rounded-md bg-indigo-700/80 w-fit text-xs">Oversized Tee</p>
+                            <p class="px-3 py-0.5 bg-fuchsia-700/80 rounded-md w-fit text-xs">Shirt</p>
+                        @elseif($product->category == 'Sweatshirt')
+                            <p class="px-3 py-0.5 rounded-md bg-indigo-700/80 w-fit text-xs">Sweatshirt</p>
                         @else
                             <p></p>
                         @endif

@@ -3,7 +3,7 @@
 namespace App\Http\Livewire;
 
 use Livewire\Component;
-use App\Models\Artist;
+use App\Models\Profile;
 use App\Models\TemporaryFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +18,7 @@ class SocialLinks extends Component
 
     public function store()
     {   
-        Artist::updateOrCreate(['id' => Auth::user()->id], [
+        Profile::updateOrCreate(['user_id' => Auth::id()], [
             'facebook' => $this->facebook,
             'twitter' => $this->twitter,
             'instagram' => $this->instagram,
@@ -36,17 +36,17 @@ class SocialLinks extends Component
 
     private function forceFill()
     {
-        if (Artist::find(Auth::user()->id)) {
-            $artist = Artist::findOrFail(Auth::user()->id);
-            $this->facebook = $artist->facebook;
-            $this->twitter = $artist->twitter;
-            $this->instagram = $artist->instagram;
-            $this->dribble = $artist->dribble;
-            $this->behance = $artist->behance;
-            $this->pinterest = $artist->pinterest;
-            $this->deviantart = $artist->deviantart;
-            $this->tiktok = $artist->tiktok;
-            $this->website = $artist->website;
+        if (Profile::where('user_id', Auth::id())->exists()) {
+            $profile = Profile::where('user_id', Auth::id())->firstOrFail();
+            $this->facebook = $profile->facebook;
+            $this->twitter = $profile->twitter;
+            $this->instagram = $profile->instagram;
+            $this->dribble = $profile->dribble;
+            $this->behance = $profile->behance;
+            $this->pinterest = $profile->pinterest;
+            $this->deviantart = $profile->deviantart;
+            $this->tiktok = $profile->tiktok;
+            $this->website = $profile->website;
         }
     }
 

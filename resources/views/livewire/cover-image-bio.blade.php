@@ -11,8 +11,8 @@
         <form method="POST" action="{{ route('upload.cover') }}" enctype="multipart/form-data" class="">
             @csrf
             <x-jet-label for="cover-image" value="{{ __('Cover Image') }}" />
-            @if (Auth::user()->artist->cover_image)
-                <img src="{{ asset('storage/cover-image/' . Auth::user()->artist->cover_image) }}"
+            @if (Auth::user()->profile?->cover_image)
+                <img src="{{ asset('storage/cover-image/' . Auth::user()->profile->cover_image) }}"
                     class="w-full rounded-lg h-48 md:h-72 lg:h-96">
             @endif
             <input type="file" id="cover-image" name="cover_image" wire:model.defer="cover_image"

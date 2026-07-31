@@ -3,17 +3,17 @@
     <x-jet-whatsapp-contact />
     <div class="relative z-20 min-h-screen px-1 mx-auto mt-6 pb-28 max-w-7xl">
         <p class="tracking-wide text-md"><span class="px-1 text-indigo-400 bg-black">{{ $user_count }} results</span>
-            for Artists</p>
+            for Users</p>
         <div class="grid grid-cols-1 gap-2 mt-8 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
-            @foreach ($artists as $artist)
-                <a href="{{ route('people', $artist->name) }}" class="relative group">
+            @foreach ($users as $user)
+                <a href="{{ route('people', $user->name) }}" class="relative group">
                     <div
                         class="absolute transition duration-1000 rounded-xl opacity-25 -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 blur group-hover:opacity-100 group-hover:duration-200">
                     </div>
                     <div class="relative flex items-center gap-3 px-6 py-4 bg-black rounded-xl">
-                        <img class="object-cover w-16 h-16 rounded-full " src="{{ $artist->profile_photo_url }}"
-                            alt="{{ $artist->name }}" />
-                        <p class="text-white">{{ $artist->name }}</p>
+                        <img class="object-cover w-16 h-16 rounded-full " src="{{ $user->profile_photo_url }}"
+                            alt="{{ $user->name }}" />
+                        <p class="text-white">{{ $user->name }}</p>
                     </div>
                 </a>
             @endforeach
@@ -47,9 +47,9 @@
                         </div>
                         <div class="flex flex-col justify-between px-2 py-1 tracking-wider md:px-4 md:py-2">
                             @if ($product->category == 'Shirt')
-                                <p class="px-3 py-0.5 bg-fuchsia-700/80 rounded-md w-fit text-xs">Standard Tee</p>
-                            @elseif($product->category == 'Oversized')
-                                <p class="px-3 py-0.5 rounded-md bg-indigo-700/80 w-fit text-xs">Oversized Tee</p>
+                                <p class="px-3 py-0.5 bg-fuchsia-700/80 rounded-md w-fit text-xs">Shirt</p>
+                            @elseif(in_array($product->category, ['Sweatshirt', 'Hoodie']))
+                                <p class="px-3 py-0.5 rounded-md bg-indigo-700/80 w-fit text-xs">{{ $product->category }}</p>
                             @else
                                 <p></p>
                             @endif

@@ -1,11 +1,10 @@
 @php
-    $mode = $mode ?? 'product';
-    $action = $mode === 'custom' ? route('upload.custom') : route('product.store');
-    $frontName = $mode === 'custom' ? 'custom_image_front' : 'image_front';
-    $backName = $mode === 'custom' ? 'custom_image_back' : 'image_back';
-    $isOversized = str_contains(strtolower($template->category), 'oversized');
-    $frontPosition = $isOversized ? ['x' => 270, 'y' => 208, 'w' => 360, 'h' => 525] : ['x' => 240, 'y' => 208, 'w' => 405, 'h' => 525];
-    $backPosition = $isOversized ? ['x' => 270, 'y' => 176, 'w' => 360, 'h' => 525] : ['x' => 240, 'y' => 208, 'w' => 405, 'h' => 525];
+    $mode = 'product';
+    $action = route('product.store');
+    $frontName = 'image_front';
+    $backName = 'image_back';
+    $frontPosition = $template->front_position;
+    $backPosition = $template->back_position;
     $colorValue = fn ($color) => match (strtolower($color)) {
         'black' => '#111111',
         'gray', 'grey' => '#808080',
@@ -23,7 +22,7 @@
     <div class="min-h-screen bg-neutral-900 pb-24 text-white" data-mockup-editor x-data="{ open: false, price: '', accepted: false, preview: false, selectedColor: '{{ $firstColor }}', size: '', quantity: 1 }">
         <div class="mx-auto max-w-7xl px-4 py-6">
             <div class="mb-5 flex flex-wrap items-center gap-2 text-sm">
-                <a href="{{ $mode === 'custom' ? route('product.index') : route('product.create') }}" class="rounded-md px-2 py-1 transition hover:bg-indigo-500/50">
+                <a href="{{ route('product.create') }}" class="rounded-md px-2 py-1 transition hover:bg-indigo-500/50">
                     Product Selection
                 </a>
                 <span class="text-gray-500">/</span>
@@ -32,6 +31,7 @@
 
             <form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="grid gap-8 lg:grid-cols-[380px_1fr]">
                 @csrf
+                <input type="hidden" name="product_type" value="{{ $template->type }}">
                 <input type="hidden" name="template_front" value="{{ $template->mockup_image }}">
                 <input type="hidden" name="template_back" value="{{ $template->mockup_image_2 }}">
                 <input type="hidden" name="preview_color" data-selected-color value="{{ $firstColor }}">
@@ -70,7 +70,6 @@
                                 <x-jet-input id="tags" name="tags" type="text" class="mt-1 block w-full" placeholder="panda, bear, snake" />
                                 @error('tags')<p class="mt-1 text-rose-400">{{ $message }}</p>@enderror
                             </div>
-                            <input type="hidden" value="{{ $template->category }}" name="category">
                         </div>
                     @endif
 
@@ -96,16 +95,17 @@
 
                     @if ($mode === 'product')
                         <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <x-jet-label for="price" value="{{ __('Price') }}" />
-                                <x-jet-input id="price" name="price" type="number" step="0.01" min="{{ $template->min }}" class="mt-1 block w-full" x-model="price" placeholder="Min {{ $template->min }}" />
-                                <input type="hidden" name="commission" x-bind:value="price ? (price * {{ $template->commission / 100 }}).toFixed(2) : 0">
-                                <input type="hidden" name="min" value="{{ $template->min }}">
-                                @error('price')<p class="mt-1 text-rose-400">{{ $message }}</p>@enderror
+                            <div class="rounded-md border border-indigo-500 bg-indigo-500/10 p-3">
+                                <x-jet-label value="{{ __('Fixed price') }}" />
+                                <p class="mt-1 text-xl text-indigo-300">RM{{ number_format($template->min, 2) }}</p>
+                                <p class="mt-1 text-xs text-gray-400">15% creator commission on external purchases</p>
                             </div>
                             <div>
-                                <x-jet-label value="{{ __('Margin') }}" />
-                                <x-jet-input type="text" class="mt-1 block w-full text-indigo-300" x-bind:value="price ? 'RM' + (price * {{ $template->commission / 100 }}).toFixed(2) : ''" disabled />
+                                <x-jet-label for="visibility" value="{{ __('Visibility') }}" />
+                                <select id="visibility" name="visibility" class="mt-1 block w-full rounded-md border-neutral-700 bg-neutral-800 text-white">
+                                    <option value="public" selected>Public</option>
+                                    <option value="private">Private</option>
+                                </select>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
@@ -162,7 +162,7 @@
                                 </button>
                             </div>
                             <div data-template-preview class="relative mx-auto aspect-[44/45] max-w-[520px] overflow-hidden rounded-md" style="background-color: {{ $colorValue($firstColor) }}">
-                                <img src="{{ asset('storage/mockup-image/' . ($side === 'front' ? $template->mockup_image : $template->mockup_image_2)) }}" alt="{{ $template->category }} {{ $side }}" class="h-full w-full object-contain">
+                                <img src="{{ asset('' . ($side === 'front' ? $template->mockup_image : $template->mockup_image_2)) }}" alt="{{ $template->category }} {{ $side }}" class="h-full w-full object-contain">
                                 <div class="absolute" style="left: {{ ($position['x'] / 880) * 100 }}%; top: {{ ($position['y'] / 900) * 100 }}%; width: {{ ($position['w'] / 880) * 100 }}%; height: {{ ($position['h'] / 900) * 100 }}%;">
                                     <img data-design-preview="{{ $side }}" alt="" class="hidden h-full w-full object-contain">
                                 </div>
