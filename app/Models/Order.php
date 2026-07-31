@@ -13,7 +13,6 @@ class Order extends Model
     protected $casts = ['id' => 'string'];
     protected $fillable = [
         'id',
-        'collection_id',
         'email',
         'name',
         'description',

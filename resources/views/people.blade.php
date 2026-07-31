@@ -82,7 +82,7 @@
             <div class="profile-stat-strip profile-reveal profile-reveal-delay-more">
                 <div><strong>{{ $productsCount }}</strong><span>{{ $isOwner ? 'total designs' : 'public designs' }}</span></div>
                 <div><strong>{{ $totalSold }}</strong><span>pieces moved</span></div>
-                <div><strong>{{ $productsCollection->count() }}</strong><span>collections</span></div>
+                <div><strong>{{ $user->created_at?->format('Y') ?? '2026' }}</strong><span>maker since</span></div>
                 <span class="profile-stat-note">Made by people<br>with something to say.</span>
             </div>
         </section>
@@ -92,7 +92,7 @@
                 <div>
                     <span class="profile-eyebrow"><i></i> 01 / Selected work</span>
                     <h2>Objects with a point of view.</h2>
-                    <p>{{ $isOwner ? 'Your public and private editions, arranged for a quick studio read.' : 'A small collection of pieces made by '.$user->name.'.' }}</p>
+                    <p>{{ $isOwner ? 'Your public and private editions, arranged for a quick studio read.' : 'A small run of pieces made by '.$user->name.'.' }}</p>
                 </div>
                 <span class="profile-section-index">{{ str_pad((string) $productsCount, 2, '0', STR_PAD_LEFT) }} editions</span>
             </div>

@@ -78,7 +78,6 @@ class ProductsController extends Controller
                 'tags' => $validated['tags'],
                 'price' => $catalog['price'],
                 'commission_rate' => config('catalog.commission_rate'),
-                'collection_id' => null,
                 'status' => 1,
                 'sold' => 0,
                 'preview' => $previewSide,

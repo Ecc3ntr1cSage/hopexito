@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductCollection;
 use App\Models\Profile;
 use App\Models\TemporaryFile;
 use Illuminate\Http\Request;
@@ -48,18 +47,6 @@ class UploadController extends Controller
 
             return $filename;
         }
-        if ($request->hasFile('collection_image')) {
-            $file = $request->file('collection_image');
-            $extension = $file->getClientOriginalExtension();
-            $filename = uniqid('7a9') . '-' . Auth::user()->name . '.' . $extension;
-            $file->storeAs('public/collection-image/', $filename);
-
-            TemporaryFile::create([
-                'filename' => $filename
-            ]);
-
-            return $filename;
-        }
     }
     // upload cover image
     public function uploadCover(Request $request)
@@ -81,29 +68,4 @@ class UploadController extends Controller
         session()->flash('message', 'Profile Updated');
         return redirect()->route('profile.show');
     }
-    // upload collection image
-    public function uploadCollection(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string',
-            'collection_image' => 'required|string',
-        ]);
-
-        $temp = TemporaryFile::where('filename', $request->collection_image)->first();
-        if ($temp) {
-            $temp->delete();
-        }
-
-        ProductCollection::create([
-            'id' => uniqid(),
-            'user_id' => Auth::id(),
-            'name' => Auth::user()->name,
-            'title' => $request->title,
-            'collection_image' => $request->collection_image
-        ]);
-
-        session()->flash('message', 'New Collection Added');
-        return redirect()->route('product.manage');
-    }
-
 }

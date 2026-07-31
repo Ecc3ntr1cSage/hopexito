@@ -72,7 +72,7 @@ class DemoSeeder extends Seeder
         $order = Order::updateOrCreate(
             ['id' => '00000000-0000-4000-8000-000000000001'],
             [
-                'collection_id' => 'demo', 'email' => $user->email, 'name' => $user->name,
+                'email' => $user->email, 'name' => $user->name,
                 'description' => 'Demo paid order', 'delivery' => 10, 'status' => 1,
                 'amount' => 35, 'paid' => 'true', 'paid_at' => now(), 'address' => $user->address,
                 'postcode' => $user->postcode, 'state' => $user->state, 'phone' => $user->phone,

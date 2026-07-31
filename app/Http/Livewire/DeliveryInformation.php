@@ -2,11 +2,32 @@
 
 namespace App\Http\Livewire;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class DeliveryInformation extends Component
 {
     public $name, $email, $phone, $address, $postcode, $state;
+
+    public function mount(): void
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $this->fill([
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'address' => $user->address,
+                'postcode' => $user->postcode,
+                'state' => $user->state,
+            ]);
+            return;
+        }
+
+        if ($details = session('delivery_info')) {
+            $this->fill($details);
+        }
+    }
 
     public function storeDeliveryInfo()
     {

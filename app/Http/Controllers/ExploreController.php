@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\ProductCollection;
 use App\Models\Search;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,13 +19,7 @@ class ExploreController extends Controller
             ->get();
 
         $products = Product::available()->inRandomOrder()->take(8)->get();
-        $collections = ProductCollection::with('product')
-            ->whereHas('product', fn ($query) => $query->available())
-            ->inRandomOrder()
-            ->take(2)
-            ->get();
-
-        return view('explore', compact('users', 'products', 'collections'));
+        return view('explore', compact('users', 'products'));
     }
 
     public function search(Request $request)
@@ -56,16 +49,6 @@ class ExploreController extends Controller
         $product_count = $products->total();
         $user_count = $users->count();
         return view('shop/search', compact('users', 'products', 'search', 'product_count', 'user_count'));
-    }
-
-    public function collection()
-    {
-        $productsCollection = ProductCollection::with(['product' => fn ($query) => $query->available()])
-            ->whereHas('product', fn ($query) => $query->available())
-            ->inRandomOrder()
-            ->paginate(5);
-
-        return view('shop/collection', compact('productsCollection'));
     }
 
     public function shop()
@@ -100,10 +83,9 @@ class ExploreController extends Controller
 
         $productsCount = (clone $productsQuery)->count();
         $products = $productsQuery->orderByDesc('status')->orderByDesc('created_at')->paginate(16);
-        $productsCollection = ProductCollection::where('user_id', $user->id)->get();
         $totalSold = Product::where('user_id', $user->id)->sum('sold');
 
-        return view('people', compact('user', 'products', 'productsCount', 'productsCollection', 'totalSold'));
+        return view('people', compact('user', 'products', 'productsCount', 'totalSold'));
     }
 
     private function type(string $type, string $view)

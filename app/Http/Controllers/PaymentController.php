@@ -82,9 +82,18 @@ class PaymentController extends Controller
 
     public function storeBill(Request $request)
     {
+        $paymentResult = $request->input('payment_result', 'success');
+        abort_unless(in_array($paymentResult, ['success', 'failed'], true), 422);
+
+        if ($paymentResult === 'failed') {
+            session()->flash('message', 'Payment was not completed. Review your delivery details and try again.');
+            return redirect()->route('guest.checkout');
+        }
+
         $order = Auth::check() ? $this->completeAuthenticatedOrder() : $this->completeGuestOrder();
+        session()->put('last_order_id', $order->id);
         session()->flash('message', 'Demo payment successful. Order '.$order->id.' is paid.');
-        return Auth::check() ? redirect()->route('order.index') : redirect()->route('cart.index');
+        return redirect()->route('order.index');
     }
 
     public function callback(Request $request) { return response()->json(['status' => 'demo-payment']); }
@@ -98,7 +107,7 @@ class PaymentController extends Controller
 
         return DB::transaction(function () use ($user, $carts) {
             $order = Order::create([
-                'id' => (string) Str::uuid(), 'collection_id' => 'demo', 'email' => $user->email,
+                'id' => (string) Str::uuid(), 'email' => $user->email,
                 'name' => $user->name, 'description' => 'Demo payment completed', 'delivery' => $this->delivery(),
                 'status' => 1, 'amount' => $this->total(), 'paid' => 'true', 'paid_at' => Carbon::now(),
                 'address' => $user->address, 'postcode' => $user->postcode, 'state' => $user->state, 'phone' => $user->phone,
@@ -130,21 +139,21 @@ class PaymentController extends Controller
         $delivery = Config::get('shipping.price')[$state] ?? 10;
         $subtotal = SessionCart::instance('cart')->subtotal();
         $order = Order::create([
-            'id' => (string) Str::uuid(), 'collection_id' => 'demo', 'email' => $details['email'],
+            'id' => (string) Str::uuid(), 'email' => $details['email'],
             'name' => $details['name'].' (G)', 'description' => 'Demo payment completed', 'delivery' => $delivery,
             'status' => 1, 'amount' => $subtotal + $delivery, 'paid' => 'true', 'paid_at' => Carbon::now(),
             'address' => $details['address'], 'postcode' => $details['postcode'], 'state' => $state, 'phone' => $details['phone'],
         ]);
 
         foreach ($contents as $cart) {
-            $product = Product::findOrFail($cart->id);
+            $product = Product::findOrFail($cart['id']);
             abort_unless($product->status !== 2 && $product->canBeViewedBy(null), 404);
             ProductOrder::create([
                 'id' => (string) Str::uuid(), 'billplz_id' => $order->id, 'product_id' => $product->id,
-                'title' => $product->title, 'price' => $product->price, 'quantity' => $cart->qty,
-                'size' => $cart->options['size'], 'color' => $cart->options['color'], 'is_owner_purchase' => false,
+                'title' => $product->title, 'price' => $product->price, 'quantity' => $cart['qty'],
+                'size' => $cart['options']['size'], 'color' => $cart['options']['color'], 'is_owner_purchase' => false,
             ]);
-            $this->recordSale($product, $cart->qty, false);
+            $this->recordSale($product, $cart['qty'], false);
         }
         SessionCart::instance('cart')->destroy();
         return $order;

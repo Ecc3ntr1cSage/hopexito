@@ -18,7 +18,6 @@ class Product extends Model
         'product_type',
         'visibility',
         'tags',
-        'collection_id',
         'price',
         'commission_rate',
         'status',
@@ -99,9 +98,6 @@ class Product extends Model
     }
     public function productCart(){
         return $this->hasMany(Cart::class, 'product_id', 'id');
-    }
-    public function productCollection(){
-        return $this->hasOne(ProductCollection::class, 'id', 'collection_id');
     }
     public function getRouteKeyName()
     {

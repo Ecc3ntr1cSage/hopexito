@@ -20,6 +20,7 @@ Route::get('billplz', [PaymentController::class, 'createBill'])->name('billplz-c
 Route::post('billplz', [PaymentController::class, 'storeBill'])->name('billplz-store');
 Route::get('billplz-callback', [PaymentController::class, 'callback'])->name('billplz-callback');
 Route::get('billplz-redirect', [PaymentController::class, 'redirect'])->name('billplz-redirect');
+Route::get('order/index', ManageOrder::class)->name('order.index');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [Controller::class, 'redirectUser'])->name('dashboard');
     Route::get('mockup/standard-tee', [MockupController::class, 'redirectToStudio'])->defaults('type', 'shirt')->name('mockup.shirt');
@@ -28,9 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // upload controller 
     Route::post('upload', [UploadController::class, 'store'])->name('upload');
     Route::post('upload/cover-image', [UploadController::class, 'uploadCover'])->name('upload.cover');
-    Route::post('upload/product-collection', [UploadController::class, 'uploadCollection'])->name('upload.collection');
     // order controller
-    Route::get('order/index', ManageOrder::class)->name('order.index');
     Route::get('product/manage', ManageProduct::class)->name('product.manage');
     Route::get('sales', ManageSales::class)->name('product.sales');
     Route::get('product/create', [ProductsController::class, 'create'])->name('product.create');
@@ -50,7 +49,6 @@ Route::get('shop/all', [ExploreController::class, 'shop'])->name('shop.all');
 Route::get('shop/standard-tee', [ExploreController::class, 'shirt'])->name('shop.shirt');
 Route::get('shop/sweatshirt', [ExploreController::class, 'sweat'])->name('shop.sweat');
 Route::get('shop/hoodie', [ExploreController::class, 'hoodie'])->name('shop.hoodie');
-Route::get('collection', [ExploreController::class, 'collection'])->name('shop.collection');
 Route::get('{shopname}', [ExploreController::class, 'people'])->name('people');
 // google auth
 Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google-auth');

@@ -23,6 +23,10 @@
                         <a href="{{ route('profile.show') }}"><span>Profile settings</span><b aria-hidden="true">&nearr;</b></a>
                         <a href="{{ route('product.manage') }}"><span>Manage products</span><b aria-hidden="true">&nearr;</b></a>
                         <a href="{{ route('product.create') }}"><span>Create a product</span><b aria-hidden="true">&nearr;</b></a>
+                        <form method="POST" action="{{ route('logout') }}" class="site-account-logout-form">
+                            @csrf
+                            <button type="submit"><span>Log out</span><b aria-hidden="true">&nearr;</b></button>
+                        </form>
                     </div>
                 </div>
                 @livewire('cart.cart-counter')
@@ -43,6 +47,10 @@
                 <span>Account</span>
                 <a href="{{ route('profile.show') }}">Profile settings <span aria-hidden="true">&nearr;</span></a>
                 <a href="{{ route('product.manage') }}">Manage products <span aria-hidden="true">&nearr;</span></a>
+                <form method="POST" action="{{ route('logout') }}" class="site-nav-mobile-logout">
+                    @csrf
+                    <button type="submit">Log out <span aria-hidden="true">&nearr;</span></button>
+                </form>
             </div>
         @else
             <a href="{{ route('explore', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth', { mode: 'login' })">Create now <span aria-hidden="true">&nearr;</span></a>

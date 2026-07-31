@@ -3,68 +3,12 @@
 namespace App\Http\Livewire\Manage;
 
 use App\Models\Product;
-use App\Models\ProductCollection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 class ManageProduct extends Component
 {
-    use WithFileUploads;
-
     public $title, $tags, $search;
-
-    public function previewFront($id){
-        $product = Product::findOrFail($id);
-        abort_unless($product->isOwnedBy(Auth::user()), 403);
-        $product->update(['preview' => 0]);
-
-        session()->flash('message', 'Preview Changed To Front');
-        return redirect()->route('product.manage');
-    }
-
-    public function previewBack($id){
-        $product = Product::findOrFail($id);
-        abort_unless($product->isOwnedBy(Auth::user()), 403);
-        $product->update(['preview' => 1]);
-
-        session()->flash('message', 'Preview Changed To Back');
-        return redirect()->route('product.manage');
-    }
-    // add product to collection
-    public function addToCollection($product_id, $collection_id)
-    {
-        $product = Product::findOrFail($product_id);
-        abort_unless($product->isOwnedBy(Auth::user()), 403);
-        $collection = ProductCollection::findOrFail($collection_id);
-        abort_unless((int) $collection->user_id === (int) Auth::id(), 403);
-        $product->update(['collection_id' => $collection_id]);
-    }
-    // remove product from collection
-    public function removeFromCollection($product_id, $collection_id)
-    {
-        $product = Product::findOrFail($product_id);
-        abort_unless($product->isOwnedBy(Auth::user()), 403);
-        $product->update(['collection_id' => null]);
-    }
-    // delete entire collection
-    public function deleteCollection($id)
-    {
-        $collection = ProductCollection::findOrFail($id);
-        abort_unless((int) $collection->user_id === (int) Auth::id(), 403);
-        $image_path = $collection->collection_image;
-        Storage::delete("collection-image/{$image_path}");
-        foreach ($collection->product as $product) {
-            $product->update([
-                'collection_id' => '',
-            ]);
-        }
-        ProductCollection::where('id', $id)->delete();
-        session()->flash('message', 'Collection Deleted');
-        return redirect()->route('product.manage');
-        
-    }
     // edit product by id
     public function editProduct($id)
     {
@@ -177,11 +121,10 @@ class ManageProduct extends Component
     {
         $search = '%' . $this->search . '%';
         $products = Product::where('user_id', Auth::id())->where('status', '!=', 2)->where('title', 'like', $search)->orderBy('status', 'desc')->get();
-        $productCollections = ProductCollection::where('user_id', Auth::id())->get();
         $archives = Product::where('user_id', Auth::id())->where('status', 2)->get();
         $noArchives = $archives->isEmpty();
         $inCart = $this->inCart();
 
-        return view('livewire.manage.manage-product', compact('products','archives','noArchives','inCart','productCollections'));
+        return view('livewire.manage.manage-product', compact('products','archives','noArchives','inCart'));
     }
 }

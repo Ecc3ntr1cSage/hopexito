@@ -1,6 +1,6 @@
 @section('title', 'Manage Products | HopeXito')
 
-<div class="manage-page" x-data="{ nav: 'products', collectionModal: false }">
+<div class="manage-page" x-data="{ nav: 'products' }">
     <x-jet-session-message />
 
     <section class="manage-hero manage-container">
@@ -19,7 +19,7 @@
         <div class="manage-stat-rail manage-reveal manage-reveal-delay-more">
             <div><strong>{{ $products->count() }}</strong><span>active editions</span></div>
             <div><strong>{{ $archives->count() }}</strong><span>in archive</span></div>
-            <div><strong>{{ $productCollections->count() }}</strong><span>collections</span></div>
+            <div><strong>{{ $products->where('status', 3)->count() }}</strong><span>pinned to profile</span></div>
             <div class="manage-stat-note">A quiet place<br>to make things real.</div>
         </div>
     </section>
@@ -27,8 +27,7 @@
     <section class="manage-workspace manage-container">
         <nav class="manage-tabs" aria-label="Product workspace sections">
             <button type="button" :class="nav === 'products' ? 'is-active' : ''" @click="nav = 'products'"><span>01</span> Products <b>{{ $products->count() }}</b></button>
-            <button type="button" :class="nav === 'collections' ? 'is-active' : ''" @click="nav = 'collections'"><span>02</span> Collections <b>{{ $productCollections->count() }}</b></button>
-            <button type="button" :class="nav === 'archives' ? 'is-active' : ''" @click="nav = 'archives'"><span>03</span> Archives <b>{{ $archives->count() }}</b></button>
+            <button type="button" :class="nav === 'archives' ? 'is-active' : ''" @click="nav = 'archives'"><span>02</span> Archives <b>{{ $archives->count() }}</b></button>
         </nav>
 
         <section x-cloak x-show="nav === 'products'" x-transition:enter="manage-panel-enter" x-transition:enter-start="manage-panel-start" x-transition:enter-end="manage-panel-end" class="manage-panel">
@@ -48,8 +47,9 @@
                                     @if ($product->status === 3)<span class="manage-status manage-status-pinned">Pinned</span>@endif
                                     <span class="manage-status {{ $product->visibility === 'public' ? 'manage-status-public' : 'manage-status-private' }}">{{ ucfirst($product->visibility) }}</span>
                                 </div>
-                                <button type="button" class="manage-product-menu-button" @click="menuOpen = !menuOpen" :aria-expanded="menuOpen.toString()" aria-label="Open product actions"><span></span><span></span><span></span></button>
-                                <div x-cloak x-show="menuOpen" x-transition:enter="manage-menu-enter" x-transition:enter-start="manage-menu-start" x-transition:enter-end="manage-menu-end" @click.outside="menuOpen = false" class="manage-product-menu">
+                                <button type="button" class="manage-product-menu-button" @click.stop="menuOpen = !menuOpen" :aria-expanded="menuOpen.toString()" aria-label="Open product actions"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></button>
+                                <div x-cloak x-show="menuOpen" x-transition:enter="manage-menu-enter" x-transition:enter-start="manage-menu-start" x-transition:enter-end="manage-menu-end" @click.stop @click.outside="menuOpen = false" class="manage-product-menu">
+                                    <a href="{{ route('product.show', $product->slug) }}" @click="menuOpen = false">View product <span aria-hidden="true">&nearr;</span></a>
                                     @if ($product->status === 3)
                                         <button type="button" wire:click="unpinProduct('{{ $product->id }}')" @click="menuOpen = false">Unpin product</button>
                                     @else
@@ -95,39 +95,6 @@
             </div>
         </section>
 
-        <section x-cloak x-show="nav === 'collections'" x-transition:enter="manage-panel-enter" x-transition:enter-start="manage-panel-start" x-transition:enter-end="manage-panel-end" class="manage-panel">
-            <div class="manage-panel-heading">
-                <div><span class="manage-eyebrow"><i></i> Curated shelves</span><h2>Collections</h2></div>
-                <button type="button" class="manage-primary-action manage-small-action" @click="collectionModal = true"><span>Add collection</span><b aria-hidden="true">+</b></button>
-            </div>
-
-            <div class="manage-collection-grid">
-                @forelse ($productCollections as $collection)
-                    <article class="manage-collection-card">
-                        <div class="manage-collection-cover" style="background-image: url('{{ asset('storage/collection-image/' . $collection->collection_image) }}')">
-                            <div class="manage-collection-cover-shade"></div>
-                            <div class="manage-collection-cover-meta"><span>{{ $collection->product->count() }} editions</span><button type="button" wire:click="deleteCollection('{{ $collection->id }}')" aria-label="Delete {{ $collection->title }}">&times;</button></div>
-                            <h3>{{ $collection->title }}</h3>
-                        </div>
-                        <div class="manage-collection-products">
-                            <span class="manage-collection-label">Assign editions</span>
-                            <div class="manage-collection-product-list">
-                                @foreach ($products as $product)
-                                    @if ((string) $product->collection_id === (string) $collection->id)
-                                        <button type="button" wire:click="removeFromCollection('{{ $product->id }}','{{ $collection->id }}')" class="is-assigned">{{ $product->title }} <span aria-hidden="true">&minus;</span></button>
-                                    @elseif ($product->collection_id === null)
-                                        <button type="button" wire:click="addToCollection('{{ $product->id }}','{{ $collection->id }}')">{{ $product->title }} <span aria-hidden="true">+</span></button>
-                                    @endif
-                                @endforeach
-                            </div>
-                        </div>
-                    </article>
-                @empty
-                    <div class="manage-empty"><span class="manage-eyebrow"><i></i> No collections yet</span><p>Group related pieces into a shelf your audience can browse.</p><button type="button" class="manage-secondary-action" @click="collectionModal = true">Create your first collection <span aria-hidden="true">&nearr;</span></button></div>
-                @endforelse
-            </div>
-        </section>
-
         <section x-cloak x-show="nav === 'archives'" x-transition:enter="manage-panel-enter" x-transition:enter-start="manage-panel-start" x-transition:enter-end="manage-panel-end" class="manage-panel">
             <div class="manage-panel-heading"><div><span class="manage-eyebrow"><i></i> Quiet shelf</span><h2>Archives</h2></div><span class="manage-panel-note">Archived pieces are hidden from your public profile.</span></div>
             @if ($noArchives)
@@ -146,29 +113,4 @@
             @endif
         </section>
     </section>
-
-    <div x-cloak x-show="collectionModal" x-transition.opacity class="manage-modal-backdrop" @click.self="collectionModal = false" @keydown.escape.window="collectionModal = false">
-        <div class="manage-modal" role="dialog" aria-modal="true" aria-labelledby="new-collection-title">
-            <div class="manage-modal-heading"><div><span class="manage-eyebrow"><i></i> New shelf</span><h2 id="new-collection-title">Create collection</h2></div><button type="button" class="manage-modal-close" @click="collectionModal = false" aria-label="Close collection dialog">&times;</button></div>
-            <form method="POST" action="{{ route('upload.collection') }}" enctype="multipart/form-data" class="manage-collection-form">
-                @csrf
-                <div class="manage-form-field"><label for="collection-image">Cover image</label><input type="file" id="collection-image" name="collection_image" wire:model.defer="collection_image"></div>
-                <div class="manage-form-field"><label for="collection-title">Title</label><input id="collection-title" type="text" name="title" required></div>
-                <button type="submit" class="manage-modal-submit">Save collection <span aria-hidden="true">&nearr;</span></button>
-            </form>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
-    <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
-    <script>
-        if (window.FilePond) {
-            FilePond.registerPlugin(FilePondPluginImagePreview);
-            const collectionInput = document.querySelector('#collection-image');
-            if (collectionInput) {
-                FilePond.create(collectionInput);
-                FilePond.setOptions({ server: { url: '{{ route('upload') }}', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } } });
-            }
-        }
-    </script>
 </div>

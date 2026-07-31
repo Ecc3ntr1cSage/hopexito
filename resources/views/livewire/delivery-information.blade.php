@@ -1,67 +1,112 @@
-<div class="max-w-2xl min-h-screen mx-auto">
-    <x-jet-session-message/>
-    <x-jet-gradient-card>
-        <div class="p-8 space-y-2 bg-black rounded-xl">
-            <x-jet-header>Delivery Information</x-jet-header>
-            <x-jet-label for="name" value="{{ __('Name') }}" />
-            <x-jet-input id="name" type="text" class="block w-full mt-1" wire:model.lazy="name" />
-            @error('name')
-                <div class="text-red-500">Please provide your name.</div>
-            @enderror
-            <x-jet-label for="email" value="{{ __('Email') }}" />
-            <x-jet-input id="email" type="text" class="block w-full mt-1" wire:model.lazy="email" />
-            @error('email')
-                <div class="text-red-500">Please provide your email.</div>
-            @enderror
-            <div class="flex flex-col">
-                <x-jet-label for="phone" value="{{ __('Phone Number') }}" />
-                <div class="flex gap-2">
-                    <x-jet-input type="text" class="w-16 mt-1" readonly value="+60" />
-                    <x-jet-input id="phone" type="text" class="block w-full mt-1" wire:model.lazy="phone" />
-                </div>
-                @error('phone')
-                    <div class="text-red-500">Please provide your mobile phone number.</div>
-                @enderror
-            </div>
-            <x-jet-label for="address" value="{{ __('Address') }}" />
-            <x-jet-input id="address" type="text" class="block w-full mt-1" wire:model.lazy="address" />
-            @error('address')
-                <div class="text-red-500">Please provide your address.</div>
-            @enderror
-            <x-jet-label for="postcode" value="{{ __('Postcode') }}" />
-            <x-jet-input id="postcode" type="text" class="block w-full mt-1" wire:model.lazy="postcode" />
-            @error('postcode')
-                <div class="text-red-500">Please provide the postcode.</div>
-            @enderror
-            <x-jet-label for="state" value="{{ __('State') }}" />
-            <select id="state" wire:model.lazy="state"
-                class="text-white block w-full p-2.5 bg-neutral-800 border border-neutral-500 rounded-md focus:ring-indigo-500">
-                <option selected class="">Choose a state</option>
-                <option value="Johor">Johor</option>
-                <option value="Kedah">Kedah</option>
-                <option value="Kelantan">Kelantan</option>
-                <option value="Melaka">Melaka</option>
-                <option value="Negeri Sembilan">Negeri Sembilan</option>
-                <option value="Pahang">Pahang</option>
-                <option value="Perak">Perak</option>
-                <option value="Perlis">Perlis</option>
-                <option value="Pulau Pinang">Pulau Pinang</option>
-                <option value="Selangor">Selangor</option>
-                <option value="Terengganu">Terengganu</option>
-                <option value="Kuala Lumpur">Kuala Lumpur</option>
-                <option value="Putrajaya">Putrajaya</option>
-                <option value="Sarawak">Sarawak</option>
-                <option value="Sabah">Sabah</option>
-                <option value="Labuan">Labuan</option>
-            </select>
-            @error('state')
-                <div class="text-red-500">Please provide the state.</div>
-            @enderror
-            <div class="pt-3">
-                <x-jet-button type="button" wire:click="storeDeliveryInfo">
-                    Proceed to Payment
-                </x-jet-button>
-            </div>
+<div class="checkout-page">
+    <x-jet-session-message />
+
+    <header class="checkout-hero">
+        <div>
+            <div class="checkout-kicker">HopeXito / checkout</div>
+            <h1>Make it yours.</h1>
+            <p>A few details, then you can review the payment simulation before anything is placed.</p>
         </div>
-    </x-jet-gradient-card>
+        <a class="checkout-close-link" href="{{ route('cart.index') }}" aria-label="Return to cart">&times;</a>
+    </header>
+
+    <nav class="checkout-progress" aria-label="Checkout progress">
+        <span class="is-complete"><b>01</b> Bag</span>
+        <i></i>
+        <span class="is-active"><b>02</b> Delivery</span>
+        <i></i>
+        <span><b>03</b> Payment</span>
+    </nav>
+
+    <div class="checkout-layout">
+        <section class="checkout-form-panel">
+            <div class="checkout-panel-heading">
+                <span class="checkout-index">02</span>
+                <div>
+                    <div class="checkout-kicker">Delivery details</div>
+                    <h2>Where should we send it?</h2>
+                </div>
+            </div>
+
+            @if (Auth::check())
+                <div class="checkout-profile-note">
+                    <span class="checkout-note-mark">i</span>
+                    <p>Using the delivery details saved to your profile. <a href="{{ route('profile.show') }}">Edit profile</a></p>
+                </div>
+            @endif
+
+            <div class="checkout-form-grid">
+                <label class="checkout-field checkout-field-wide">
+                    <span>Name</span>
+                    <input type="text" wire:model.lazy="name" @if(Auth::check()) readonly @endif>
+                    @error('name') <small>{{ $message }}</small> @enderror
+                </label>
+                <label class="checkout-field checkout-field-wide">
+                    <span>Email</span>
+                    <input type="email" wire:model.lazy="email" @if(Auth::check()) readonly @endif>
+                    @error('email') <small>{{ $message }}</small> @enderror
+                </label>
+                <label class="checkout-field">
+                    <span>Phone number</span>
+                    <div class="checkout-phone-field">
+                        <b>+60</b>
+                        <input type="text" wire:model.lazy="phone" @if(Auth::check()) readonly @endif>
+                    </div>
+                    @error('phone') <small>{{ $message }}</small> @enderror
+                </label>
+                <label class="checkout-field">
+                    <span>Postcode</span>
+                    <input type="text" wire:model.lazy="postcode" @if(Auth::check()) readonly @endif>
+                    @error('postcode') <small>{{ $message }}</small> @enderror
+                </label>
+                <label class="checkout-field checkout-field-wide">
+                    <span>Street address</span>
+                    <input type="text" wire:model.lazy="address" @if(Auth::check()) readonly @endif>
+                    @error('address') <small>{{ $message }}</small> @enderror
+                </label>
+                <label class="checkout-field checkout-field-wide">
+                    <span>State</span>
+                    <select wire:model.lazy="state" @if(Auth::check()) disabled @endif>
+                        <option value="">Choose a state</option>
+                        <option value="Johor">Johor</option>
+                        <option value="Kedah">Kedah</option>
+                        <option value="Kelantan">Kelantan</option>
+                        <option value="Melaka">Melaka</option>
+                        <option value="Negeri Sembilan">Negeri Sembilan</option>
+                        <option value="Pahang">Pahang</option>
+                        <option value="Perak">Perak</option>
+                        <option value="Perlis">Perlis</option>
+                        <option value="Pulau Pinang">Pulau Pinang</option>
+                        <option value="Selangor">Selangor</option>
+                        <option value="Terengganu">Terengganu</option>
+                        <option value="Kuala Lumpur">Kuala Lumpur</option>
+                        <option value="Putrajaya">Putrajaya</option>
+                        <option value="Sarawak">Sarawak</option>
+                        <option value="Sabah">Sabah</option>
+                        <option value="Labuan">Labuan</option>
+                    </select>
+                    @error('state') <small>{{ $message }}</small> @enderror
+                </label>
+            </div>
+
+            <div class="checkout-form-footer">
+                <a class="checkout-back-link" href="{{ route('cart.index') }}">&larr; Back to bag</a>
+                <button class="checkout-primary-action" type="button" wire:click="storeDeliveryInfo" wire:loading.attr="disabled">
+                    <span wire:loading.remove>Continue to payment <b>&rarr;</b></span>
+                    <span wire:loading>Checking details&hellip;</span>
+                </button>
+            </div>
+        </section>
+
+        <aside class="checkout-aside">
+            <div class="checkout-aside-label">Next / payment simulation</div>
+            <div class="checkout-orbit" aria-hidden="true"><span></span><b>03</b></div>
+            <h2>One last moment of choice.</h2>
+            <p>Choose a demo payment method and decide whether this test order succeeds or returns you here for another pass.</p>
+            <div class="checkout-aside-rule"></div>
+            <div class="checkout-aside-detail"><span>Shipping</span><strong>State-based</strong></div>
+            <div class="checkout-aside-detail"><span>Experience</span><strong>Demo only</strong></div>
+            <div class="checkout-aside-detail"><span>Support</span><strong>WhatsApp ready</strong></div>
+        </aside>
+    </div>
 </div>
