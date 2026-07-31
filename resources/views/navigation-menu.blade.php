@@ -7,7 +7,7 @@
             @auth
                 <a href="{{ route('product.create') }}" class="nav-create">Create <span aria-hidden="true">↗</span></a>
             @else
-                <a href="{{ route('register') }}" class="nav-create">Create <span aria-hidden="true">↗</span></a>
+                <a href="{{ route('explore') }}" class="nav-create">Log in to create <span aria-hidden="true">↗</span></a>
             @endauth
         </div>
         <div class="site-nav-account">
@@ -15,7 +15,7 @@
                 <a href="{{ route('people', Auth::user()->name) }}" class="nav-profile"><img src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" /></a>
                 @livewire('cart.cart-counter')
             @else
-                <a href="{{ route('login') }}">Log in</a>
+                <a href="{{ route('explore') }}">Log in</a>
                 @livewire('cart.cart-counter')
             @endauth
         </div>
@@ -28,8 +28,8 @@
             <a href="{{ route('product.create') }}">Create a product <span aria-hidden="true">↗</span></a>
             <a href="{{ route('people', Auth::user()->name) }}">Your profile</a>
         @else
-            <a href="{{ route('register') }}">Join the community <span aria-hidden="true">↗</span></a>
-            <a href="{{ route('login') }}">Log in</a>
+            <a href="{{ route('explore') }}">Log in to create <span aria-hidden="true">↗</span></a>
+            <a href="{{ route('explore') }}">Log in</a>
         @endauth
     </div>
 </nav>

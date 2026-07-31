@@ -13,7 +13,8 @@ class MockupGenerator
         string $templatePath,
         array $position,
         string $garmentColor,
-        ?string $outputPath = null
+        ?string $outputPath = null,
+        array $transform = []
     ): string {
         $templateFullPath = $this->fullPath($templatePath);
         $designFullPath = $design instanceof UploadedFile ? $design->getRealPath() : $this->fullPath($design);
@@ -24,24 +25,45 @@ class MockupGenerator
             return $path;
         }
 
-        $template = Image::make($templateFullPath)->resize(880, 900);
+        $canvasSize = config('catalog.canvas', ['width' => 850, 'height' => 900]);
+        $template = Image::make($templateFullPath)->resize($canvasSize['width'], $canvasSize['height']);
         $canvas = Image::canvas($template->width(), $template->height(), $this->color($garmentColor));
 
         $canvas->insert($template, 'top-left', 0, 0);
 
-        $designImage = Image::make($designFullPath)->resize(
+        $transform = array_merge([
+            'x' => 50,
+            'y' => 50,
+            'scale' => 1,
+            'rotation' => 0,
+        ], $transform);
+
+        $printArea = Image::canvas(
             (int) $position['w'],
             (int) $position['h'],
+            'rgba(0,0,0,0)'
+        );
+
+        $designImage = Image::make($designFullPath)->resize(
+            (int) ((int) $position['w'] * (float) $transform['scale']),
+            (int) ((int) $position['h'] * (float) $transform['scale']),
             function ($constraint) {
                 $constraint->aspectRatio();
                 $constraint->upsize();
             }
         );
 
-        $x = (int) $position['x'] + (int) (((int) $position['w'] - $designImage->width()) / 2);
-        $y = (int) $position['y'] + (int) (((int) $position['h'] - $designImage->height()) / 2);
+        if ((float) $transform['rotation'] !== 0.0) {
+            $designImage->rotate((float) $transform['rotation'], 'rgba(0,0,0,0)');
+        }
 
-        $canvas->insert($designImage, 'top-left', max(0, $x), max(0, $y));
+        $centerX = (int) round((int) $position['w'] * ((float) $transform['x'] / 100));
+        $centerY = (int) round((int) $position['h'] * ((float) $transform['y'] / 100));
+        $x = $centerX - (int) round($designImage->width() / 2);
+        $y = $centerY - (int) round($designImage->height() / 2);
+
+        $printArea->insert($designImage, 'top-left', $x, $y);
+        $canvas->insert($printArea, 'top-left', (int) $position['x'], (int) $position['y']);
 
         $path = $outputPath ?: 'products/'.uniqid('mockup-', true).'.png';
         Storage::disk('public')->put($path, (string) $canvas->encode('png'));

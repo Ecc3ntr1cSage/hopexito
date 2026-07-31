@@ -17,6 +17,19 @@ class UnifiedCatalogTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_product_studio_is_the_canonical_creation_route(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('product.create', ['type' => 'sweat']))
+            ->assertOk()
+            ->assertSee('Product studio')
+            ->assertSee('Sweatshirt');
+
+        $this->actingAs($user)->get(route('mockup.hoodie'))
+            ->assertRedirect(route('product.create', ['type' => 'hoodie']));
+    }
+
     public function test_a_user_can_create_a_fixed_price_product_with_three_color_variants(): void
     {
         Storage::fake('public');
@@ -27,18 +40,64 @@ class UnifiedCatalogTest extends TestCase
             'title' => 'Night Hoodie',
             'tags' => 'night, graphic',
             'visibility' => 'public',
+            'rights' => '1',
+            'transforms' => [
+                'front' => ['x' => 50, 'y' => 50, 'scale' => 1, 'rotation' => 0],
+                'back' => ['x' => 48, 'y' => 52, 'scale' => 0.8, 'rotation' => -12],
+            ],
             'image_front' => UploadedFile::fake()->create('front.png', 10, 'image/png'),
             'image_back' => UploadedFile::fake()->create('back.png', 10, 'image/png'),
         ]);
 
-        $response->assertRedirect(route('product.manage'));
+        $response->assertRedirect();
         $product = Product::firstOrFail();
+        $response->assertRedirect(route('product.show', $product));
         $this->assertSame('hoodie', $product->product_type);
         $this->assertEquals(70, $product->price);
         $this->assertEquals(0.15, (float) $product->commission_rate);
         $this->assertSame('public', $product->visibility);
         $this->assertCount(3, $product->variants);
         $this->assertSame(['Black', 'Gray', 'White'], $product->variants->pluck('color')->sort()->values()->all());
+        $this->assertTrue($product->variants->every(fn ($variant) => filled($variant->image_front_path) && filled($variant->image_back_path)));
+    }
+
+    public function test_product_without_back_artwork_uses_plain_back_mockups(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('product.store'), [
+            'product_type' => 'shirt',
+            'title' => 'Front Only',
+            'tags' => 'minimal',
+            'visibility' => 'public',
+            'preview_side' => 'back',
+            'rights' => '1',
+            'transforms' => ['front' => ['x' => 50, 'y' => 50, 'scale' => 1, 'rotation' => 0]],
+            'image_front' => UploadedFile::fake()->create('front.png', 10, 'image/png'),
+        ])->assertRedirect();
+
+        $product = Product::firstOrFail();
+        $this->assertSame(0, $product->preview);
+        $this->assertSame('mockups/white-shirt-back.png', $product->variants()->where('color', 'White')->value('image_back_path'));
+    }
+
+    public function test_transform_bounds_are_validated_server_side(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->from(route('product.create'))->post(route('product.store'), [
+            'product_type' => 'shirt',
+            'title' => 'Invalid transform',
+            'tags' => 'test',
+            'rights' => '1',
+            'transforms' => ['front' => ['x' => 101, 'y' => 50, 'scale' => 1, 'rotation' => 0]],
+            'image_front' => UploadedFile::fake()->create('front.png', 10, 'image/png'),
+        ])->assertRedirect(route('product.create'))
+            ->assertSessionHasErrors('transforms.front.x');
+
+        $this->assertDatabaseCount('products', 0);
     }
 
     public function test_private_products_are_owner_only(): void
@@ -79,6 +138,7 @@ class UnifiedCatalogTest extends TestCase
 
         $this->actingAs($buyer)->post(route('cart.store'), [
             'product_id' => $product->id, 'size' => 'M', 'color' => 'White', 'quantity' => 1, 'buy_now' => true,
+            'price' => 1,
         ])->assertRedirect(route('billplz-create'));
         $this->actingAs($buyer)->post(route('billplz-store'))->assertRedirect(route('order.index'));
 

@@ -13,7 +13,7 @@
                         @auth
                             <a href="{{ route('product.create') }}" class="button button-quiet">Start creating</a>
                         @else
-                            <a href="{{ route('register') }}" class="button button-quiet">Join the community</a>
+                            <a href="{{ route('explore', ['auth' => 'login']) }}" class="button button-quiet" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in to start creating</a>
                         @endauth
                     </div>
                     <div class="landing-proof" aria-label="HopeXito community highlights">
@@ -90,7 +90,7 @@
                     @auth
                         <a href="{{ route('product.create') }}" class="button button-dark">Create your first product <span aria-hidden="true">↗</span></a>
                     @else
-                        <a href="{{ route('register') }}" class="button button-dark">Create your free shop <span aria-hidden="true">↗</span></a>
+                        <a href="{{ route('explore', ['auth' => 'login']) }}" class="button button-dark" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in to start creating <span aria-hidden="true">↗</span></a>
                     @endauth
                 </div>
             </div>

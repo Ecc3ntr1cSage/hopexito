@@ -1,176 +1,208 @@
-@php
-    $mode = 'product';
-    $action = route('product.store');
-    $frontName = 'image_front';
-    $backName = 'image_back';
-    $frontPosition = $template->front_position;
-    $backPosition = $template->back_position;
-    $colorValue = fn ($color) => match (strtolower($color)) {
-        'black' => '#111111',
-        'gray', 'grey' => '#808080',
-        'navy' => '#1f2a44',
-        'red' => '#b91c1c',
-        'blue' => '#2563eb',
-        default => '#ffffff',
-    };
-    $firstColor = trim($colors[0] ?? 'White');
-@endphp
-
-@section('title', $template->category . ' | HopeXito')
+@section('title', 'Create a product | HopeXito')
 <x-app-layout>
-    <x-jet-session-message />
-    <div class="min-h-screen bg-neutral-900 pb-24 text-white" data-mockup-editor x-data="{ open: false, price: '', accepted: false, preview: false, selectedColor: '{{ $firstColor }}', size: '', quantity: 1 }">
-        <div class="mx-auto max-w-7xl px-4 py-6">
-            <div class="mb-5 flex flex-wrap items-center gap-2 text-sm">
-                <a href="{{ route('product.create') }}" class="rounded-md px-2 py-1 transition hover:bg-indigo-500/50">
-                    Product Selection
-                </a>
-                <span class="text-gray-500">/</span>
-                <p class="text-indigo-300">{{ $template->category }}</p>
+    <form method="POST" action="{{ route('product.store') }}" enctype="multipart/form-data"
+        x-data="productStudio({ catalog: @js($catalog), colors: @js($colors), canvas: @js($canvas), initialType: @js($initialType), assetBase: @js($assetBase) })"
+        x-ref="form" x-on:submit="submitForm" class="product-studio" data-product-studio>
+        @csrf
+
+        <input type="hidden" name="product_type" :value="productType">
+        <input type="hidden" name="preview_color" :value="previewColor">
+        <input type="hidden" name="transforms[front][x]" :value="transforms.front.x">
+        <input type="hidden" name="transforms[front][y]" :value="transforms.front.y">
+        <input type="hidden" name="transforms[front][scale]" :value="transforms.front.scale">
+        <input type="hidden" name="transforms[front][rotation]" :value="transforms.front.rotation">
+        <input type="hidden" name="transforms[back][x]" :value="transforms.back.x">
+        <input type="hidden" name="transforms[back][y]" :value="transforms.back.y">
+        <input type="hidden" name="transforms[back][scale]" :value="transforms.back.scale">
+        <input type="hidden" name="transforms[back][rotation]" :value="transforms.back.rotation">
+
+        <header class="studio-header">
+            <a href="{{ route('product.manage') }}" class="studio-back-link" aria-label="Back to products">
+                <span aria-hidden="true">←</span>
+                <span>Products</span>
+            </a>
+            <div class="studio-header-meta">
+                <span class="studio-kicker">Product studio</span>
+                <span class="studio-header-dot" aria-hidden="true"></span>
+                <span x-text="typeConfig.label"></span>
             </div>
+            <div class="studio-header-status">
+                <span class="studio-status-dot" :class="{ 'is-ready': canPublish }" aria-hidden="true"></span>
+                <span x-text="canPublish ? 'Ready to publish' : 'Draft in progress'"></span>
+            </div>
+        </header>
 
-            <form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="grid gap-8 lg:grid-cols-[380px_1fr]">
-                @csrf
-                <input type="hidden" name="product_type" value="{{ $template->type }}">
-                <input type="hidden" name="template_front" value="{{ $template->mockup_image }}">
-                <input type="hidden" name="template_back" value="{{ $template->mockup_image_2 }}">
-                <input type="hidden" name="preview_color" data-selected-color value="{{ $firstColor }}">
-                <input type="hidden" name="front_x" value="{{ $frontPosition['x'] }}">
-                <input type="hidden" name="front_y" value="{{ $frontPosition['y'] }}">
-                <input type="hidden" name="front_w" value="{{ $frontPosition['w'] }}">
-                <input type="hidden" name="front_h" value="{{ $frontPosition['h'] }}">
-                <input type="hidden" name="back_x" value="{{ $backPosition['x'] }}">
-                <input type="hidden" name="back_y" value="{{ $backPosition['y'] }}">
-                <input type="hidden" name="back_w" value="{{ $backPosition['w'] }}">
-                <input type="hidden" name="back_h" value="{{ $backPosition['h'] }}">
-
-                <aside class="space-y-5">
-                    <div class="space-y-3">
-                        <div>
-                            <x-jet-label for="front-design" value="{{ __('Front Design') }}" />
-                            <input id="front-design" name="{{ $frontName }}" data-design-input="front" type="file" accept="image/*" class="mt-1 block w-full rounded-md border border-neutral-700 bg-neutral-800 p-2 text-sm" required>
-                            @error($frontName)<p class="mt-1 text-rose-400">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <x-jet-label for="back-design" value="{{ __('Back Design') }}" />
-                            <input id="back-design" name="{{ $backName }}" data-design-input="back" type="file" accept="image/*" class="mt-1 block w-full rounded-md border border-neutral-700 bg-neutral-800 p-2 text-sm">
-                            @error($backName)<p class="mt-1 text-rose-400">{{ $message }}</p>@enderror
-                        </div>
-                    </div>
-
-                    @if ($mode === 'product')
-                        <div class="space-y-3">
-                            <div>
-                                <x-jet-label for="title" value="{{ __('Title') }}" />
-                                <x-jet-input id="title" name="title" type="text" class="mt-1 block w-full" placeholder="Artwork title" />
-                                @error('title')<p class="mt-1 text-rose-400">{{ $message }}</p>@enderror
-                            </div>
-                            <div>
-                                <x-jet-label for="tags" value="{{ __('Tags') }}" />
-                                <x-jet-input id="tags" name="tags" type="text" class="mt-1 block w-full" placeholder="panda, bear, snake" />
-                                @error('tags')<p class="mt-1 text-rose-400">{{ $message }}</p>@enderror
-                            </div>
-                        </div>
-                    @endif
-
+        <div class="studio-layout">
+            <main class="studio-canvas-region" aria-label="Product canvas">
+                <div class="studio-canvas-toolbar">
                     <div>
-                        <x-jet-label value="{{ $mode === 'custom' ? __('Choose Color') : __('Available Colors') }}" />
-                        <div class="mt-2 flex flex-wrap gap-2">
-                            @foreach ($colors as $color)
-                                @php $color = trim($color); @endphp
-                                <button type="button" data-color-swatch="{{ $color }}" data-color-value="{{ $colorValue($color) }}" x-on:click="selectedColor = '{{ $color }}'" class="h-9 w-9 rounded-full border border-white/40" style="background-color: {{ $colorValue($color) }}" title="{{ $color }}"></button>
-                                @if ($mode === 'product')
-                                    <label class="flex items-center gap-1 rounded-md border border-neutral-700 px-2 py-1 text-xs">
-                                        <input type="checkbox" name="color[]" value="{{ $color }}" class="rounded bg-neutral-800" @checked($loop->first)>
-                                        {{ $color }}
-                                    </label>
-                                @endif
-                            @endforeach
-                        </div>
-                        @if ($mode === 'custom')
-                            <input type="hidden" name="color" x-bind:value="selectedColor">
-                        @endif
-                        @error('color')<p class="mt-1 text-rose-400">{{ $message }}</p>@enderror
+                        <p class="studio-canvas-eyebrow">Live garment preview</p>
+                        <p class="studio-canvas-title"><span x-text="typeConfig.label"></span> · <span x-text="previewColor"></span></p>
                     </div>
+                    <div class="studio-side-controls" role="group" aria-label="Choose garment side">
+                        <button type="button" class="studio-side-tab" :class="{ 'is-active': activeSide === 'front' }"
+                            x-on:click="setSide('front')">Front</button>
+                        <button type="button" class="studio-side-tab" :class="{ 'is-active': activeSide === 'back' }"
+                            x-on:click="setSide('back')">Back</button>
+                        <button type="button" class="studio-flip-button" x-on:click="flipSide" aria-label="Flip to the other side"
+                            title="Flip garment">
+                            <span aria-hidden="true">↻</span>
+                        </button>
+                    </div>
+                </div>
 
-                    @if ($mode === 'product')
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="rounded-md border border-indigo-500 bg-indigo-500/10 p-3">
-                                <x-jet-label value="{{ __('Fixed price') }}" />
-                                <p class="mt-1 text-xl text-indigo-300">RM{{ number_format($template->min, 2) }}</p>
-                                <p class="mt-1 text-xs text-gray-400">15% creator commission on external purchases</p>
-                            </div>
-                            <div>
-                                <x-jet-label for="visibility" value="{{ __('Visibility') }}" />
-                                <select id="visibility" name="visibility" class="mt-1 block w-full rounded-md border-neutral-700 bg-neutral-800 text-white">
-                                    <option value="public" selected>Public</option>
-                                    <option value="private">Private</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="rounded-md border border-neutral-700 p-2 text-center">
-                                <input type="radio" name="preview" value="0" class="mr-1" checked>
-                                Front preview
-                            </label>
-                            <label class="rounded-md border border-neutral-700 p-2 text-center">
-                                <input type="radio" name="preview" value="1" class="mr-1">
-                                Back preview
-                            </label>
-                        </div>
-                        <label class="flex gap-3 text-xs text-gray-300">
-                            <input type="checkbox" class="mt-1 rounded bg-neutral-800" x-model="accepted">
-                            <span>I have the right to sell products containing this artwork.</span>
-                        </label>
-                    @else
-                        <div class="space-y-4">
-                            <div>
-                                <x-jet-label value="{{ __('Choose Size') }}" />
-                                <div class="mt-2 flex flex-wrap gap-2">
-                                    @foreach (['XS', 'S', 'M', 'L', 'XL', '2XL'] as $size)
-                                        <label class="rounded-md border border-neutral-700 px-3 py-2 text-sm" :class="size === '{{ $size }}' ? 'border-indigo-400 text-lime-300' : ''">
-                                            <input type="radio" name="size" value="{{ $size }}" class="hidden" x-on:click="size = '{{ $size }}'">
-                                            {{ $size }}
-                                        </label>
-                                    @endforeach
+                <div class="studio-viewport" x-ref="viewport" x-on:wheel.prevent="zoomViewport($event)"
+                    x-on:pointerdown="startViewportPan($event)">
+                    <div class="studio-grid" aria-hidden="true"></div>
+                    <div class="studio-canvas-note studio-canvas-note-top">850 × 900 mockup space</div>
+                    <div class="studio-canvas-note studio-canvas-note-bottom" x-text="activeSide === 'front' ? 'Front view' : 'Back view'"></div>
+
+                    <div class="studio-stage" x-ref="stage" :class="{ 'is-flipping': isFlipping }" :style="stageStyle">
+                        <img class="studio-garment" :src="mockupUrl" :alt="`${typeConfig.label} ${previewColor} ${activeSide} mockup`">
+                        <div class="studio-print-area" x-ref="printArea" :style="printAreaStyle">
+                            <template x-if="hasArtwork">
+                                <div class="studio-artwork" tabindex="0" :class="{ 'is-selected': artworkSelected }"
+                                    :style="artworkStyle" x-on:pointerdown.stop="startArtworkInteraction($event, 'drag')"
+                                    x-on:keydown="nudgeArtwork($event)" x-on:focus="artworkSelected = true">
+                                    <img :src="artworkUrl" :alt="`${activeSide} artwork preview`">
+                                    <button type="button" class="studio-handle studio-handle-nw" aria-label="Resize artwork"
+                                        x-on:pointerdown.stop="startArtworkInteraction($event, 'resize', 'nw')"></button>
+                                    <button type="button" class="studio-handle studio-handle-ne" aria-label="Resize artwork"
+                                        x-on:pointerdown.stop="startArtworkInteraction($event, 'resize', 'ne')"></button>
+                                    <button type="button" class="studio-handle studio-handle-sw" aria-label="Resize artwork"
+                                        x-on:pointerdown.stop="startArtworkInteraction($event, 'resize', 'sw')"></button>
+                                    <button type="button" class="studio-handle studio-handle-se" aria-label="Resize artwork"
+                                        x-on:pointerdown.stop="startArtworkInteraction($event, 'resize', 'se')"></button>
+                                    <button type="button" class="studio-rotate-handle" aria-label="Rotate artwork"
+                                        x-on:pointerdown.stop="startArtworkInteraction($event, 'rotate')"><span aria-hidden="true">↻</span></button>
                                 </div>
-                                @error('size')<p class="mt-1 text-rose-400">{{ $message }}</p>@enderror
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="studio-viewport-controls" role="group" aria-label="Canvas controls">
+                    <button type="button" x-on:click="resetViewport" title="Fit canvas">Fit</button>
+                    <button type="button" x-on:click="zoomOut" aria-label="Zoom out">−</button>
+                    <span class="studio-zoom-readout" x-text="`${Math.round(viewport.zoom * 100)}%`"></span>
+                    <button type="button" x-on:click="zoomIn" aria-label="Zoom in">+</button>
+                    <span class="studio-viewport-hint">Scroll to zoom · Space + drag to pan</span>
+                </div>
+            </main>
+
+            <aside class="studio-panel" :class="{ 'is-open': sheetOpen }" aria-label="Product controls">
+                <div class="studio-sheet-grabber" x-on:pointerdown="toggleSheet" aria-label="Toggle studio controls"></div>
+                <div class="studio-panel-heading">
+                    <div>
+                        <p class="studio-kicker">Create a listing</p>
+                        <h1>Make it yours.</h1>
+                    </div>
+                    <span class="studio-panel-price" x-text="`RM${Number(typeConfig.price).toFixed(2)}`"></span>
+                </div>
+
+                <nav class="studio-tabs" role="tablist" aria-label="Product creation steps">
+                    <button type="button" role="tab" :aria-selected="activeTab === 'design'" :class="{ 'is-active': activeTab === 'design' }"
+                        x-on:click="setTab('design')"><span>01</span>Design</button>
+                    <button type="button" role="tab" :aria-selected="activeTab === 'product'" :class="{ 'is-active': activeTab === 'product' }"
+                        x-on:click="setTab('product')"><span>02</span>Product</button>
+                    <button type="button" role="tab" :aria-selected="activeTab === 'publish'" :class="{ 'is-active': activeTab === 'publish' }"
+                        x-on:click="setTab('publish')"><span>03</span>Publish</button>
+                </nav>
+
+                <div class="studio-panel-scroll">
+                    <section x-show="activeTab === 'design'" role="tabpanel" x-cloak>
+                        <div class="studio-section-intro">
+                            <p class="studio-section-label">Artwork</p>
+                            <p>Set the artwork for the side currently on the canvas.</p>
+                        </div>
+
+                        <input x-ref="frontFile" id="front-design" name="image_front" type="file" accept="image/*" required
+                            class="sr-only" x-on:change="chooseFile('front', $event)">
+                        <input x-ref="backFile" id="back-design" name="image_back" type="file" accept="image/*"
+                            class="sr-only" x-on:change="chooseFile('back', $event)">
+
+                        <div class="studio-upload-card" :class="{ 'has-file': files[activeSide] }">
+                            <div class="studio-upload-icon" aria-hidden="true" x-text="files[activeSide] ? '✓' : '+'"></div>
+                            <div class="min-w-0">
+                                <p class="studio-upload-title" x-text="files[activeSide] ? files[activeSide].name : `${activeSide === 'front' ? 'Front' : 'Back'} artwork`"></p>
+                                <p class="studio-upload-copy" x-text="files[activeSide] ? `${Math.round(files[activeSide].size / 1024)} KB · ready` : (activeSide === 'front' ? 'PNG, JPG, or WebP · max 8 MB' : 'Optional · upload artwork for this side')"></p>
                             </div>
-                            <div>
-                                <x-jet-label value="{{ __('Quantity') }}" />
-                                <div class="mt-2 flex w-40 items-center justify-between rounded-md border border-indigo-500">
-                                    <button type="button" class="px-4 py-2" x-on:click="quantity = Math.max(1, quantity - 1)">-</button>
-                                    <input type="text" name="quantity" x-model="quantity" class="w-14 border-0 bg-transparent text-center text-white">
-                                    <button type="button" class="px-4 py-2" x-on:click="quantity++">+</button>
-                                </div>
+                            <button type="button" class="studio-text-button" x-on:click="openFilePicker" x-text="files[activeSide] ? 'Replace' : 'Upload'"></button>
+                        </div>
+                        <button type="button" x-show="files[activeSide] && activeSide === 'back'" x-on:click="removeArtwork" class="studio-remove-button" x-cloak>Remove back artwork</button>
+                        @error('image_front')<p class="studio-error">{{ $message }}</p>@enderror
+                        @error('image_back')<p class="studio-error">{{ $message }}</p>@enderror
+                        <p x-show="fileError" x-text="fileError" class="studio-error" x-cloak></p>
+
+                        <div class="studio-control-block">
+                            <div class="studio-control-heading"><span>Preview color</span><span class="studio-mono" x-text="`${colors.length} variants included`"></span></div>
+                            <div class="studio-color-row" role="radiogroup" aria-label="Preview color">
+                                <template x-for="color in colors" :key="color">
+                                    <button type="button" role="radio" :aria-checked="previewColor === color" class="studio-color-swatch"
+                                        :class="`color-${color.toLowerCase()} ${previewColor === color ? 'is-active' : ''}`" :title="color"
+                                        x-on:click="previewColor = color; markDirty()"><span x-text="color"></span></button>
+                                </template>
                             </div>
                         </div>
-                    @endif
 
-                    <x-jet-button class="w-full py-3" x-bind:disabled="{{ $mode === 'product' ? '!accepted' : 'false' }}">
-                        <span class="mx-auto">{{ $mode === 'custom' ? 'Add Custom Product' : 'Save Product' }}</span>
-                    </x-jet-button>
-                </aside>
+                        <div class="studio-control-block" x-show="hasArtwork" x-cloak>
+                            <div class="studio-control-heading"><span>Transform <em x-text="activeSide"></em></span><button type="button" class="studio-reset-button" x-on:click="resetArtwork">Reset</button></div>
+                            <label class="studio-range-label"><span>Scale</span><span class="studio-mono" x-text="`${Math.round(activeTransform.scale * 100)}%`"></span></label>
+                            <input class="studio-range" type="range" min="0.25" max="2" step="0.01" x-model.number="transforms[activeSide].scale" x-on:input="markDirty">
+                            <label class="studio-range-label"><span>Rotation</span><span class="studio-mono" x-text="`${Math.round(activeTransform.rotation)}°`"></span></label>
+                            <input class="studio-range" type="range" min="-180" max="180" step="1" x-model.number="transforms[activeSide].rotation" x-on:input="markDirty">
+                            <p class="studio-control-hint">Drag artwork to move it. Use the corners to resize.</p>
+                        </div>
+                    </section>
 
-                <section class="grid gap-5 xl:grid-cols-2">
-                    @foreach (['front' => $frontPosition, 'back' => $backPosition] as $side => $position)
-                        <div class="rounded-lg border border-neutral-700 bg-neutral-950/60 p-3">
-                            <div class="mb-2 flex items-center justify-between text-sm text-gray-300">
-                                <span>{{ ucfirst($side) }}</span>
-                                <button type="button" class="rounded-md px-2 py-1 text-indigo-300 hover:bg-indigo-500/20" x-on:click="open = {{ $side === 'back' ? 'true' : 'false' }}">
-                                    View {{ $side }}
+                    <section x-show="activeTab === 'product'" role="tabpanel" x-cloak>
+                        <div class="studio-section-intro"><p class="studio-section-label">Product details</p><p>Choose a garment and give your design a name.</p></div>
+                        <div class="studio-type-grid" role="radiogroup" aria-label="Product type">
+                            <template x-for="(type, key) in catalog" :key="key">
+                                <button type="button" role="radio" :aria-checked="productType === key" class="studio-type-option" :class="{ 'is-active': productType === key }" x-on:click="setProductType(key)">
+                                    <span x-text="type.label"></span><strong x-text="`RM${Number(type.price).toFixed(0)}`"></strong>
                                 </button>
-                            </div>
-                            <div data-template-preview class="relative mx-auto aspect-[44/45] max-w-[520px] overflow-hidden rounded-md" style="background-color: {{ $colorValue($firstColor) }}">
-                                <img src="{{ asset('' . ($side === 'front' ? $template->mockup_image : $template->mockup_image_2)) }}" alt="{{ $template->category }} {{ $side }}" class="h-full w-full object-contain">
-                                <div class="absolute" style="left: {{ ($position['x'] / 880) * 100 }}%; top: {{ ($position['y'] / 900) * 100 }}%; width: {{ ($position['w'] / 880) * 100 }}%; height: {{ ($position['h'] / 900) * 100 }}%;">
-                                    <img data-design-preview="{{ $side }}" alt="" class="hidden h-full w-full object-contain">
-                                </div>
+                            </template>
+                        </div>
+                        <label class="studio-field-label" for="title">Title</label>
+                        <input id="title" name="title" type="text" class="studio-field" value="{{ old('title') }}" placeholder="Give this design a name" required x-on:input="markDirty">
+                        @error('title')<p class="studio-error">{{ $message }}</p>@enderror
+                        <label class="studio-field-label" for="tags">Tags</label>
+                        <input id="tags" name="tags" type="text" class="studio-field" value="{{ old('tags') }}" placeholder="e.g. night, graphic, minimal" required x-on:input="markDirty">
+                        @error('tags')<p class="studio-error">{{ $message }}</p>@enderror
+                        <div class="studio-fixed-price"><span>Retail price</span><strong x-text="`RM${Number(typeConfig.price).toFixed(2)}`"></strong><small>Fixed by catalog</small></div>
+                    </section>
+
+                    <section x-show="activeTab === 'publish'" role="tabpanel" x-cloak>
+                        <div class="studio-section-intro"><p class="studio-section-label">Publish settings</p><p>Decide where this product can be seen and choose its cover side.</p></div>
+                        <label class="studio-field-label" for="visibility">Visibility</label>
+                        <select id="visibility" name="visibility" class="studio-field" x-on:change="markDirty">
+                            <option value="public">Public · visible in your profile and marketplace</option>
+                            <option value="private">Private · visible only to you</option>
+                        </select>
+                        <div class="studio-control-block">
+                            <div class="studio-control-heading"><span>Listing preview</span><span class="studio-mono" x-text="previewSide"></span></div>
+                            <div class="studio-preview-options">
+                                <label :class="{ 'is-disabled': !files.front }"><input type="radio" name="preview_side" value="front" x-model="previewSide">Front</label>
+                                <label :class="{ 'is-disabled': !files.back }"><input type="radio" name="preview_side" value="back" x-model="previewSide" :disabled="!files.back">Back</label>
                             </div>
                         </div>
-                    @endforeach
-                </section>
-            </form>
+                        <div class="studio-commission-note"><span class="studio-note-mark">%</span><div><strong>15% creator commission</strong><p>You earn 15% of the fixed product price on external purchases. Your own purchases receive the owner discount and create no earnings.</p></div></div>
+                        <label class="studio-rights-check"><input type="checkbox" name="rights" value="1" x-model="rightsAccepted" required><span>I have the right to sell products containing this artwork.</span></label>
+                        @error('rights')<p class="studio-error">{{ $message }}</p>@enderror
+                    </section>
+                </div>
+
+                <footer class="studio-panel-footer">
+                    <button type="button" class="studio-footer-back" x-show="activeTab !== 'design'" x-on:click="previousTab" x-cloak>Back</button>
+                    <span class="studio-footer-step" x-text="`${tabIndex + 1} / 3`"></span>
+                    <button type="button" class="studio-footer-next" x-show="activeTab !== 'publish'" x-on:click="nextTab">Continue <span aria-hidden="true">→</span></button>
+                    <button type="submit" class="studio-create-button" x-show="activeTab === 'publish'" :disabled="!canPublish || submitting" x-cloak>
+                        <span x-show="!submitting">Create product <span aria-hidden="true">↗</span></span>
+                        <span x-show="submitting">Generating six mockups…</span>
+                    </button>
+                </footer>
+            </aside>
         </div>
-    </div>
+    </form>
 </x-app-layout>

@@ -22,9 +22,9 @@ Route::get('billplz-callback', [PaymentController::class, 'callback'])->name('bi
 Route::get('billplz-redirect', [PaymentController::class, 'redirect'])->name('billplz-redirect');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [Controller::class, 'redirectUser'])->name('dashboard');
-    Route::get('mockup/standard-tee', [MockupController::class, 'shirt'])->name('mockup.shirt');
-    Route::get('mockup/sweatshirt', [MockupController::class, 'sweatshirt'])->name('mockup.sweat');
-    Route::get('mockup/hoodie', [MockupController::class, 'hoodie'])->name('mockup.hoodie');
+    Route::get('mockup/standard-tee', [MockupController::class, 'redirectToStudio'])->defaults('type', 'shirt')->name('mockup.shirt');
+    Route::get('mockup/sweatshirt', [MockupController::class, 'redirectToStudio'])->defaults('type', 'sweat')->name('mockup.sweat');
+    Route::get('mockup/hoodie', [MockupController::class, 'redirectToStudio'])->defaults('type', 'hoodie')->name('mockup.hoodie');
     // upload controller 
     Route::post('upload', [UploadController::class, 'store'])->name('upload');
     Route::post('upload/cover-image', [UploadController::class, 'uploadCover'])->name('upload.cover');
