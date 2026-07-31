@@ -1,7 +1,7 @@
 @section('title', 'Create a product | HopeXito')
 <x-app-layout>
     <form method="POST" action="{{ route('product.store') }}" enctype="multipart/form-data"
-        x-data="productStudio({ catalog: @js($catalog), colors: @js($colors), canvas: @js($canvas), initialType: @js($initialType), assetBase: @js($assetBase) })"
+        x-data="productStudio({ catalog: @js($catalog), colors: @js($colors), canvas: @js($canvas), initialType: @js($initialType), initialTitle: @js(old('title', '')), initialTags: @js(old('tags', '')), assetBase: @js($assetBase) })"
         x-ref="form" x-on:submit="submitForm" class="product-studio" data-product-studio>
         @csrf
 
@@ -165,10 +165,10 @@
                             </template>
                         </div>
                         <label class="studio-field-label" for="title">Title</label>
-                        <input id="title" name="title" type="text" class="studio-field" value="{{ old('title') }}" placeholder="Give this design a name" required x-on:input="markDirty">
+                        <input id="title" name="title" type="text" class="studio-field" placeholder="Give this design a name" required x-model="title" x-on:input="markDirty">
                         @error('title')<p class="studio-error">{{ $message }}</p>@enderror
                         <label class="studio-field-label" for="tags">Tags</label>
-                        <input id="tags" name="tags" type="text" class="studio-field" value="{{ old('tags') }}" placeholder="e.g. night, graphic, minimal" required x-on:input="markDirty">
+                        <input id="tags" name="tags" type="text" class="studio-field" placeholder="e.g. night, graphic, minimal" required x-model="tags" x-on:input="markDirty">
                         @error('tags')<p class="studio-error">{{ $message }}</p>@enderror
                         <div class="studio-fixed-price"><span>Retail price</span><strong x-text="`RM${Number(typeConfig.price).toFixed(2)}`"></strong><small>Fixed by catalog</small></div>
                     </section>

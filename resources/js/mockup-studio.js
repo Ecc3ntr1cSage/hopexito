@@ -13,6 +13,8 @@ export default function productStudio(config) {
         activeTab: 'design',
         previewColor: 'White',
         previewSide: 'front',
+        title: config.initialTitle || '',
+        tags: config.initialTags || '',
         files: { front: null, back: null },
         previews: { front: null, back: null },
         transforms: { front: freshTransform(), back: freshTransform() },
@@ -53,9 +55,12 @@ export default function productStudio(config) {
         },
 
         get canPublish() {
-            const title = this.$refs?.form?.querySelector('[name="title"]')?.value?.trim();
-            const tags = this.$refs?.form?.querySelector('[name="tags"]')?.value?.trim();
-            return Boolean(this.files.front && title && tags && this.rightsAccepted);
+            return Boolean(
+                this.files.front
+                && this.title.trim()
+                && this.tags.trim()
+                && this.rightsAccepted
+            );
         },
 
         get stageStyle() {
@@ -122,8 +127,24 @@ export default function productStudio(config) {
         },
 
         nextTab() {
-            if (this.activeTab === 'design') this.setTab('product');
-            else if (this.activeTab === 'product') this.setTab('publish');
+            if (this.activeTab === 'design') {
+                if (!this.files.front) {
+                    this.fileError = 'Upload front artwork before continuing.';
+                    this.$refs.frontFile?.focus();
+                    return;
+                }
+                this.setTab('product');
+                return;
+            }
+
+            if (this.activeTab === 'product') {
+                if (!this.title.trim() || !this.tags.trim()) {
+                    const missingField = !this.title.trim() ? 'title' : 'tags';
+                    this.$refs.form.querySelector(`[name="${missingField}"]`)?.reportValidity();
+                    return;
+                }
+                this.setTab('publish');
+            }
         },
 
         previousTab() {
@@ -297,7 +318,14 @@ export default function productStudio(config) {
         submitForm(event) {
             if (!this.canPublish) {
                 event.preventDefault();
-                this.setTab(!this.files.front ? 'design' : (!this.$refs.form.querySelector('[name="title"]').value.trim() ? 'product' : 'publish'));
+                if (!this.files.front) {
+                    this.fileError = 'Upload front artwork before publishing.';
+                    this.setTab('design');
+                } else if (!this.title.trim() || !this.tags.trim()) {
+                    this.setTab('product');
+                } else {
+                    this.setTab('publish');
+                }
                 return;
             }
             this.submitting = true;

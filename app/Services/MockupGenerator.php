@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use RuntimeException;
 
 class MockupGenerator
 {
@@ -19,13 +20,19 @@ class MockupGenerator
         $templateFullPath = $this->fullPath($templatePath);
         $designFullPath = $design instanceof UploadedFile ? $design->getRealPath() : $this->fullPath($design);
 
+        $canvasSize = config('catalog.canvas', ['width' => 850, 'height' => 900]);
+
         if (! extension_loaded('gd')) {
-            $path = $outputPath ?: 'products/'.uniqid('mockup-', true).'.png';
-            Storage::disk('public')->put($path, file_get_contents($templateFullPath));
-            return $path;
+            return $this->generateWithFfmpeg(
+                $templateFullPath,
+                $designFullPath,
+                $position,
+                $outputPath,
+                $transform,
+                $canvasSize
+            );
         }
 
-        $canvasSize = config('catalog.canvas', ['width' => 850, 'height' => 900]);
         $template = Image::make($templateFullPath)->resize($canvasSize['width'], $canvasSize['height']);
         $canvas = Image::canvas($template->width(), $template->height(), $this->color($garmentColor));
 
@@ -71,6 +78,70 @@ class MockupGenerator
         return $path;
     }
 
+    private function generateWithFfmpeg(
+        string $templateFullPath,
+        string $designFullPath,
+        array $position,
+        ?string $outputPath,
+        array $transform,
+        array $canvasSize
+    ): string {
+        $path = $outputPath ?: 'products/'.uniqid('mockup-', true).'.png';
+        $directory = dirname($path);
+
+        if ($directory !== '.') {
+            Storage::disk('public')->makeDirectory($directory);
+        }
+
+        $outputFullPath = Storage::disk('public')->path($path);
+        $transform = array_merge([
+            'x' => 50,
+            'y' => 50,
+            'scale' => 1,
+            'rotation' => 0,
+        ], $transform);
+
+        $printWidth = max(1, (int) $position['w']);
+        $printHeight = max(1, (int) $position['h']);
+        $designWidth = max(1, (int) round($printWidth * (float) $transform['scale']));
+        $designHeight = max(1, (int) round($printHeight * (float) $transform['scale']));
+        $centerX = (int) round($printWidth * ((float) $transform['x'] / 100));
+        $centerY = (int) round($printHeight * ((float) $transform['y'] / 100));
+        $rotation = ((float) $transform['rotation']) * pi() / 180;
+
+        $filter = implode('', [
+            sprintf('[0:v]scale=%d:%d,format=rgba[template];', (int) $canvasSize['width'], (int) $canvasSize['height']),
+            sprintf('[1:v]scale=%d:%d:force_original_aspect_ratio=decrease,format=rgba,rotate=%F:c=none:ow=rotw(iw):oh=roth(ih)[art];', $designWidth, $designHeight, $rotation),
+            sprintf('color=color=black@0.0:size=%dx%d:d=1,format=rgba[area];', $printWidth, $printHeight),
+            sprintf('[area][art]overlay=x=%d-w/2:y=%d-h/2:format=auto[printed];', $centerX, $centerY),
+            sprintf('[template][printed]overlay=x=%d:y=%d:format=auto,format=rgba[out]', (int) $position['x'], (int) $position['y']),
+        ]);
+
+        $this->runCommand([
+            'ffmpeg',
+            '-y',
+            '-v',
+            'error',
+            '-i',
+            $templateFullPath,
+            '-i',
+            $designFullPath,
+            '-filter_complex',
+            $filter,
+            '-map',
+            '[out]',
+            '-frames:v',
+            '1',
+            $outputFullPath,
+        ]);
+
+        if (! is_file($outputFullPath) || filesize($outputFullPath) === 0) {
+            throw new RuntimeException('Mockup generation failed: FFmpeg did not produce an output image.');
+        }
+
+        return $path;
+    }
+
     private function fullPath(string $path): string
     {
         if (is_file($path)) {
@@ -98,5 +169,29 @@ class MockupGenerator
             'blue' => '#2563eb',
             default => '#ffffff',
         };
+    }
+
+    private function runCommand(array $command): void
+    {
+        $process = proc_open($command, [
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ], $pipes);
+
+        if (! is_resource($process)) {
+            throw new RuntimeException('Mockup generation failed: unable to start FFmpeg.');
+        }
+
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+
+        $exitCode = proc_close($process);
+
+        if ($exitCode !== 0) {
+            $message = trim($stderr ?: $stdout);
+            throw new RuntimeException('Mockup generation failed: '.($message ?: 'FFmpeg exited with code '.$exitCode.'.'));
+        }
     }
 }

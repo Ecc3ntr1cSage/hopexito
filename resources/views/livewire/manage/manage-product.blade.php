@@ -1,282 +1,174 @@
 @section('title', 'Manage Products | HopeXito')
-<div class="max-w-3xl min-h-screen mx-auto mt-8 mb-32 text-white" x-data="{ nav: 1 }">
+
+<div class="manage-page" x-data="{ nav: 'products', collectionModal: false }">
     <x-jet-session-message />
-    <h1
-        class="px-2 text-2xl font-bold text-transparent md:px-0 bg-clip-text bg-gradient-to-r from-red-400 to-indigo-800">
-        Product Management</h1>
-    <p class="px-2 my-2 mb-8 md:px-0">Take control of your product listings with our comprehensive product management
-        tool.
-    </p>
-    <ul class="flex mb-10 border-b border-gray-100">
-        <li class="flex-1 transition hover:bg-white/10">
-            <a class="relative block p-4 cursor-pointer" x-on:click="nav = 1">
-                <span x-bind:class="nav == 1 ? 'bg-fuchsia-600' : 'bg-tranparent'"
-                    class="absolute inset-x-0 w-full h-px -bottom-px"></span>
-                <div class="flex items-center justify-center gap-4">
-                    <span x-bind:class="nav == 1 ? 'text-fuchsia-500' : 'text-white'"
-                        class="text-sm font-medium">Products</span>
-                </div>
-            </a>
-        </li>
-        <li class="flex-1 transition hover:bg-white/10">
-            <a class="relative block p-4 cursor-pointer" x-on:click="nav = 2">
-                <span x-bind:class="nav == 2 ? 'bg-fuchsia-600' : 'bg-tranparent'"
-                    class="absolute inset-x-0 w-full h-px -bottom-px"></span>
-                <div class="flex items-center justify-center gap-4">
-                    <span x-bind:class="nav == 2 ? 'text-fuchsia-500' : 'text-white'"
-                        class="text-sm font-medium">Collection</span>
-                </div>
-            </a>
-        </li>
-        <li class="flex-1 transition hover:bg-white/10">
-            <a class="relative block p-4 cursor-pointer" x-on:click="nav = 3">
-                <span x-bind:class="nav == 3 ? 'bg-fuchsia-600' : 'bg-tranparent'"
-                    class="absolute inset-x-0 w-full h-px -bottom-px"></span>
-                <div class="flex items-center justify-center gap-4">
-                    <span x-bind:class="nav == 3 ? 'text-fuchsia-500' : 'text-white'"
-                        class="text-sm font-medium">Archives</span>
-                </div>
-            </a>
-        </li>
-    </ul>
-    <div x-cloak x-show="nav == 1" x-transition.opacity x-transition:enter.duration.500ms
-        x-transition:leave.duration.100ms>
-        <x-jet-input class="mx-3 mb-4 md:mx-0" type="text" wire:model.lazy="search"
-            placeholder="Search by product name" />
-        <div class="flex flex-wrap justify-start gap-2 px-2 font-mono md:gap-6 md:px-0">
-            @foreach ($products as $product)
-                <div class="" x-data="{ open: false, modal: false, dropdown: false, id: '{{ $product->id }}' }" x-on:mouseenter="open = true"
-                    x-on:mouseleave="open = false">
-                    <div class="relative w-48 md:w-60">
-                        <img class="object-cover object-center transition duration-500 shadow-md shadow-purple-500/30 rounded-xl"
-                            src="{{ $product->product_image }}">
-                        <svg x-show="open" x-transition.duration.500ms x-cloak xmlns="http://www.w3.org/2000/svg"
-                            x-on:click="dropdown = true" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor"
-                            class="absolute w-8 h-8 p-1 rounded-lg top-1 right-1 hover:bg-white/40">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-                        </svg>
-                        <ul x-cloak x-show="dropdown == true && id == '{{ $product->id }}' "
-                            x-on:click.away="dropdown = false"
-                            class="absolute right-0 z-50 p-1 font-sans text-white rounded-lg shadow-lg w-44 top-9 bg-zinc-900">
-                            @if ($product->status == 3)
-                                <button wire:click="unpinProduct('{{ $product->id }}')"
-                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
-                                    Unpin
-                                </button>
-                            @else
-                                <button wire:click="pinProduct('{{ $product->id }}')"
-                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
-                                    Pin
-                                </button>
-                            @endif
-                            @if ($product->product_image_2 && $product->preview == 0)
-                                <button wire:click="previewBack('{{ $product->id }}')"
-                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
-                                    Preview (Back)
-                                </button>
-                            @elseif($product->product_image_2 && $product->preview == 1)
-                                <button wire:click="previewFront('{{ $product->id }}')"
-                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
-                                    Preview (Front)
-                                </button>
-                            @endif
-                            <button x-on:click="modal = true" wire:click="forceFill('{{ $product->id }}')"
-                                class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
-                                Edit
-                            </button>
-                            <button wire:click="archiveProduct('{{ $product->id }}')"
-                                class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
-                                Archive
-                            </button>
-                            @if ($product->visibility === 'public')
-                                <button wire:click="setVisibility('{{ $product->id }}', 'private')"
-                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">Make private</button>
-                            @else
-                                <button wire:click="setVisibility('{{ $product->id }}', 'public')"
-                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">Make public</button>
-                            @endif
-                            <x-jet-modal-custom>
-                                <form class="flex-col w-full space-y-4">
-                                    <h2>Edit product</h2>
-                                    <x-jet-label for="title" value="{{ __('Title') }}" />
-                                    <x-jet-input id="title" class="block w-full mt-1" type="text" name="title"
-                                        wire:model.defer="title" />
-                                    @error('title')
-                                        <p class="text-rose-500">{{ $message }}</p>
-                                    @enderror
-                                    <x-jet-label for="tags" value="{{ __('Tags') }}" />
-                                    <x-jet-input id="tags" class="block w-full mt-1" type="text"
-                                        wire:model.defer="tags" />
-                                    @error('tags')
-                                        <p class="text-rose-500">{{ $message }}</p>
-                                    @enderror
-                                    <p class="text-sm text-indigo-300">Price and commission are fixed by product type.</p>
-                                    <x-jet-button type="button" wire:click="editProduct('{{ $product->id }}')"
-                                        class="float-right">
-                                        Save</x-jet-button>
-                                </form>
-                            </x-jet-modal-custom>
-                            {{-- Delete product --}}
-                            @if ($product->sold == 0 && $inCart[$product->id] == false)
-                                <button wire:click="deleteProduct('{{ $product->id }}')"
-                                    class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
-                                    Delete
-                                </button>
-                            @endif
-                        </ul>
-                        <div x-show="open" x-transition.duration.500ms x-cloak
-                            class="absolute bottom-0 w-full p-2 text-sm text-center text-black rounded-xl bg-white/20 backdrop-blur">
-                            <p class="">{{ $product->title }}</p>
-                            <p><span class="font-bold">{{ $product->sold }} </span>sold</p>
-                            <p>Price: <span
-                                    class="px-1 rounded-lg bg-violet-500">{{ number_format($product->price, 2) }}</span>
-                            </p>
-                            <p>Commission: <span
-                                    class="px-1 rounded-lg bg-violet-500">{{ number_format($product->commission, 2) }}</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+
+    <section class="manage-hero manage-container">
+        <div class="manage-breadcrumb"><a href="{{ route('people', Auth::user()->name) }}">Your profile</a><span>/</span><span>Workspace</span></div>
+        <div class="manage-hero-grid">
+            <div class="manage-hero-copy manage-reveal">
+                <span class="manage-eyebrow"><i></i> Product studio / 02</span>
+                <h1>Work, in one place.</h1>
+                <p>Keep your editions moving, your shelves considered, and your public presence in sync.</p>
+            </div>
+            <div class="manage-hero-actions manage-reveal manage-reveal-delay">
+                <a href="{{ route('product.create') }}" class="manage-primary-action group"><span>Create a product</span><b aria-hidden="true">&nearr;</b></a>
+                <a href="{{ route('people', Auth::user()->name) }}" class="manage-secondary-action">View public profile <span aria-hidden="true">&nearr;</span></a>
+            </div>
         </div>
-    </div>
-    {{-- Product Collection --}}
-    <div x-cloak x-data="{ modal3: false, modal2: false, id: '' }" x-show="nav == 2" x-transition.opacity x-transition:enter.duration.500ms
-        x-transition:leave.duration.100ms>
-        <x-jet-button-custom x-on:click="modal3 = true">
-            Add new collection
-        </x-jet-button-custom>
-        <x-jet-modal-custom-3>
-            <form method="POST" action="{{ route('upload.collection') }}" enctype="multipart/form-data"
-                class="flex-col w-full space-y-4">
-                @csrf
-                <x-jet-header>Create new collection</x-jet-header>
-                <x-jet-label for="collection-image" value="{{ __('Collection Image') }}" />
-                <input type="file" id="collection-image" name="collection_image"
-                    wire:model.defer="collection_image" class="w-full">
-                <x-jet-label for="title" value="{{ __('Title') }}" />
-                <x-jet-input id="title" class="block w-full mt-1" type="text" name="title" />
-                <x-jet-button class="float-right">Save</x-jet-button>
-            </form>
-        </x-jet-modal-custom-3>
-        <div class="flex flex-col gap-4 my-4">
-            @foreach ($productCollections as $item)
-                <div x-on:click="modal2 = true"
-                    style="background-image: url('{{ asset('storage/collection-image/' . $item->collection_image) }}')"
-                    class="relative block overflow-hidden bg-center bg-no-repeat bg-cover md:rounded-xl">
-                    <span
-                        class="absolute z-10 inline-flex items-center px-3 py-1 font-semibold text-white bg-black rounded-full right-4 top-4">
-                        {{ $item->product->count() }}
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-                            class="ml-1.5 h-4 w-4 text-pink-500">
-                            <path
-                                d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 6.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 8h-6.572l1.305-6.093z" />
-                        </svg>
-                    </span>
-                    <button wire:click="deleteCollection('{{ $item->id }}')"
-                        class="absolute z-10 inline-flex items-center px-4 py-1.5 font-semibold text-white transition bg-black rounded-full cursor-pointer hover:bg-red-500 right-4 top-12">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            wire:click="deleteCollection({{ $item->id }})" stroke-width="1.5"
-                            stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                        </svg>
-                    </button>
-                    <div class="relative p-8 pt-40 text-white bg-black bg-opacity-30">
-                        <h3 class="px-6 py-2 text-xl tracking-wider rounded-full w-fit bg-black/70">
-                            {{ $item->title }}</h3>
-                    </div>
-                </div>
-                <div class="grid grid-cols-3 gap-2 p-2 md:grid-cols-4">
-                    @foreach ($products as $product)
-                        @unless ($product->collection_id != $item->id)
-                            <p wire:click="removeFromCollection('{{ $product->id }}','{{ $item->id }}')"
-                                class="p-2 rounded-md cursor-pointer bg-violet-500">
-                                <span wire:loading.remove
-                                    wire:target="removeFromCollection('{{ $product->id }}','{{ $item->id }}')">{{ $product->title }}</span>
-                                <svg wire:loading
-                                    wire:target="removeFromCollection('{{ $product->id }}','{{ $item->id }}')"
-                                    viewBox="0 0 24 24" class="block w-6 h-6 m-auto -my-1 text-white animate-spin">
-                                    <path fill="currentColor" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
-                                </svg>
-                            </p>
-                        @endunless
-                        @unless ($product->collection_id != null)
-                            <p wire:click="addToCollection('{{ $product->id }}','{{ $item->id }}')"
-                                class="p-2 bg-transparent rounded-md cursor-pointer ring-2 ring-rose-500">
-                                <span wire:loading.remove
-                                    wire:target="addToCollection('{{ $product->id }}','{{ $item->id }}')">{{ $product->title }}</span>
-                                <svg wire:loading
-                                    wire:target="addToCollection('{{ $product->id }}','{{ $item->id }}')"
-                                    viewBox="0 0 24 24" class="block w-6 h-6 m-auto -my-1 text-rose-400 animate-spin">
-                                    <path fill="currentColor" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
-                                </svg>
-                            </p>
-                        @endunless
+        <div class="manage-stat-rail manage-reveal manage-reveal-delay-more">
+            <div><strong>{{ $products->count() }}</strong><span>active editions</span></div>
+            <div><strong>{{ $archives->count() }}</strong><span>in archive</span></div>
+            <div><strong>{{ $productCollections->count() }}</strong><span>collections</span></div>
+            <div class="manage-stat-note">A quiet place<br>to make things real.</div>
+        </div>
+    </section>
+
+    <section class="manage-workspace manage-container">
+        <nav class="manage-tabs" aria-label="Product workspace sections">
+            <button type="button" :class="nav === 'products' ? 'is-active' : ''" @click="nav = 'products'"><span>01</span> Products <b>{{ $products->count() }}</b></button>
+            <button type="button" :class="nav === 'collections' ? 'is-active' : ''" @click="nav = 'collections'"><span>02</span> Collections <b>{{ $productCollections->count() }}</b></button>
+            <button type="button" :class="nav === 'archives' ? 'is-active' : ''" @click="nav = 'archives'"><span>03</span> Archives <b>{{ $archives->count() }}</b></button>
+        </nav>
+
+        <section x-cloak x-show="nav === 'products'" x-transition:enter="manage-panel-enter" x-transition:enter-start="manage-panel-start" x-transition:enter-end="manage-panel-end" class="manage-panel">
+            <div class="manage-panel-heading">
+                <div><span class="manage-eyebrow"><i></i> Live catalogue</span><h2>Your editions</h2></div>
+                <label class="manage-search"><span aria-hidden="true">/</span><input type="search" wire:model.lazy="search" placeholder="Search products" aria-label="Search products"></label>
+            </div>
+
+            <div class="manage-product-grid">
+                @forelse ($products as $product)
+                    <article class="manage-product-card" x-data="{ side: '{{ $product->preview == 1 && $product->product_image_2 ? 'back' : 'front' }}', menuOpen: false, editOpen: false }">
+                        <div class="manage-product-frame">
+                            <div class="manage-product-media">
+                                <img x-bind:src="side === 'back' ? @js($product->product_image_2) : @js($product->product_image)" alt="{{ $product->title }}" class="manage-product-image">
+                                <div class="manage-product-media-meta"><span>{{ $product->category }}</span><span>{{ str_pad((string) $product->id, 3, '0', STR_PAD_LEFT) }}</span></div>
+                                <div class="manage-product-media-status">
+                                    @if ($product->status === 3)<span class="manage-status manage-status-pinned">Pinned</span>@endif
+                                    <span class="manage-status {{ $product->visibility === 'public' ? 'manage-status-public' : 'manage-status-private' }}">{{ ucfirst($product->visibility) }}</span>
+                                </div>
+                                <button type="button" class="manage-product-menu-button" @click="menuOpen = !menuOpen" :aria-expanded="menuOpen.toString()" aria-label="Open product actions"><span></span><span></span><span></span></button>
+                                <div x-cloak x-show="menuOpen" x-transition:enter="manage-menu-enter" x-transition:enter-start="manage-menu-start" x-transition:enter-end="manage-menu-end" @click.outside="menuOpen = false" class="manage-product-menu">
+                                    @if ($product->status === 3)
+                                        <button type="button" wire:click="unpinProduct('{{ $product->id }}')" @click="menuOpen = false">Unpin product</button>
+                                    @else
+                                        <button type="button" wire:click="pinProduct('{{ $product->id }}')" @click="menuOpen = false">Pin to profile</button>
+                                    @endif
+                                    @if ($product->product_image_2)
+                                        <button type="button" @click="side = side === 'front' ? 'back' : 'front'; menuOpen = false" x-text="side === 'front' ? 'Preview back' : 'Preview front'"></button>
+                                    @endif
+                                    <button type="button" wire:click="forceFill('{{ $product->id }}')" @click="menuOpen = false; editOpen = true">Edit details</button>
+                                    @if ($product->visibility === 'public')
+                                        <button type="button" wire:click="setVisibility('{{ $product->id }}', 'private')" @click="menuOpen = false">Make private</button>
+                                    @else
+                                        <button type="button" wire:click="setVisibility('{{ $product->id }}', 'public')" @click="menuOpen = false">Make public</button>
+                                    @endif
+                                    <button type="button" wire:click="archiveProduct('{{ $product->id }}')" @click="menuOpen = false">Archive</button>
+                                    @if ($product->sold == 0 && $inCart[$product->id] == false)
+                                        <button type="button" wire:click="deleteProduct('{{ $product->id }}')" @click="menuOpen = false" class="manage-menu-danger">Delete product</button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div class="manage-product-details">
+                            <div><span class="manage-product-type">{{ $product->category }} / {{ $product->visibility }}</span><h3>{{ $product->title }}</h3></div>
+                            <strong>RM{{ number_format($product->price, 2) }}</strong>
+                        </div>
+                        <div class="manage-product-metrics"><span><b>{{ $product->sold }}</b> sold</span><span>RM{{ number_format($product->commission, 2) }} commission</span><span>{{ $product->tags }}</span></div>
+
+                        <div x-cloak x-show="editOpen" x-transition.opacity class="manage-modal-backdrop" @click.self="editOpen = false" @keydown.escape.window="editOpen = false">
+                            <div class="manage-modal" role="dialog" aria-modal="true" aria-labelledby="edit-product-{{ $product->id }}">
+                                <div class="manage-modal-heading"><div><span class="manage-eyebrow"><i></i> Edit edition</span><h2 id="edit-product-{{ $product->id }}">Product details</h2></div><button type="button" class="manage-modal-close" @click="editOpen = false" aria-label="Close edit product dialog">&times;</button></div>
+                                <div class="manage-form-field"><label for="title-{{ $product->id }}">Title</label><input id="title-{{ $product->id }}" type="text" wire:model.defer="title"></div>
+                                @error('title') <p class="manage-form-error">{{ $message }}</p> @enderror
+                                <div class="manage-form-field"><label for="tags-{{ $product->id }}">Tags</label><input id="tags-{{ $product->id }}" type="text" wire:model.defer="tags"></div>
+                                @error('tags') <p class="manage-form-error">{{ $message }}</p> @enderror
+                                <p class="manage-modal-note">Price and commission are fixed by product type.</p>
+                                <button type="button" class="manage-modal-submit" wire:click="editProduct('{{ $product->id }}')" @click="editOpen = false">Save changes <span aria-hidden="true">&nearr;</span></button>
+                            </div>
+                        </div>
+                    </article>
+                @empty
+                    <div class="manage-empty"><span class="manage-eyebrow"><i></i> No editions found</span><p>Start with one piece and build your catalogue from there.</p><a href="{{ route('product.create') }}" class="manage-secondary-action">Open product studio <span aria-hidden="true">&nearr;</span></a></div>
+                @endforelse
+            </div>
+        </section>
+
+        <section x-cloak x-show="nav === 'collections'" x-transition:enter="manage-panel-enter" x-transition:enter-start="manage-panel-start" x-transition:enter-end="manage-panel-end" class="manage-panel">
+            <div class="manage-panel-heading">
+                <div><span class="manage-eyebrow"><i></i> Curated shelves</span><h2>Collections</h2></div>
+                <button type="button" class="manage-primary-action manage-small-action" @click="collectionModal = true"><span>Add collection</span><b aria-hidden="true">+</b></button>
+            </div>
+
+            <div class="manage-collection-grid">
+                @forelse ($productCollections as $collection)
+                    <article class="manage-collection-card">
+                        <div class="manage-collection-cover" style="background-image: url('{{ asset('storage/collection-image/' . $collection->collection_image) }}')">
+                            <div class="manage-collection-cover-shade"></div>
+                            <div class="manage-collection-cover-meta"><span>{{ $collection->product->count() }} editions</span><button type="button" wire:click="deleteCollection('{{ $collection->id }}')" aria-label="Delete {{ $collection->title }}">&times;</button></div>
+                            <h3>{{ $collection->title }}</h3>
+                        </div>
+                        <div class="manage-collection-products">
+                            <span class="manage-collection-label">Assign editions</span>
+                            <div class="manage-collection-product-list">
+                                @foreach ($products as $product)
+                                    @if ((string) $product->collection_id === (string) $collection->id)
+                                        <button type="button" wire:click="removeFromCollection('{{ $product->id }}','{{ $collection->id }}')" class="is-assigned">{{ $product->title }} <span aria-hidden="true">&minus;</span></button>
+                                    @elseif ($product->collection_id === null)
+                                        <button type="button" wire:click="addToCollection('{{ $product->id }}','{{ $collection->id }}')">{{ $product->title }} <span aria-hidden="true">+</span></button>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </article>
+                @empty
+                    <div class="manage-empty"><span class="manage-eyebrow"><i></i> No collections yet</span><p>Group related pieces into a shelf your audience can browse.</p><button type="button" class="manage-secondary-action" @click="collectionModal = true">Create your first collection <span aria-hidden="true">&nearr;</span></button></div>
+                @endforelse
+            </div>
+        </section>
+
+        <section x-cloak x-show="nav === 'archives'" x-transition:enter="manage-panel-enter" x-transition:enter-start="manage-panel-start" x-transition:enter-end="manage-panel-end" class="manage-panel">
+            <div class="manage-panel-heading"><div><span class="manage-eyebrow"><i></i> Quiet shelf</span><h2>Archives</h2></div><span class="manage-panel-note">Archived pieces are hidden from your public profile.</span></div>
+            @if ($noArchives)
+                <div class="manage-empty"><span class="manage-eyebrow"><i></i> Archive is clear</span><p>When a piece has had its run, it will live here until you are ready to bring it back.</p></div>
+            @else
+                <div class="manage-archive-grid">
+                    @foreach ($archives as $archive)
+                        <article class="manage-archive-card">
+                            <div class="manage-archive-frame"><div class="manage-archive-media"><img src="{{ $archive->product_image }}" alt="{{ $archive->title }}"><span>Archived / {{ str_pad((string) $archive->id, 3, '0', STR_PAD_LEFT) }}</span></div></div>
+                            <div class="manage-product-details"><div><span class="manage-product-type">{{ $archive->category }}</span><h3>{{ $archive->title }}</h3></div><strong>RM{{ number_format($archive->price, 2) }}</strong></div>
+                            <div class="manage-product-metrics"><span><b>{{ $archive->sold }}</b> sold</span><span>RM{{ number_format($archive->commission, 2) }} commission</span></div>
+                            <button type="button" class="manage-restore-button" wire:click="unarchiveProduct('{{ $archive->id }}')">Restore to catalogue <span aria-hidden="true">&nearr;</span></button>
+                        </article>
                     @endforeach
                 </div>
-                <x-jet-section-border />
-            @endforeach
+            @endif
+        </section>
+    </section>
+
+    <div x-cloak x-show="collectionModal" x-transition.opacity class="manage-modal-backdrop" @click.self="collectionModal = false" @keydown.escape.window="collectionModal = false">
+        <div class="manage-modal" role="dialog" aria-modal="true" aria-labelledby="new-collection-title">
+            <div class="manage-modal-heading"><div><span class="manage-eyebrow"><i></i> New shelf</span><h2 id="new-collection-title">Create collection</h2></div><button type="button" class="manage-modal-close" @click="collectionModal = false" aria-label="Close collection dialog">&times;</button></div>
+            <form method="POST" action="{{ route('upload.collection') }}" enctype="multipart/form-data" class="manage-collection-form">
+                @csrf
+                <div class="manage-form-field"><label for="collection-image">Cover image</label><input type="file" id="collection-image" name="collection_image" wire:model.defer="collection_image"></div>
+                <div class="manage-form-field"><label for="collection-title">Title</label><input id="collection-title" type="text" name="title" required></div>
+                <button type="submit" class="manage-modal-submit">Save collection <span aria-hidden="true">&nearr;</span></button>
+            </form>
         </div>
     </div>
-    {{-- If archive has items --}}
-    @if (!$noArchives)
-        <div class="flex flex-wrap justify-start gap-3 px-3 font-mono md:gap-5 md:px-0" x-cloak x-show="nav == 3"
-            x-transition.opacity x-transition:enter.duration.500ms x-transition:leave.duration.100ms>
-            @foreach ($archives as $archive)
-                <div class="" x-data="{ open: false, dropdown: false, id: '{{ $archive->id }}' }" x-on:mouseenter="open = true"
-                    x-on:mouseleave="open = false">
-                    <div class="relative w-44 md:w-60">
-                        <img class="object-cover object-center transition duration-500 shadow-md shadow-purple-500/30 rounded-xl"
-                            src="{{ $archive->product_image }}">
-                        <svg x-show="open" x-transition.duration.500ms x-cloak xmlns="http://www.w3.org/2000/svg"
-                            x-on:click="dropdown = true" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor"
-                            class="absolute w-8 h-8 p-1 rounded-lg top-1 right-1 hover:bg-white/40">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
-                        </svg>
-                        <ul x-show="dropdown == true && id == '{{ $archive->id }}' "
-                            x-on:click.away="dropdown = false"
-                            class="absolute right-0 z-50 p-1 font-sans text-white rounded-lg shadow-lg w-36 top-9 bg-zinc-900">
-                            <button wire:click="unarchiveProduct('{{ $archive->id }}')"
-                                class="w-full px-4 py-2 text-left rounded-md hover:bg-indigo-500">
-                                Unarchive
-                            </button>
-                        </ul>
-                        <div x-show="open" x-transition.duration.500ms x-cloak
-                            class="absolute bottom-0 w-full p-2 text-sm text-center text-black rounded-xl bg-white/20 backdrop-blur">
-                            <p class="">{{ $archive->title }}</p>
-                            <p><span class="font-bold">{{ $archive->sold }}
-                                </span>sold
-                            </p>
-                            <p>Price: <span
-                                    class="px-1 rounded-lg bg-violet-500">{{ number_format($archive->price, 2) }}</span>
-                            </p>
-                            <p>Commission: <span
-                                    class="px-1 rounded-lg bg-violet-500">{{ number_format($archive->commission, 2) }}</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @endif
+
     <script src="https://unpkg.com/filepond@^4/dist/filepond.js"></script>
     <script src="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js"></script>
     <script>
-        FilePond.registerPlugin(FilePondPluginImagePreview);
-        const fileInput = document.querySelector('input[id="collection-image"]');
-        const pond = FilePond.create(fileInput);
-        FilePond.setOptions({
-            server: {
-                url: '{{ route('upload') }}',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
+        if (window.FilePond) {
+            FilePond.registerPlugin(FilePondPluginImagePreview);
+            const collectionInput = document.querySelector('#collection-image');
+            if (collectionInput) {
+                FilePond.create(collectionInput);
+                FilePond.setOptions({ server: { url: '{{ route('upload') }}', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } } });
             }
-        });
+        }
     </script>
 </div>

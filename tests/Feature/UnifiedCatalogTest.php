@@ -45,8 +45,8 @@ class UnifiedCatalogTest extends TestCase
                 'front' => ['x' => 50, 'y' => 50, 'scale' => 1, 'rotation' => 0],
                 'back' => ['x' => 48, 'y' => 52, 'scale' => 0.8, 'rotation' => -12],
             ],
-            'image_front' => UploadedFile::fake()->create('front.png', 10, 'image/png'),
-            'image_back' => UploadedFile::fake()->create('back.png', 10, 'image/png'),
+            'image_front' => $this->pngUpload('front.png'),
+            'image_back' => $this->pngUpload('back.png'),
         ]);
 
         $response->assertRedirect();
@@ -59,6 +59,12 @@ class UnifiedCatalogTest extends TestCase
         $this->assertCount(3, $product->variants);
         $this->assertSame(['Black', 'Gray', 'White'], $product->variants->pluck('color')->sort()->values()->all());
         $this->assertTrue($product->variants->every(fn ($variant) => filled($variant->image_front_path) && filled($variant->image_back_path)));
+        $whiteFront = $product->variants()->where('color', 'White')->value('image_front_path');
+        Storage::disk('public')->assertExists($whiteFront);
+        $this->assertNotSame(
+            file_get_contents(public_path('mockups/white-hoodie-front.png')),
+            Storage::disk('public')->get($whiteFront)
+        );
     }
 
     public function test_product_without_back_artwork_uses_plain_back_mockups(): void
@@ -74,11 +80,19 @@ class UnifiedCatalogTest extends TestCase
             'preview_side' => 'back',
             'rights' => '1',
             'transforms' => ['front' => ['x' => 50, 'y' => 50, 'scale' => 1, 'rotation' => 0]],
-            'image_front' => UploadedFile::fake()->create('front.png', 10, 'image/png'),
+            'image_front' => $this->pngUpload('front.png'),
         ])->assertRedirect();
 
         $product = Product::firstOrFail();
         $this->assertSame(0, $product->preview);
+        $this->assertCount(3, $product->variants);
+        $this->assertSame(
+            ['Black', 'Gray', 'White'],
+            $product->variants->pluck('color')->sort()->values()->all()
+        );
+        $this->assertTrue($product->variants->every(
+            fn ($variant) => $variant->image_back_path === 'mockups/'.strtolower($variant->color).'-shirt-back.png'
+        ));
         $this->assertSame('mockups/white-shirt-back.png', $product->variants()->where('color', 'White')->value('image_back_path'));
     }
 
@@ -93,7 +107,7 @@ class UnifiedCatalogTest extends TestCase
             'tags' => 'test',
             'rights' => '1',
             'transforms' => ['front' => ['x' => 101, 'y' => 50, 'scale' => 1, 'rotation' => 0]],
-            'image_front' => UploadedFile::fake()->create('front.png', 10, 'image/png'),
+            'image_front' => $this->pngUpload('front.png'),
         ])->assertRedirect(route('product.create'))
             ->assertSessionHasErrors('transforms.front.x');
 
@@ -109,6 +123,19 @@ class UnifiedCatalogTest extends TestCase
         $this->get(route('product.show', $product))->assertNotFound();
         $this->actingAs($other)->get(route('product.show', $product))->assertNotFound();
         $this->actingAs($owner)->get(route('product.show', $product))->assertOk();
+    }
+
+    public function test_product_show_renders_the_purchase_surface(): void
+    {
+        $owner = User::factory()->create();
+        $product = $this->makeProduct($owner, 'public', 'shirt');
+
+        $this->get(route('product.show', $product))
+            ->assertOk()
+            ->assertSee('product-page')
+            ->assertSee('Add to bag')
+            ->assertSee('Buy now')
+            ->assertSee('Size guide');
     }
 
     public function test_owner_purchase_uses_discount_without_creator_earnings(): void
@@ -173,5 +200,10 @@ class UnifiedCatalogTest extends TestCase
             ]);
         }
         return $product;
+    }
+
+    private function pngUpload(string $name): UploadedFile
+    {
+        return UploadedFile::fake()->createWithContent($name, file_get_contents(public_path('image/hopexito.png')));
     }
 }
