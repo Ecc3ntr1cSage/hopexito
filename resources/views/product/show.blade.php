@@ -33,7 +33,6 @@
 @endphp
 
 <x-app-layout>
-    <x-jet-whatsapp-contact />
 
     <main class="product-page" x-data="{
         preview: 'front',

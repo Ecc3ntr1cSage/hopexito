@@ -1,6 +1,5 @@
 @section('title', 'Shop ' . ($productType ?? 'Sweatshirt') . ' | HopeXito')
 <x-app-layout>
-    <x-jet-whatsapp-contact />
     <div class="mx-auto mt-8 max-w-7xl">
         <x-jet-title>All Products</x-jet-title>
         <div class="flex items-center gap-2 ml-2 text-white">

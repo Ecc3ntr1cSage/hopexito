@@ -235,50 +235,106 @@ class DemoSeeder extends Seeder
 
     private function seedPurchases(): void
     {
+        // Every purchase is a separate bill containing exactly one product.
         // DemoUser buys three TestUser products and two of their own products.
         $this->seedOrder(
             id: '11111111-1111-4111-8111-111111111111',
             buyerId: self::DEMO_USER_ID,
-            itemIds: [9, 10, 11, 1, 2],
-            productOrderIds: [
-                'a1111111-1111-4111-8111-111111111111',
-                'a1111111-1111-4111-8111-111111111112',
-                'a1111111-1111-4111-8111-111111111113',
-                'a1111111-1111-4111-8111-111111111114',
-                'a1111111-1111-4111-8111-111111111115',
-            ],
-            colors: ['Black', 'Black', 'Navy', 'Gray', 'Black'],
+            productId: 9,
+            productOrderId: 'a1111111-1111-4111-8111-111111111111',
+            color: 'Black',
             createdAt: '2026-08-01 19:00:00'
         );
+        $this->seedOrder(
+            id: '11111111-1111-4111-8111-111111111112',
+            buyerId: self::DEMO_USER_ID,
+            productId: 10,
+            productOrderId: 'a1111111-1111-4111-8111-111111111112',
+            color: 'Black',
+            createdAt: '2026-08-02 10:30:00'
+        );
+        $this->seedOrder(
+            id: '11111111-1111-4111-8111-111111111113',
+            buyerId: self::DEMO_USER_ID,
+            productId: 11,
+            productOrderId: 'a1111111-1111-4111-8111-111111111113',
+            color: 'Navy',
+            createdAt: '2026-08-03 14:15:00'
+        );
+        $this->seedOrder(
+            id: '11111111-1111-4111-8111-111111111114',
+            buyerId: self::DEMO_USER_ID,
+            productId: 1,
+            productOrderId: 'a1111111-1111-4111-8111-111111111114',
+            color: 'Gray',
+            createdAt: '2026-08-04 18:45:00'
+        );
+        $this->seedOrder(
+            id: '11111111-1111-4111-8111-111111111115',
+            buyerId: self::DEMO_USER_ID,
+            productId: 2,
+            productOrderId: 'a1111111-1111-4111-8111-111111111115',
+            color: 'Black',
+            createdAt: '2026-08-05 09:20:00'
+        );
 
-        // TestUser buys five DemoUser products.
+        // TestUser buys five DemoUser products and one of their own products.
+        $this->seedOrder(
+            id: '22222222-2222-4222-8222-222222222221',
+            buyerId: self::TEST_USER_ID,
+            productId: 1,
+            productOrderId: 'b2222222-2222-4222-8222-222222222221',
+            color: 'Gray',
+            createdAt: '2026-08-06 11:10:00'
+        );
         $this->seedOrder(
             id: '22222222-2222-4222-8222-222222222222',
             buyerId: self::TEST_USER_ID,
-            itemIds: [1, 2, 3, 4, 5],
-            productOrderIds: [
-                'b2222222-2222-4222-8222-222222222221',
-                'b2222222-2222-4222-8222-222222222222',
-                'b2222222-2222-4222-8222-222222222223',
-                'b2222222-2222-4222-8222-222222222224',
-                'b2222222-2222-4222-8222-222222222225',
-            ],
-            colors: ['Gray', 'Black', 'Green', 'Black', 'Gray'],
-            createdAt: '2026-08-01 19:05:00'
+            productId: 2,
+            productOrderId: 'b2222222-2222-4222-8222-222222222222',
+            color: 'Black',
+            createdAt: '2026-08-07 15:40:00'
+        );
+        $this->seedOrder(
+            id: '22222222-2222-4222-8222-222222222223',
+            buyerId: self::TEST_USER_ID,
+            productId: 3,
+            productOrderId: 'b2222222-2222-4222-8222-222222222223',
+            color: 'Green',
+            createdAt: '2026-08-08 20:05:00'
+        );
+        $this->seedOrder(
+            id: '22222222-2222-4222-8222-222222222224',
+            buyerId: self::TEST_USER_ID,
+            productId: 4,
+            productOrderId: 'b2222222-2222-4222-8222-222222222224',
+            color: 'Black',
+            createdAt: '2026-08-09 08:55:00'
+        );
+        $this->seedOrder(
+            id: '22222222-2222-4222-8222-222222222225',
+            buyerId: self::TEST_USER_ID,
+            productId: 5,
+            productOrderId: 'b2222222-2222-4222-8222-222222222225',
+            color: 'Gray',
+            createdAt: '2026-08-10 13:25:00'
+        );
+        $this->seedOrder(
+            id: '22222222-2222-4222-8222-222222222226',
+            buyerId: self::TEST_USER_ID,
+            productId: 12,
+            productOrderId: 'b2222222-2222-4222-8222-222222222226',
+            color: 'Green',
+            createdAt: '2026-08-11 17:50:00'
         );
     }
 
-    private function seedOrder(string $id, int $buyerId, array $itemIds, array $productOrderIds, array $colors, string $createdAt): void
+    private function seedOrder(string $id, int $buyerId, int $productId, string $productOrderId, string $color, string $createdAt): void
     {
         $buyer = DB::table('users')->where('id', $buyerId)->first();
-        $products = DB::table('products')->whereIn('id', $itemIds)->get()->keyBy('id');
-        $subtotal = 0.0;
-
-        foreach ($itemIds as $productId) {
-            $product = $products[$productId];
-            $ownerPurchase = (int) $product->user_id === $buyerId;
-            $subtotal += (float) $product->price * ($ownerPurchase ? 0.85 : 1);
-        }
+        $product = DB::table('products')->where('id', $productId)->firstOrFail();
+        $ownerPurchase = (int) $product->user_id === $buyerId;
+        $price = round((float) $product->price * ($ownerPurchase ? 0.85 : 1), 2);
 
         DB::table('orders')->insert([
             'id' => $id,
@@ -287,7 +343,7 @@ class DemoSeeder extends Seeder
             'description' => 'Demo payment completed',
             'delivery' => 7.00,
             'status' => 1,
-            'amount' => round($subtotal + 7.00, 2),
+            'amount' => round($price + 7.00, 2),
             'tracking_number' => null,
             'paid' => 'true',
             'paid_at' => $createdAt,
@@ -299,30 +355,24 @@ class DemoSeeder extends Seeder
             'updated_at' => $createdAt,
         ]);
 
-        foreach ($itemIds as $index => $productId) {
-            $product = $products[$productId];
-            $ownerPurchase = (int) $product->user_id === $buyerId;
-            $price = round((float) $product->price * ($ownerPurchase ? 0.85 : 1), 2);
+        DB::table('product_orders')->insert([
+            'id' => $productOrderId,
+            'billplz_id' => $id,
+            'product_id' => $product->id,
+            'title' => $product->title,
+            'price' => $price,
+            'quantity' => 1,
+            'size' => 'M',
+            'color' => $color,
+            'is_owner_purchase' => $ownerPurchase,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+        ]);
 
-            DB::table('product_orders')->insert([
-                'id' => $productOrderIds[$index],
-                'billplz_id' => $id,
-                'product_id' => $product->id,
-                'title' => $product->title,
-                'price' => $price,
-                'quantity' => 1,
-                'size' => 'M',
-                'color' => $colors[$index],
-                'is_owner_purchase' => $ownerPurchase,
-                'created_at' => $createdAt,
-                'updated_at' => $createdAt,
-            ]);
+        DB::table('products')->where('id', $product->id)->increment('sold');
 
-            DB::table('products')->where('id', $product->id)->increment('sold');
-
-            if (! $ownerPurchase) {
-                $this->recordCommission($product, $createdAt);
-            }
+        if (! $ownerPurchase) {
+            $this->recordCommission($product, $createdAt);
         }
     }
 

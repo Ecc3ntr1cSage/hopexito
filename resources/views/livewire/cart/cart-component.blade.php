@@ -2,7 +2,6 @@
 
 <div class="cart-page">
     <x-jet-session-message />
-    <x-jet-whatsapp-contact />
 
     @if (count($cart) === 0)
         <section class="cart-empty-shell">

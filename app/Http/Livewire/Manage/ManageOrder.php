@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\Manage;
 
 use App\Models\Order;
+use App\Models\ProductOrder;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -20,9 +21,17 @@ class ManageOrder extends Component
     }
     public function render()
     {
+        $sales = collect();
+
         if (Auth::check()) {
             $orders = Order::with('productOrder.product')
                 ->where('email', Auth::user()->email)
+                ->orderByDesc('created_at')
+                ->get();
+
+            $sales = ProductOrder::with(['order', 'product.variants'])
+                ->where('is_owner_purchase', false)
+                ->whereHas('product', fn ($query) => $query->where('user_id', Auth::id()))
                 ->orderByDesc('created_at')
                 ->get();
         } else {
@@ -45,6 +54,13 @@ class ManageOrder extends Component
             'spent' => $orders->sum('amount'),
         ];
 
-        return view('livewire.manage.manage-order', compact('orders', 'stats'));
+        $salesStats = [
+            'orders' => $sales->pluck('billplz_id')->unique()->count(),
+            'items' => $sales->sum('quantity'),
+            'gross' => $sales->sum(fn ($item) => (float) $item->price * (int) $item->quantity),
+            'earnings' => $sales->sum(fn ($item) => (float) $item->price * (int) $item->quantity * (float) ($item->product?->commission_rate ?? 0.15)),
+        ];
+
+        return view('livewire.manage.manage-order', compact('orders', 'stats', 'sales', 'salesStats'));
     }
 }

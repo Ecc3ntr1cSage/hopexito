@@ -6,8 +6,6 @@
 @section('title', 'Discover independent design | HopeXito')
 
 <x-app-layout>
-    <x-jet-whatsapp-contact />
-
     <main class="discover-page">
         <section class="discover-hero">
             <div class="discover-container">

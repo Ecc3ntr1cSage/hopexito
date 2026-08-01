@@ -1,6 +1,5 @@
 @section('title', $search . ' | HopeXito')
 <x-app-layout>
-    <x-jet-whatsapp-contact />
     <div class="relative z-20 min-h-screen px-1 mx-auto mt-6 pb-28 max-w-7xl">
         <p class="tracking-wide text-md"><span class="px-1 text-indigo-400 bg-black">{{ $user_count }} results</span>
             for Users</p>

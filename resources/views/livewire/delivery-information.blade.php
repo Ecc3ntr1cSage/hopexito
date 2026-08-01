@@ -106,7 +106,7 @@
             <div class="checkout-aside-rule"></div>
             <div class="checkout-aside-detail"><span>Shipping</span><strong>State-based</strong></div>
             <div class="checkout-aside-detail"><span>Experience</span><strong>Demo only</strong></div>
-            <div class="checkout-aside-detail"><span>Support</span><strong>WhatsApp ready</strong></div>
+            <div class="checkout-aside-detail"><span>Support</span><strong>Help available</strong></div>
         </aside>
     </div>
 </div>
