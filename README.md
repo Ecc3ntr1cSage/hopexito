@@ -102,8 +102,7 @@ app/
 database/
 ├── migrations/
 ├── seeders/
-│   ├── DatabaseSeeder.php
-│   └── DemoSeeder.php
+│   └── DatabaseSeeder.php
 
 resources/
 ├── css/app.css
@@ -205,19 +204,11 @@ php artisan test
 ## Seeders
 
 ### DatabaseSeeder
-Creates the unified demo user and runs `DemoSeeder`.
-
-### DemoSeeder
 Generates the complete demo environment:
-- Demo user (`user@demo.com`)
-- Shirt, sweatshirt, and hoodie catalog products
-- **3 demo products with six color/side variants each**
-- 1 paid sample order with order lines and wallet entries
 
-Run standalone:
-```bash
-php artisan db:seed --class=DemoSeeder
-```
+- Demo and test users (`user@demo.com` and `user@test.com`)
+- Shirt, sweatshirt, and hoodie catalog products with color variants
+- Paid sample orders with order lines and wallet transactions
 
 To reset everything fresh:
 ```bash
