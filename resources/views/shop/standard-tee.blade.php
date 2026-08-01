@@ -30,7 +30,7 @@
                 stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
             </svg>
-            <a href="{{ route('shop.sweat') }}"
+            <a href="{{ route('discover', ['type' => 'sweat']) }}"
                 class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Sweatshirt</a>
         </div>
     </div>

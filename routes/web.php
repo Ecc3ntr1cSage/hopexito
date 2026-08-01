@@ -47,9 +47,6 @@ Route::middleware('auth')->group(function () {
 Route::redirect('explore', '/');
 Route::get('shop', [StorefrontController::class, 'search'])->name('search');
 Route::get('discover', [StorefrontController::class, 'discover'])->name('discover');
-Route::get('shop/standard-tee', [StorefrontController::class, 'shirt'])->name('shop.shirt');
-Route::get('shop/sweatshirt', [StorefrontController::class, 'sweat'])->name('shop.sweat');
-Route::get('shop/hoodie', [StorefrontController::class, 'hoodie'])->name('shop.hoodie');
 Route::get('{shopname}', [StorefrontController::class, 'people'])->name('people');
 // google auth
 Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google-auth');

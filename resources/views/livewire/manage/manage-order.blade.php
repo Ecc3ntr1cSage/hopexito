@@ -1,93 +1,135 @@
-@inject('carbon', 'Carbon\Carbon')
 @section('title', 'Order History | HopeXito')
-<div class="max-w-3xl min-h-screen mx-auto mt-8 mb-32 text-white">
-    <x-jet-session-message/>
-    <h1 class="px-2 text-2xl font-bold text-transparent md:px-0 lg:text-3xl bg-clip-text bg-gradient-to-r from-red-400 to-indigo-800">
-        Your Orders</h1>
-    <p class="px-2 my-2 mb-8 md:px-0">Check the status of recent orders, manage returns, and discover similar products.</p>
-    @foreach ($order as $order)
-        <div class="mb-12">
-            <div class="flex flex-col px-2 mb-4 font-mono md:px-6 md:flex-row md:items-center md:justify-between">
-                <p class="">Order <span class="text-indigo-400 uppercase">#{{ $order->id }}</span></p>
-                <p class="">Order placed on <span
-                        class="text-indigo-400">{{ $carbon::parse($order->paid_at)->format('F d, Y g:i A') }}</span>
-                </p>
-                <p class="">Total <span
-                        class="text-indigo-400">RM{{ number_format($order->amount, 2) }}</span></p>
+<div class="orders-page" x-data="{ filter: 'all', query: '' }">
+    <div class="orders-container">
+        <x-jet-session-message />
+
+        <header class="orders-hero">
+            <div>
+                <p class="orders-kicker">Account / orders</p>
+                <h1>Order history</h1>
+                <p class="orders-lede">A clear view of what you bought, where it is, and what to do next.</p>
             </div>
-            <div class="flex flex-col transition shadow-md md:flex-row bg-black/30 rounded-xl hover:shadow-indigo-500/30">
-                <div class="flex-col w-full md:w-3/5">
-                    @foreach ($order->productOrder as $item)
-                        <div class="flex p-4 space-x-8">
-                            <img class="w-40 transition rounded-lg" src="{{ $item->product->product_card_image }}" alt="" />
-                            <div class="relative flex-col w-full space-y-1">
-                                <p class="text-indigo-400">{{ $item->title }}</p>
-                                <p class= uppercase">{{ $item->size }} / {{ $item->color }}
-                                </p>
-                                <p class="tracking-wider text-fuchsia-400">RM{{ number_format($item->price, 2) }} x
-                                    {{ $item->quantity }}</p>
-                                <div class="absolute bottom-2">
-                                    <x-jet-button-custom onclick="window.location.href='{{ route('product.show', $item->product->slug) }}'">
-                                        Buy Again
-                                    </x-jet-button-custom>
-                                </div>
-                            </div>
+            <a href="{{ route('search') }}" class="orders-hero-link">Keep browsing <span aria-hidden="true">&nearr;</span></a>
+        </header>
+
+        <section class="orders-stat-rail" aria-label="Order summary">
+            <div><span>Total orders</span><strong>{{ $stats['orders'] }}</strong></div>
+            <div><span>Items purchased</span><strong>{{ $stats['items'] }}</strong></div>
+            <div><span>In progress</span><strong>{{ $stats['active'] }}</strong></div>
+            <div><span>Total spent</span><strong>RM{{ number_format($stats['spent'], 2) }}</strong></div>
+        </section>
+
+        <div class="orders-toolbar">
+            <div class="orders-filters" role="group" aria-label="Filter orders">
+                <button type="button" :class="{ 'is-active': filter === 'all' }" @click="filter = 'all'" :aria-pressed="filter === 'all'">All orders <span>{{ $stats['orders'] }}</span></button>
+                <button type="button" :class="{ 'is-active': filter === 'active' }" @click="filter = 'active'" :aria-pressed="filter === 'active'">In progress <span>{{ $stats['active'] }}</span></button>
+                <button type="button" :class="{ 'is-active': filter === 'delivered' }" @click="filter = 'delivered'" :aria-pressed="filter === 'delivered'">Delivered <span>{{ $stats['orders'] - $stats['active'] }}</span></button>
+            </div>
+            <label class="orders-search">
+                <span class="sr-only">Search orders</span>
+                <span aria-hidden="true">/</span>
+                <input type="search" x-model="query" placeholder="Search by order or product" />
+            </label>
+        </div>
+
+        <div class="orders-list">
+            @forelse ($orders as $order)
+                @php
+                    $statusKey = $order->status == 4 ? 'delivered' : 'active';
+                    $statusLabel = match ((int) $order->status) {
+                        1 => 'Order placed',
+                        2 => 'Processing',
+                        3 => 'On the way',
+                        4 => 'Delivered',
+                        default => 'Order received',
+                    };
+                    $statusDescription = match ((int) $order->status) {
+                        1 => 'We have your order and will start preparing it soon.',
+                        2 => 'Your order is being prepared by the creator.',
+                        3 => 'Your order is with the delivery partner.',
+                        4 => 'This order has arrived. We hope you love it.',
+                        default => 'We are checking the latest update for this order.',
+                    };
+                    $searchText = strtolower($order->id . ' ' . $order->productOrder->pluck('title')->implode(' '));
+                    $currentStep = min(max((int) $order->status, 1), 4);
+                    $placedAt = $order->paid_at ?: $order->created_at;
+                @endphp
+
+                <article class="order-card" data-order-filter="{{ $statusKey }}" data-order-search="{{ $searchText }}" x-show="(filter === 'all' || $el.dataset.orderFilter === filter) && (!query || $el.dataset.orderSearch.includes(query.toLowerCase()))" x-cloak>
+                    <div class="order-card-header">
+                        <div>
+                            <p class="order-card-label">Order #{{ strtoupper(substr($order->id, 0, 8)) }}</p>
+                            <p class="order-card-date">Placed {{ \Carbon\Carbon::parse($placedAt)->format('M d, Y') }}</p>
                         </div>
-                    @endforeach
-                </div>
-                <div class="relative flex-col w-full p-4 md:w-2/5" x-data="{ id: '{{ $order->id }}', copied: false }">
-                    <p>Delivery address</p>
-                    <div class="text-sm text-fuchsia-400">
-                        <p>{{ $order->address }}</p>
-                        <p>{{ $order->postcode }}</p>
-                        <p>{{ $order->state }}</p>
+                        <div class="order-card-total">
+                            <span>{{ $statusLabel }}</span>
+                            <strong>RM{{ number_format($order->amount, 2) }}</strong>
+                        </div>
                     </div>
-                    @if ($order->status != 4 && $order->status == 3)
-                        <x-jet-button type="button" class=" mt-6"
-                            wire:click="received('{{ $order->id }}')">
-                            Order Received
-                        </x-jet-button>
-                        <a href="https://www.jtexpress.my/tracking/{!! $order->tracking_number !!}" target="_blank">
-                            <x-jet-button-utility type="button" class="mt-2">
-                                Track your order
-                            </x-jet-button-utility>
-                        </a>
-                    @elseif($order->status == 4)
-                        <p class="absolute p-2 font-bold uppercase text-lime-500 border-lime-500 bottom-6 border-y-2">
-                            Order Completed</p>
-                    @endif
+
+                    <div class="order-card-main">
+                        <div class="order-items">
+                            @foreach ($order->productOrder as $item)
+                                <div class="order-item">
+                                    <div class="order-item-media">
+                                        @if ($item->product?->product_card_image)
+                                            <img src="{{ $item->product->product_card_image }}" alt="{{ $item->title }}" />
+                                        @else
+                                            <span aria-hidden="true">HX</span>
+                                        @endif
+                                    </div>
+                                    <div class="order-item-copy">
+                                        <div class="order-item-topline">
+                                            <h2>{{ $item->title }}</h2>
+                                            <strong>RM{{ number_format($item->price * $item->quantity, 2) }}</strong>
+                                        </div>
+                                        <p>{{ $item->size }} / {{ $item->color }} <span>Quantity {{ $item->quantity }}</span></p>
+                                        @if ($item->product)
+                                            <a href="{{ route('product.show', $item->product->slug) }}" class="order-buy-again">Buy again <span aria-hidden="true">&nearr;</span></a>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <aside class="order-card-aside">
+                            <p class="order-aside-label">Delivery details</p>
+                            <p class="order-address">{{ $order->address }}<br>{{ $order->postcode }}, {{ $order->state }}</p>
+                            <div class="order-status-note">
+                                <span class="order-status-mark" aria-hidden="true"></span>
+                                <div><strong>{{ $statusLabel }}</strong><p>{{ $statusDescription }}</p></div>
+                            </div>
+                            @if ($order->status == 3 && $order->tracking_number)
+                                <div class="order-actions">
+                                    <button type="button" wire:click="received('{{ $order->id }}')" class="order-action-primary">Mark received</button>
+                                    <a href="https://www.jtexpress.my/tracking/{{ $order->tracking_number }}" target="_blank" rel="noreferrer" class="order-action-secondary">Track package <span aria-hidden="true">&nearr;</span></a>
+                                </div>
+                            @elseif ($order->status == 4)
+                                <p class="order-complete">Completed</p>
+                            @endif
+                        </aside>
+                    </div>
+
+                    <div class="order-progress" aria-label="{{ $statusLabel }}">
+                        @foreach (['Placed', 'Processing', 'Shipped', 'Delivered'] as $stepIndex => $step)
+                            <div class="order-step {{ $stepIndex + 1 <= $currentStep ? 'is-complete' : '' }} {{ $stepIndex + 1 === $currentStep ? 'is-current' : '' }}">
+                                <span aria-hidden="true"></span><small>{{ $step }}</small>
+                            </div>
+                        @endforeach
+                    </div>
+                </article>
+            @empty
+                <div class="orders-empty">
+                    <span class="orders-empty-mark" aria-hidden="true">/</span>
+                    <h2>No orders yet</h2>
+                    <p>Your next favourite piece is waiting to be discovered.</p>
+                    <a href="{{ route('search') }}" class="orders-empty-action">Explore the shop <span aria-hidden="true">&nearr;</span></a>
                 </div>
-            </div>
-            <div
-                class="flex flex-col p-4 mt-4 space-y-5 transition shadow-md bg-black/30 rounded-xl hover:shadow-indigo-500/30">
-                <p>Order Progress</p>
-                <div class="relative">
-                    <p class="absolute w-full h-2 rounded-full bg-neutral-800"></p>
-                    @if ($order->status == 1)
-                        <p
-                            class="absolute w-[10%] h-2 bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 rounded-full">
-                        </p>
-                    @elseif($order->status == 2)
-                        <p
-                            class="absolute h-2 bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 rounded-full w-[40%]">
-                        </p>
-                    @elseif($order->status == 3)
-                        <p
-                            class="absolute w-[70%] h-2 bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500 rounded-full">
-                        </p>
-                    @elseif($order->status == 4)
-                        <p
-                            class="absolute w-full h-2 rounded-full bg-gradient-to-r from-rose-400 via-fuchsia-500 to-indigo-500">
-                        </p>
-                    @endif
-                </div>
-                <div class="flex justify-between px-2">
-                    <p>Order placed</p>
-                    <p>Processing</p>
-                    <p>Shipped</p>
-                    <p>Delivered</p>
-                </div>
+            @endforelse
+            <div class="orders-filter-empty" x-show="{{ $orders->count() }} > 0 && !Array.from($root.querySelectorAll('.order-card')).some(card => card.style.display !== 'none')" x-cloak>
+                <h2>No matching orders</h2>
+                <p>Try a different search or filter.</p>
             </div>
         </div>
-    @endforeach
+    </div>
 </div>

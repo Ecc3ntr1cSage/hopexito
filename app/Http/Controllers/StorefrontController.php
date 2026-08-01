@@ -51,25 +51,26 @@ class StorefrontController extends Controller
         return view('shop/search', compact('users', 'products', 'search', 'product_count', 'user_count'));
     }
 
-    public function discover()
+    public function discover(Request $request)
     {
-        $products = Product::available()->inRandomOrder()->paginate(100);
-        return view('discover', compact('products'));
-    }
+        $selectedType = $request->string('type')->toString();
+        $allowedTypes = ['shirt', 'sweat', 'hoodie'];
+        if (! in_array($selectedType, $allowedTypes, true)) {
+            $selectedType = null;
+        }
 
-    public function shirt()
-    {
-        return $this->type('shirt', 'shop/standard-tee');
-    }
+        $productsQuery = Product::available();
+        if ($selectedType !== null) {
+            $productsQuery->where('product_type', $selectedType);
+        }
 
-    public function sweat()
-    {
-        return $this->type('sweat', 'shop/oversized');
-    }
+        $products = $productsQuery->inRandomOrder()->paginate(100)->withQueryString();
+        $typeCounts = Product::available()
+            ->selectRaw('product_type, COUNT(*) as aggregate')
+            ->groupBy('product_type')
+            ->pluck('aggregate', 'product_type');
 
-    public function hoodie()
-    {
-        return $this->type('hoodie', 'shop/oversized');
+        return view('discover', compact('products', 'selectedType', 'typeCounts'));
     }
 
     public function people(string $name)
@@ -88,10 +89,4 @@ class StorefrontController extends Controller
         return view('people', compact('user', 'products', 'productsCount', 'totalSold'));
     }
 
-    private function type(string $type, string $view)
-    {
-        $products = Product::available()->where('product_type', $type)->inRandomOrder()->paginate(100);
-        $productType = config('catalog.types.'.$type.'.label');
-        return view($view, compact('products', 'productType'));
-    }
 }

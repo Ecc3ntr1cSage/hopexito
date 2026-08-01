@@ -20,6 +20,7 @@
                         <span class="site-account-label">Account / {{ Auth::user()->name }}</span>
                         <a href="{{ route('people', Auth::user()->name) }}"><span>Public profile</span><b aria-hidden="true">&nearr;</b></a>
                         <a href="{{ route('profile.show') }}"><span>Profile settings</span><b aria-hidden="true">&nearr;</b></a>
+                        <a href="{{ route('order.index') }}"><span>Order history</span><b aria-hidden="true">&nearr;</b></a>
                         <a href="{{ route('product.manage') }}"><span>Manage products</span><b aria-hidden="true">&nearr;</b></a>
                         <a href="{{ route('product.create') }}"><span>Create a product</span><b aria-hidden="true">&nearr;</b></a>
                         <form method="POST" action="{{ route('logout') }}" class="site-account-logout-form">
@@ -44,6 +45,7 @@
             <div class="site-nav-mobile-account">
                 <span>Account</span>
                 <a href="{{ route('profile.show') }}">Profile settings <span aria-hidden="true">&nearr;</span></a>
+                <a href="{{ route('order.index') }}">Order history <span aria-hidden="true">&nearr;</span></a>
                 <a href="{{ route('product.manage') }}">Manage products <span aria-hidden="true">&nearr;</span></a>
                 <form method="POST" action="{{ route('logout') }}" class="site-nav-mobile-logout">
                     @csrf

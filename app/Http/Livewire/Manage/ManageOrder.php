@@ -21,16 +21,30 @@ class ManageOrder extends Component
     public function render()
     {
         if (Auth::check()) {
-            $order = Order::where('email', Auth::user()->email)->orderBy('created_at', 'DESC')->get();
+            $orders = Order::with('productOrder.product')
+                ->where('email', Auth::user()->email)
+                ->orderByDesc('created_at')
+                ->get();
         } else {
-            $order = Order::where('id', session('last_order_id'))->get();
-            if ($order->isEmpty() && session('delivery_info.email')) {
-                $order = Order::where('email', session('delivery_info.email'))
+            $orders = Order::with('productOrder.product')
+                ->where('id', session('last_order_id'))
+                ->get();
+            if ($orders->isEmpty() && session('delivery_info.email')) {
+                $orders = Order::with('productOrder.product')
+                    ->where('email', session('delivery_info.email'))
                     ->orderBy('created_at', 'DESC')
                     ->limit(1)
                     ->get();
             }
         }
-        return view('livewire.manage.manage-order', compact('order'));
+
+        $stats = [
+            'orders' => $orders->count(),
+            'items' => $orders->sum(fn ($order) => $order->productOrder->sum('quantity')),
+            'active' => $orders->where('status', '!=', 4)->count(),
+            'spent' => $orders->sum('amount'),
+        ];
+
+        return view('livewire.manage.manage-order', compact('orders', 'stats'));
     }
 }

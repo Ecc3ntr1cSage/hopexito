@@ -220,8 +220,8 @@ export default function productStudio(config) {
                 event.target.value = '';
                 return;
             }
-            if (file.size > 8 * 1024 * 1024) {
-                this.fileError = 'Images must be smaller than 8 MB.';
+            if (file.size > 16 * 1024 * 1024) {
+                this.fileError = 'Images must be smaller than 16 MB.';
                 event.target.value = '';
                 return;
             }
