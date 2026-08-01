@@ -18,23 +18,6 @@
 <x-app-layout>
     <main class="profile-page">
         <section class="profile-hero profile-container">
-            <div class="profile-cover-shell profile-reveal">
-                <div class="profile-cover-core">
-                    @if ($profile?->cover_image)
-                        <img src="{{ asset('storage/cover-image/' . $profile->cover_image) }}" alt="{{ $user->name }} cover image">
-                        <span class="profile-cover-wash" aria-hidden="true"></span>
-                    @else
-                        <div class="profile-cover-placeholder" aria-hidden="true">
-                            <div class="profile-cover-grid"></div>
-                            <span class="profile-cover-mark">HX</span>
-                            <span class="profile-cover-caption">Independent work<br>since 2026</span>
-                        </div>
-                    @endif
-                    <span class="profile-cover-index">Creator archive / {{ str_pad((string) $user->id, 3, '0', STR_PAD_LEFT) }}</span>
-                    <span class="profile-cover-name">{{ $user->name }}</span>
-                </div>
-            </div>
-
             <div class="profile-identity-layout">
                 <div class="profile-identity profile-reveal profile-reveal-delay">
                     <div class="profile-avatar-shell">

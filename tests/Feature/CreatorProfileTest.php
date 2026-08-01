@@ -40,6 +40,8 @@ class CreatorProfileTest extends TestCase
             ->assertSee('Your workspace')
             ->assertSee(route('profile.show'))
             ->assertSee(route('product.manage'))
-            ->assertSee('Manage products');
+            ->assertSee('Manage products')
+            ->assertDontSee('profile-cover')
+            ->assertDontSee('cover_image');
     }
 }

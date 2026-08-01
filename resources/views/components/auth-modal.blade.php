@@ -19,13 +19,50 @@
         },
         closeAuth() {
             this.open = false;
+        },
+        fillCredentials(email) {
+            this.mode = 'login';
+            this.open = true;
+            this.$nextTick(() => {
+                this.$refs.loginEmail.value = email;
+                this.$refs.loginPassword.value = 'password';
+                this.$refs.loginEmail.focus();
+            });
         }
     }"
     x-on:open-auth.window="openAuth($event.detail)"
     x-on:keydown.escape.window="if (open) closeAuth()"
     x-effect="document.body.classList.toggle('auth-modal-open', open)"
     class="auth-modal-root"
->
+    >
+    @if (! app()->environment('production'))
+        <aside
+            x-cloak
+            x-show="open && mode === 'login'"
+            x-transition
+            class="demo-credentials-panel"
+            aria-label="Demo login accounts"
+        >
+            <div class="demo-credentials-heading">
+                <span class="demo-credentials-kicker">Quick access</span>
+                <span class="demo-credentials-dot" aria-hidden="true"></span>
+            </div>
+            <p class="demo-credentials-title">Try the demo</p>
+            <p class="demo-credentials-copy">Select an account to fill the login form.</p>
+            <div class="demo-credentials-list">
+                <button type="button" class="demo-credential-option" @click="fillCredentials('user@demo.com')">
+                    <span><strong>DemoUser</strong><small>Creator account</small></span>
+                    <b aria-hidden="true">↗</b>
+                </button>
+                <button type="button" class="demo-credential-option" @click="fillCredentials('user@test.com')">
+                    <span><strong>TestUser</strong><small>Test account</small></span>
+                    <b aria-hidden="true">↗</b>
+                </button>
+            </div>
+            <span class="demo-credentials-password">Password for both: <b>password</b></span>
+        </aside>
+    @endif
+
     <div
         x-cloak
         x-show="open"
@@ -96,7 +133,7 @@
                     @csrf
                     <div class="auth-field">
                         <label for="auth-login-email">Email</label>
-                        <input id="auth-login-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus>
+                        <input x-ref="loginEmail" id="auth-login-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus>
                         @error('email') <span class="auth-field-error">{{ $message }}</span> @enderror
                     </div>
 
@@ -107,7 +144,7 @@
                                 <a href="{{ route('password.request') }}">Forgot password?</a>
                             @endif
                         </div>
-                        <input id="auth-login-password" type="password" name="password" autocomplete="current-password" required>
+                        <input x-ref="loginPassword" id="auth-login-password" type="password" name="password" autocomplete="current-password" required>
                         @error('password') <span class="auth-field-error">{{ $message }}</span> @enderror
                     </div>
 

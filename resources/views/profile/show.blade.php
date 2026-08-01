@@ -96,9 +96,9 @@
                                 <span class="settings-section-number">03 / Presence</span>
                                 <h2>Give the page a point of view.</h2>
                             </div>
-                            <p>Your cover image and bio are the first signal on your public profile.</p>
+                            <p>Give visitors a concise sense of the work and ideas behind your profile.</p>
                         </div>
-                        <div class="settings-livewire-card">@livewire('cover-image-bio')</div>
+                        <div class="settings-livewire-card">@livewire('profile-bio')</div>
                     </section>
 
                     <section id="links" class="settings-section settings-reveal settings-delay-one">

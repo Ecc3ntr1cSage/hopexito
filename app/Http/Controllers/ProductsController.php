@@ -9,6 +9,7 @@ use App\Services\MockupGenerator;
 use App\Support\MockupAssets;
 use App\Support\MockupGeometry;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -41,8 +42,8 @@ class ProductsController extends Controller
             'tags' => ['required', 'string', 'max:255'],
             'visibility' => ['nullable', 'in:public,private'],
             'preview_color' => ['nullable', 'string'],
-            'image_front' => ['nullable', 'required_without:image_back', 'image', 'max:8192'],
-            'image_back' => ['nullable', 'required_without:image_front', 'image', 'max:8192'],
+            'image_front' => ['nullable', 'image', 'max:8192'],
+            'image_back' => ['nullable', 'image', 'max:8192'],
             'preview_side' => ['nullable', 'in:front,back'],
             'rights' => ['accepted'],
             'transforms' => ['required', 'array'],
@@ -67,8 +68,15 @@ class ProductsController extends Controller
         ]);
         $previewColor = $validated['preview_color'] ?? $availableColors[0];
 
-        $hasFrontDesign = $request->hasFile('image_front');
-        $hasBackDesign = $request->hasFile('image_back');
+        $frontUpload = $request->file('image_front');
+        $backUpload = $request->file('image_back');
+        $hasFrontDesign = $frontUpload instanceof UploadedFile && $frontUpload->isValid();
+        $hasBackDesign = $backUpload instanceof UploadedFile && $backUpload->isValid();
+        if (! $hasFrontDesign && ! $hasBackDesign) {
+            throw ValidationException::withMessages([
+                'image_front' => 'Upload artwork on the front or back before continuing.',
+            ]);
+        }
         if ($hasFrontDesign) {
             $request->validate([
                 'transforms.front.x' => ['required', 'numeric', 'between:0,100'],

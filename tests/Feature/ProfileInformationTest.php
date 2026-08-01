@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Http\Livewire\ProfileBio;
+use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Jetstream\Http\Livewire\UpdateProfileInformationForm;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -19,7 +22,29 @@ class ProfileInformationTest extends TestCase
             ->assertOk()
             ->assertSee('Shape the way')
             ->assertSee('Save identity')
+            ->assertSee('Save bio')
+            ->assertDontSee('Cover image')
             ->assertSee('See the work move.');
+    }
+
+    public function test_profile_presence_only_exposes_bio(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('profile.show'))
+            ->assertOk()
+            ->assertDontSee('cover_image')
+            ->assertDontSee('settings-cover');
+
+        $this->assertTrue(Schema::hasTable('profiles'));
+        $this->assertFalse(Schema::hasColumn('profiles', 'cover_image'));
+
+        Livewire::test(ProfileBio::class)
+            ->set('bio', 'A small studio making useful things.')
+            ->call('updateBio');
+
+        $this->assertSame('A small studio making useful things.', Profile::where('user_id', $user->id)->value('bio'));
     }
 
     public function test_current_profile_information_is_available()
@@ -37,8 +62,8 @@ class ProfileInformationTest extends TestCase
         $this->actingAs($user = User::factory()->create());
 
         Livewire::test(UpdateProfileInformationForm::class)
-                ->set('state', ['name' => 'Test Name', 'email' => 'test@example.com'])
-                ->call('updateProfileInformation');
+            ->set('state', ['name' => 'Test Name', 'email' => 'test@example.com'])
+            ->call('updateProfileInformation');
 
         $this->assertEquals('Test Name', $user->fresh()->name);
         $this->assertEquals('test@example.com', $user->fresh()->email);

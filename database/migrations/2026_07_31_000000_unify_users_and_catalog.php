@@ -14,7 +14,6 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
                 $table->longText('bio')->nullable();
-                $table->string('cover_image')->nullable();
                 $table->string('facebook')->nullable();
                 $table->string('twitter')->nullable();
                 $table->string('instagram')->nullable();
@@ -34,7 +33,6 @@ return new class extends Migration
                     ['user_id' => $artist->id],
                     [
                         'bio' => $artist->bio,
-                        'cover_image' => $artist->cover_image,
                         'facebook' => $artist->facebook,
                         'twitter' => $artist->twitter,
                         'instagram' => $artist->instagram,

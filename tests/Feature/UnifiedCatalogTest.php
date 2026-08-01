@@ -161,6 +161,23 @@ class UnifiedCatalogTest extends TestCase
         $this->assertDatabaseCount('products', 0);
     }
 
+    public function test_invalid_front_upload_does_not_trigger_a_missing_back_error(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->from(route('product.create'))->post(route('product.store'), [
+            'product_type' => 'shirt',
+            'title' => 'Large Front Only',
+            'tags' => 'minimal',
+            'rights' => '1',
+            'transforms' => ['front' => ['x' => 50, 'y' => 50, 'scale' => 1, 'rotation' => 0]],
+            'image_front' => UploadedFile::fake()->create('front.png', 9000, 'image/png'),
+        ])->assertRedirect(route('product.create'))
+            ->assertSessionHasErrors('image_front')
+            ->assertSessionDoesntHaveErrors('image_back');
+    }
+
     public function test_transform_bounds_are_validated_server_side(): void
     {
         Storage::fake('public');

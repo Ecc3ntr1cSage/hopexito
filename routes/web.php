@@ -1,18 +1,18 @@
 <?php
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\MockupController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\StorefrontController;
-use App\Http\Controllers\MockupController;
 use App\Http\Controllers\UploadController;
-use App\Http\Livewire\Manage\ManageProduct;
-use App\Http\Livewire\Manage\ManageOrder;
-use Illuminate\Support\Facades\Route;
 use App\Http\Livewire\DeliveryInformation;
+use App\Http\Livewire\Manage\ManageOrder;
+use App\Http\Livewire\Manage\ManageProduct;
 use App\Http\Livewire\Manage\ManageSales;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
 // billplz controller
@@ -23,9 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('mockup/standard-tee', [MockupController::class, 'redirectToStudio'])->defaults('type', 'shirt')->name('mockup.shirt');
     Route::get('mockup/sweatshirt', [MockupController::class, 'redirectToStudio'])->defaults('type', 'sweat')->name('mockup.sweat');
     Route::get('mockup/hoodie', [MockupController::class, 'redirectToStudio'])->defaults('type', 'hoodie')->name('mockup.hoodie');
-    // upload controller 
+    // artwork upload controller
     Route::post('upload', [UploadController::class, 'store'])->name('upload');
-    Route::post('upload/cover-image', [UploadController::class, 'uploadCover'])->name('upload.cover');
     // order controller
     Route::get('product/manage', ManageProduct::class)->name('product.manage');
     Route::get('sales', ManageSales::class)->name('product.sales');

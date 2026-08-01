@@ -2,22 +2,51 @@
 
 namespace App\Http\Livewire;
 
-use Livewire\Component;
 use App\Models\Profile;
-use App\Models\TemporaryFile;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\UploadController;
-use Livewire\WithFileUploads;
+use Livewire\Component;
 
 class SocialLinks extends Component
 {
-    use WithFileUploads;
+    public $facebook;
 
-    public $facebook, $twitter, $instagram, $dribble, $behance, $pinterest, $deviantart, $tiktok, $filename, $cover_image, $website;
+    public $twitter;
 
-    public function store()
-    {   
+    public $instagram;
+
+    public $dribble;
+
+    public $behance;
+
+    public $pinterest;
+
+    public $deviantart;
+
+    public $tiktok;
+
+    public $website;
+
+    public function mount(): void
+    {
+        $profile = Auth::user()->profile;
+
+        if ($profile) {
+            $this->fill($profile->only([
+                'facebook',
+                'twitter',
+                'instagram',
+                'dribble',
+                'behance',
+                'pinterest',
+                'deviantart',
+                'tiktok',
+                'website',
+            ]));
+        }
+    }
+
+    public function store(): void
+    {
         Profile::updateOrCreate(['user_id' => Auth::id()], [
             'facebook' => $this->facebook,
             'twitter' => $this->twitter,
@@ -27,32 +56,16 @@ class SocialLinks extends Component
             'pinterest' => $this->pinterest,
             'deviantart' => $this->deviantart,
             'tiktok' => $this->tiktok,
-            'website' => $this->website
+            'website' => $this->website,
         ]);
-        
-        session()->flash('message', 'Links Updated');
-        return redirect()->route('people', Auth::user()->name);  
-    }
 
-    private function forceFill()
-    {
-        if (Profile::where('user_id', Auth::id())->exists()) {
-            $profile = Profile::where('user_id', Auth::id())->firstOrFail();
-            $this->facebook = $profile->facebook;
-            $this->twitter = $profile->twitter;
-            $this->instagram = $profile->instagram;
-            $this->dribble = $profile->dribble;
-            $this->behance = $profile->behance;
-            $this->pinterest = $profile->pinterest;
-            $this->deviantart = $profile->deviantart;
-            $this->tiktok = $profile->tiktok;
-            $this->website = $profile->website;
-        }
+        session()->flash('message', 'Links Updated');
+
+        $this->redirectRoute('people', ['shopname' => Auth::user()->name]);
     }
 
     public function render()
     {
-        $this->forceFill();
         return view('livewire.social-links');
     }
 }

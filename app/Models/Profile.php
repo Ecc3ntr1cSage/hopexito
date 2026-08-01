@@ -12,7 +12,6 @@ class Profile extends Model
     protected $fillable = [
         'user_id',
         'bio',
-        'cover_image',
         'facebook',
         'twitter',
         'instagram',
