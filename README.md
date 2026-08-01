@@ -62,7 +62,7 @@ app/
 ├── Http/
 │   ├── Controllers/
 │   │   ├── CartController.php
-│   │   ├── ExploreController.php
+│   │   ├── StorefrontController.php
 │   │   ├── GoogleAuthController.php
 │   │   ├── MockupController.php
 │   │   ├── OrderController.php
@@ -247,7 +247,7 @@ php artisan migrate:fresh --seed
 
 ## Demo Flow
 
-1. Open `http://localhost:8000/explore`
+1. Open `http://localhost:8000/`
 2. Browse products or search from the top bar
 3. Click a product, select size and color, and click **Add to Cart** or **Buy Now**
 4. If buying now as a guest, fill in delivery details on the checkout page

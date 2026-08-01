@@ -5,7 +5,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\ExploreController;
+use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\MockupController;
 use App\Http\Controllers\UploadController;
 use App\Http\Livewire\Manage\ManageProduct;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Livewire\DeliveryInformation;
 use App\Http\Livewire\Manage\ManageSales;
 
-Route::get('/', [ExploreController::class, 'explore']);
+Route::get('/', [StorefrontController::class, 'home'])->name('home');
 // billplz controller
 Route::get('billplz-callback', [PaymentController::class, 'callback'])->name('billplz-callback');
 Route::get('order/index', ManageOrder::class)->name('order.index');
@@ -44,14 +44,14 @@ Route::middleware('auth')->group(function () {
     Route::post('billplz', [PaymentController::class, 'storeBill'])->name('billplz-store');
     Route::get('billplz-redirect', [PaymentController::class, 'redirect'])->name('billplz-redirect');
 });
-// explore controller
-Route::get('explore', [ExploreController::class, 'explore'])->name('explore');
-Route::get('shop', [ExploreController::class, 'search'])->name('search');
-Route::get('shop/all', [ExploreController::class, 'shop'])->name('shop.all');
-Route::get('shop/standard-tee', [ExploreController::class, 'shirt'])->name('shop.shirt');
-Route::get('shop/sweatshirt', [ExploreController::class, 'sweat'])->name('shop.sweat');
-Route::get('shop/hoodie', [ExploreController::class, 'hoodie'])->name('shop.hoodie');
-Route::get('{shopname}', [ExploreController::class, 'people'])->name('people');
+// catalog controller
+Route::redirect('explore', '/');
+Route::get('shop', [StorefrontController::class, 'search'])->name('search');
+Route::get('discover', [StorefrontController::class, 'discover'])->name('discover');
+Route::get('shop/standard-tee', [StorefrontController::class, 'shirt'])->name('shop.shirt');
+Route::get('shop/sweatshirt', [StorefrontController::class, 'sweat'])->name('shop.sweat');
+Route::get('shop/hoodie', [StorefrontController::class, 'hoodie'])->name('shop.hoodie');
+Route::get('{shopname}', [StorefrontController::class, 'people'])->name('people');
 // google auth
 Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google-auth');
 Route::get('auth/google/call-back', [GoogleAuthController::class, 'callbackGoogle']);

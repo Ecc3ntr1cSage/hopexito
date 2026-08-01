@@ -15,7 +15,7 @@
                 <h1>403</h1>
                 <h2>Forbidden Area</h2>
             </div>
-            <a href="{{ route('explore') }}">Back to safety</a>
+            <a href="{{ route('home') }}">Back to safety</a>
         </div>
     </div>
 </body>

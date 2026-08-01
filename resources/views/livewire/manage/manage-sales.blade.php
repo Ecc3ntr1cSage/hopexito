@@ -19,7 +19,7 @@
         @foreach ($productOrders->sortByDesc('created_at') as $item)
             <div class="flex flex-col space-x-4 md:flex-row">
                 <div class="relative mx-auto md:mx-0 w-60 h-60">
-                    <img class="transition rounded-lg ring ring-indigo-700" src="{{ $item->product->product_image }}"
+                    <img class="transition rounded-lg ring ring-indigo-700" src="{{ $item->product->product_card_image }}"
                         alt="" />
                 </div>
                 <div class="flex flex-col gap-1 py-2 mt-4 text-center w-96 md:mt-0 md:text-left">

@@ -26,7 +26,7 @@
                 <h1>500</h1>
                 <h2>Server Error</h2>
             </div>
-            <a href="{{ route('explore') }}"></a>
+            <a href="{{ route('home') }}"></a>
         </div>
     </div>
 </body>

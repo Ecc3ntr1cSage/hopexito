@@ -8,9 +8,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ExploreController extends Controller
+class StorefrontController extends Controller
 {
-    public function explore()
+    public function home()
     {
         $users = User::whereHas('products', fn ($query) => $query->available())
             ->withCount(['products' => fn ($query) => $query->available()])
@@ -19,14 +19,14 @@ class ExploreController extends Controller
             ->get();
 
         $products = Product::available()->inRandomOrder()->take(8)->get();
-        return view('explore', compact('users', 'products'));
+        return view('home', compact('users', 'products'));
     }
 
     public function search(Request $request)
     {
         $search = trim((string) $request->input('search'));
         if ($search === '') {
-            return redirect()->route('shop.all');
+            return redirect()->route('discover');
         }
 
         $users = User::where('name', 'LIKE', "%{$search}%")
@@ -51,10 +51,10 @@ class ExploreController extends Controller
         return view('shop/search', compact('users', 'products', 'search', 'product_count', 'user_count'));
     }
 
-    public function shop()
+    public function discover()
     {
         $products = Product::available()->inRandomOrder()->paginate(100);
-        return view('shop/all', compact('products'));
+        return view('discover', compact('products'));
     }
 
     public function shirt()

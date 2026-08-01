@@ -1,4 +1,4 @@
-<a href="{{ route('explore') }}">
+<a href="{{ route('home') }}">
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="body_1" width="123"
         height="93" class="">
         <g transform="matrix(0.12011719 0 0 0.11979167 0 0)">

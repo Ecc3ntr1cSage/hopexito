@@ -24,7 +24,7 @@ class GoogleAuthController extends Controller
 
             if ($findUser) {
                Auth::login($findUser);
-                return redirect()->intended('explore');
+                return redirect()->intended(route('home'));
             } else {
                 $user = User::create([
                     'name' => $user->getName(),
@@ -41,7 +41,7 @@ class GoogleAuthController extends Controller
                     'user_id' => $user->id,
                 ]);
                 Auth::login($user);
-                return redirect()->intended('explore');
+                return redirect()->intended(route('home'));
             }
         } catch (\Throwable $th) {
             throw $th;

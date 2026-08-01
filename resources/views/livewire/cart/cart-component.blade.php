@@ -10,7 +10,7 @@
             <div class="cart-empty-mark" aria-hidden="true">+</div>
             <h1>Your bag is waiting.</h1>
             <p>Discover something worth keeping close, then return here when you are ready.</p>
-            <a class="cart-primary-action" href="{{ route('shop.all') }}">
+                <a class="cart-primary-action" href="{{ route('discover') }}">
                 Explore the marketplace
                 <span aria-hidden="true">&rarr;</span>
             </a>
@@ -22,7 +22,7 @@
                 <h1>Your selections, considered.</h1>
                 <p>{{ count($cart) }} {{ count($cart) === 1 ? 'piece' : 'pieces' }} ready for their next chapter.</p>
             </div>
-            <a class="cart-text-link" href="{{ route('shop.all') }}">
+                    <a class="cart-text-link" href="{{ route('discover') }}">
                 Continue shopping <span aria-hidden="true">&rarr;</span>
             </a>
         </header>
@@ -39,7 +39,7 @@
                         @php
                             $isAuthenticated = Auth::check();
                             $productName = $isAuthenticated ? $item->title : $item['name'];
-                            $productImage = $isAuthenticated ? $item->cartProduct->product_image : $item['options']['product_image'];
+                            $productImage = $isAuthenticated ? $item->display_image : $item['options']['product_image'];
                             $productSize = $isAuthenticated ? $item->size : $item['options']['size'];
                             $productColor = $isAuthenticated ? $item->color : $item['options']['color'];
                             $quantity = $isAuthenticated ? $item->quantity : $item['qty'];
@@ -123,13 +123,13 @@
             <section class="cart-recommendations">
                 <div class="cart-panel-heading">
                     <span>Before you go</span>
-                    <a class="cart-text-link" href="{{ route('shop.all') }}">See all <span aria-hidden="true">&rarr;</span></a>
+                    <a class="cart-text-link" href="{{ route('discover') }}">See all <span aria-hidden="true">&rarr;</span></a>
                 </div>
                 <div class="cart-recommendation-grid">
                     @foreach ($products as $product)
                         <a class="cart-recommendation-card" href="{{ route('product.show', $product->slug) }}">
                             <div class="cart-recommendation-media">
-                                <img src="{{ $product->product_image }}" alt="{{ $product->title }}">
+                                <img src="{{ $product->product_card_image }}" alt="{{ $product->title }}">
                             </div>
                             <div class="cart-recommendation-copy">
                                 <span>{{ $product->category->name ?? 'Edition' }}</span>

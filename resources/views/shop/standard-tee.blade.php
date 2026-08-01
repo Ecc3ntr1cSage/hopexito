@@ -4,7 +4,7 @@
     <div class="mx-auto mt-8 max-w-7xl">
         <x-jet-title>All Products</x-jet-title>
         <div class="flex items-center gap-2 ml-2 text-white">
-            <a href="{{ route('explore') }}">
+            <a href="{{ route('home') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-8 h-8 p-1 transition rounded-md hover:bg-indigo-500/50">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -15,7 +15,7 @@
                 stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
             </svg>
-            <a href="{{ route('shop.all') }}" class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Shop
+            <a href="{{ route('discover') }}" class="p-1 px-2 transition rounded-md hover:bg-indigo-500/50">Shop
                 All</a>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-6 h-6">
@@ -42,19 +42,14 @@
                     class="relative p-1 transition shadow-lg cursor-pointer group rounded-xl hover:shadow-fuchsia-500/50 bg-white/5 backdrop-filter backdrop-blur-3xl">
                     <div class="product-media-frame rounded-lg" x-on:mouseenter="open = true"
                         x-on:mouseleave="open = false">
-                        @if ($product->product_image_2 && $product->preview == 0)
-                            <img src="{{ $product->product_image }}" alt="{{ $product->title }}" x-show="open == false"
+                        @if ($product->product_card_hover_image)
+                            <img src="{{ $product->product_card_image }}" alt="{{ $product->title }}" x-show="open == false"
                                 class="product-media-image transition ease-in-out rounded-t-lg">
 
-                            <img x-cloak src="{{ $product->product_image_2 }}" alt="{{ $product->title }}"
-                                x-show="open == true" class="product-media-image transition ease-in-out rounded-t-lg">
-                        @elseif($product->product_image_2 && $product->preview == 1)
-                            <img src="{{ $product->product_image_2 }}" alt="{{ $product->title }}"
-                                x-show="open == false" class="product-media-image transition ease-in-out rounded-t-lg">
-                            <img x-cloak src="{{ $product->product_image }}" alt="{{ $product->title }}"
+                            <img x-cloak src="{{ $product->product_card_hover_image }}" alt="{{ $product->title }}"
                                 x-show="open == true" class="product-media-image transition ease-in-out rounded-t-lg">
                         @else
-                            <img src="{{ $product->product_image }}" alt="{{ $product->title }}"
+                            <img src="{{ $product->product_card_image }}" alt="{{ $product->title }}"
                                 class="product-media-image transition ease-in-out rounded-t-lg">
                         @endif
                     </div>

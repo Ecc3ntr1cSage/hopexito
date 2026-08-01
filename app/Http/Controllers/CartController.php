@@ -34,10 +34,13 @@ class CartController extends Controller
         $isOwner = $product->isOwnedBy(Auth::user());
         $price = (float) $product->price;
         $unitPrice = round($price * ($isOwner ? 0.85 : 1), 2);
+        $cardImage = (int) $product->preview === 1
+            ? ($variant->image_back_url ?: $variant->image_front_url)
+            : $variant->image_front_url;
         $options = [
             'size' => $validated['size'],
             'color' => $validated['color'],
-            'product_image' => $variant->image_front_url,
+            'product_image' => $cardImage,
             'product_image_2' => $variant->image_back_url,
             'owner_purchase' => $isOwner,
         ];

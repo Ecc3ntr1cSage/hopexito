@@ -45,7 +45,7 @@
                         <h1>{{ $user->name }}</h1>
                         <p>{{ $profile?->bio ?: 'A maker building things worth keeping.' }}</p>
                         <div class="profile-links">
-                            <a href="{{ route('explore') }}">Marketplace <span aria-hidden="true">&nearr;</span></a>
+                            <a href="{{ route('discover') }}">Marketplace <span aria-hidden="true">&nearr;</span></a>
                             @foreach ($socialLinks as $social)
                                 <a href="{{ $social['href'] }}" target="_blank" rel="noreferrer">{{ $social['label'] }} <span aria-hidden="true">&nearr;</span></a>
                             @endforeach
@@ -73,7 +73,7 @@
                         <div class="profile-visitor-note">
                             <span class="profile-workspace-label">Open studio</span>
                             <p>Independent ideas, made visible and ready to wear.</p>
-                            <a href="{{ route('explore') }}" class="profile-inline-link">Explore the marketplace <span aria-hidden="true">&nearr;</span></a>
+                            <a href="{{ route('discover') }}" class="profile-inline-link">Explore the marketplace <span aria-hidden="true">&nearr;</span></a>
                         </div>
                     @endif
                 </div>
@@ -103,9 +103,9 @@
                         <a href="{{ route('product.show', $product->slug) }}" class="profile-product-card {{ $loop->first ? 'profile-product-featured' : '' }}" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false">
                             <div class="profile-product-frame">
                                 <div class="profile-product-core">
-                                    <img src="{{ $product->product_image }}" alt="{{ $product->title }}" :class="hover ? 'profile-product-hidden' : ''">
-                                    @if ($product->product_image_2)
-                                        <img src="{{ $product->product_image_2 }}" alt="" class="profile-product-alt" :class="hover ? 'profile-product-visible' : ''">
+                                    <img src="{{ $product->product_card_image }}" alt="{{ $product->title }}" :class="hover ? 'profile-product-hidden' : ''">
+                                    @if ($product->product_card_hover_image)
+                                        <img src="{{ $product->product_card_hover_image }}" alt="" class="profile-product-alt" :class="hover ? 'profile-product-visible' : ''">
                                     @endif
                                     <span class="profile-product-arrow" aria-hidden="true">&nearr;</span>
                                     @if ($product->visibility === 'private')
@@ -135,7 +135,7 @@
                         <p class="profile-note-quote">“The best pieces carry a little of the person who made them.”</p>
                         <div class="profile-note-rule"></div>
                         <p class="profile-note-copy">Every HopeXito edition is made to order, so the work stays close to the person behind it.</p>
-                        <a href="{{ route('shop.all') }}" class="profile-inline-link">Browse all makers <span aria-hidden="true">&nearr;</span></a>
+                        <a href="{{ route('discover') }}" class="profile-inline-link">Browse all makers <span aria-hidden="true">&nearr;</span></a>
                     </div>
                 </aside>
             </div>

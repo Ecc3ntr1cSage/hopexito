@@ -1,5 +1,5 @@
 @section('title', $product->title . ' | HopeXito')
-@section('thumbnail', $product->product_image)
+@section('thumbnail', $product->product_card_image)
 
 @php
     $initialColor = $colors->contains($product->preview_color)
@@ -55,7 +55,7 @@
 
         <section class="product-hero product-container">
             <div class="product-breadcrumb product-reveal">
-                <a href="{{ route('explore') }}">Marketplace</a>
+                <a href="{{ route('discover') }}">Marketplace</a>
                 <span aria-hidden="true">/</span>
                 <a href="{{ route('people', $product->shopname) }}">{{ $product->shopname }}</a>
                 <span aria-hidden="true">/</span>
@@ -226,9 +226,9 @@
                 @forelse ($products as $related)
                     <a href="{{ route('product.show', $related->slug) }}" class="related-product" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false">
                         <div class="related-product-image">
-                            <img src="{{ $related->product_image }}" alt="{{ $related->title }}" :class="hover ? 'is-hidden' : ''">
-                            @if ($related->product_image_2)
-                                <img src="{{ $related->product_image_2 }}" alt="" class="related-product-back" :class="hover ? 'is-visible' : ''">
+                            <img src="{{ $related->product_card_image }}" alt="{{ $related->title }}" :class="hover ? 'is-hidden' : ''">
+                            @if ($related->product_card_hover_image)
+                                <img src="{{ $related->product_card_hover_image }}" alt="" class="related-product-back" :class="hover ? 'is-visible' : ''">
                             @endif
                             <span class="related-product-arrow" aria-hidden="true">&nearr;</span>
                         </div>
@@ -246,15 +246,15 @@
                     <span class="product-eyebrow"><i></i> Keep looking</span>
                     <h2>Designed elsewhere</h2>
                 </div>
-                <a class="product-section-link" href="{{ route('explore') }}">Explore marketplace <span aria-hidden="true">&nearr;</span></a>
+                <a class="product-section-link" href="{{ route('discover') }}">Explore marketplace <span aria-hidden="true">&nearr;</span></a>
             </div>
             <div class="product-recommendation-track product-container">
                 @forelse ($discover as $item)
                     <a href="{{ route('product.show', $item->slug) }}" class="related-product" x-data="{ hover: false }" @mouseenter="hover = true" @mouseleave="hover = false">
                         <div class="related-product-image">
-                            <img src="{{ $item->product_image }}" alt="{{ $item->title }}" :class="hover ? 'is-hidden' : ''">
-                            @if ($item->product_image_2)
-                                <img src="{{ $item->product_image_2 }}" alt="" class="related-product-back" :class="hover ? 'is-visible' : ''">
+                            <img src="{{ $item->product_card_image }}" alt="{{ $item->title }}" :class="hover ? 'is-hidden' : ''">
+                            @if ($item->product_card_hover_image)
+                                <img src="{{ $item->product_card_hover_image }}" alt="" class="related-product-back" :class="hover ? 'is-visible' : ''">
                             @endif
                             <span class="related-product-arrow" aria-hidden="true">&nearr;</span>
                         </div>

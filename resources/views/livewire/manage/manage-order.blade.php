@@ -19,7 +19,7 @@
                 <div class="flex-col w-full md:w-3/5">
                     @foreach ($order->productOrder as $item)
                         <div class="flex p-4 space-x-8">
-                            <img class="w-40 transition rounded-lg" src="{{ $item->product->product_image }}" alt="" />
+                            <img class="w-40 transition rounded-lg" src="{{ $item->product->product_card_image }}" alt="" />
                             <div class="relative flex-col w-full space-y-1">
                                 <p class="text-indigo-400">{{ $item->title }}</p>
                                 <p class= uppercase">{{ $item->size }} / {{ $item->color }}

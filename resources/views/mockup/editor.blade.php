@@ -188,11 +188,13 @@
                             <option value="private">Private · visible only to you</option>
                         </select>
                         <div class="studio-control-block">
-                            <div class="studio-control-heading"><span>Listing preview</span><span class="studio-mono" x-text="previewSide"></span></div>
+                            <div class="studio-control-heading"><span>Card preview</span><span class="studio-mono" x-text="previewSide + ' image'"></span></div>
                             <div class="studio-preview-options">
-                                <label :class="{ 'is-disabled': !files.front }"><input type="radio" name="preview_side" value="front" x-model="previewSide">Front</label>
-                                <label :class="{ 'is-disabled': !files.back }"><input type="radio" name="preview_side" value="back" x-model="previewSide" :disabled="!files.back">Back</label>
+                                <label :class="{ 'is-disabled': !files.front }"><input type="radio" name="preview_side" value="front" x-model="previewSide" :disabled="!files.front">Front image</label>
+                                <label :class="{ 'is-disabled': !files.back }"><input type="radio" name="preview_side" value="back" x-model="previewSide" :disabled="!files.back">Back image</label>
                             </div>
+                            <p x-show="previewValidationMessage" x-text="previewValidationMessage" class="studio-error" x-cloak></p>
+                            @error('preview_side')<p class="studio-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="studio-commission-note"><span class="studio-note-mark">%</span><div><strong>15% creator commission</strong><p>You earn 15% of the fixed product price on external purchases. Your own purchases receive the owner discount and create no earnings.</p></div></div>
                         <label class="studio-rights-check"><input type="checkbox" name="rights" value="1" x-model="rightsAccepted" required><span>I have the right to sell products containing this artwork.</span></label>

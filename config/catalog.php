@@ -23,7 +23,7 @@ return [
         'hoodie' => [
             'label' => 'Hoodie',
             'price' => 70.00,
-            'colors' => ['White', 'Black', 'Gray', 'Navy', 'Green'],
+            'colors' => ['Black', 'Gray', 'Navy', 'Green'],
             'front_position' => ['x' => 251, 'y' => 190, 'w' => 348, 'h' => 525],
             'back_position' => ['x' => 251, 'y' => 176, 'w' => 348, 'h' => 525],
         ],

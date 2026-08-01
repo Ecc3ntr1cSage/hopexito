@@ -1,10 +1,15 @@
-@section('title', 'Privacy Policy | HopeXito')
+@section('title', 'Privacy Notice | HopeXito')
 <x-app-layout>
-    <div class="pt-4">
-        <div class="flex flex-col items-center min-h-screen pt-6 mb-24">
-            <div class="w-full p-6 mt-6 overflow-hidden prose leading-7 text-sm text-gray-300 max-w-3xl">
-                {!! $policy !!}
-            </div>
-        </div>
-    </div>
+    @include('legal.page', [
+        'eyebrow' => 'Privacy notice / 01',
+        'headline' => 'Privacy',
+        'accent' => 'with intent.',
+        'lede' => 'A clear account of what HopeXito collects, why it is needed, and the choices you have over your information.',
+        'summaryTitle' => 'Your data, plainly.',
+        'summary' => 'We collect what helps the marketplace work, keep public work separate from private delivery details, and do not sell personal data.',
+        'documentType' => 'Privacy notice',
+        'otherRoute' => route('terms.show'),
+        'otherLabel' => 'Read the Terms of Service',
+        'content' => $policy,
+    ])
 </x-app-layout>

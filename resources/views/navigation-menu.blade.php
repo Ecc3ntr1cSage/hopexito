@@ -1,13 +1,12 @@
 <nav x-data="{ open: false }" class="site-nav">
     <div class="site-nav-inner">
-        <a href="{{ route('explore') }}" class="site-wordmark" aria-label="HopeXito home"><span>H</span>ope<span class="wordmark-x">X</span>ito</a>
+        <a href="{{ route('home') }}" class="site-wordmark" aria-label="HopeXito home"><span>H</span>ope<span class="wordmark-x">X</span>ito</a>
         <div class="site-nav-links">
-            <a href="{{ route('explore') }}#discover">Discover</a>
-            <a href="{{ route('shop.all') }}">Marketplace</a>
+            <a href="{{ route('discover') }}">Discover</a>
             @auth
                 <a href="{{ route('product.create') }}" class="nav-create">Create <span aria-hidden="true">&nearr;</span></a>
             @else
-                <a href="{{ route('explore', ['auth' => 'login']) }}" class="nav-create" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Create now <span aria-hidden="true">&nearr;</span></a>
+                <a href="{{ route('home', ['auth' => 'login']) }}" class="nav-create" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Create now <span aria-hidden="true">&nearr;</span></a>
             @endauth
         </div>
         <div class="site-nav-account">
@@ -31,15 +30,14 @@
                 </div>
                 @livewire('cart.cart-counter')
             @else
-                <a href="{{ route('explore', ['auth' => 'login']) }}" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in</a>
+                <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in</a>
                 @livewire('cart.cart-counter')
             @endauth
         </div>
         <button @click="open = !open" class="site-nav-menu" :aria-expanded="open.toString()" aria-label="Toggle menu"><span></span><span></span></button>
     </div>
     <div x-show="open" x-cloak class="site-nav-mobile">
-        <a href="{{ route('explore') }}#discover">Discover</a>
-        <a href="{{ route('shop.all') }}">Marketplace</a>
+        <a href="{{ route('discover') }}">Discover</a>
         @auth
             <a href="{{ route('product.create') }}">Create a product <span aria-hidden="true">&nearr;</span></a>
             <a href="{{ route('people', Auth::user()->name) }}">Your profile</a>
@@ -53,8 +51,8 @@
                 </form>
             </div>
         @else
-            <a href="{{ route('explore', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth', { mode: 'login' })">Create now <span aria-hidden="true">&nearr;</span></a>
-            <a href="{{ route('explore', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth', { mode: 'login' })">Log in</a>
+            <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth', { mode: 'login' })">Create now <span aria-hidden="true">&nearr;</span></a>
+            <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth', { mode: 'login' })">Log in</a>
         @endauth
     </div>
 </nav>

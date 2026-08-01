@@ -92,7 +92,7 @@
                     @foreach ($cart as $item)
                         @php
                             $productName = $isAuthenticated ? $item->title : $item['name'];
-                            $productImage = $isAuthenticated ? $item->cartProduct->product_image : $item['options']['product_image'];
+                            $productImage = $isAuthenticated ? $item->display_image : $item['options']['product_image'];
                             $productSize = $isAuthenticated ? $item->size : $item['options']['size'];
                             $productColor = $isAuthenticated ? $item->color : $item['options']['color'];
                             $quantity = $isAuthenticated ? $item->quantity : $item['qty'];

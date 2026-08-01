@@ -15,7 +15,7 @@
                 <h1>429</h1>
                 <h2>Too many request</h2>
             </div>
-            <a href="{{ route('explore') }}">Take a chill pill</a>
+            <a href="{{ route('home') }}">Take a chill pill</a>
         </div>
     </div>
 </body>

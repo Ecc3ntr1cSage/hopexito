@@ -9,11 +9,11 @@
                     <h1>Make something<br><em>worth finding.</em></h1>
                     <p class="landing-lede">HopeXito is where makers turn their point of view into products — and people discover what feels like them.</p>
                     <div class="landing-actions">
-                        <a href="{{ route('shop.all') }}" class="button button-primary">Explore the marketplace <span aria-hidden="true">↗</span></a>
+                        <a href="{{ route('discover') }}" class="button button-primary">Discover the marketplace <span aria-hidden="true">↗</span></a>
                         @auth
                             <a href="{{ route('product.create') }}" class="button button-quiet">Start creating</a>
                         @else
-                            <a href="{{ route('explore', ['auth' => 'login']) }}" class="button button-quiet" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in to start creating</a>
+                            <a href="{{ route('home', ['auth' => 'login']) }}" class="button button-quiet" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in to start creating</a>
                         @endauth
                     </div>
                 </div>
@@ -51,13 +51,13 @@
                         <p class="eyebrow">02 / the latest finds</p>
                         <h2>Worth a closer look.</h2>
                     </div>
-                    <a href="{{ route('shop.all') }}" class="text-link">View all products <span aria-hidden="true">→</span></a>
+                    <a href="{{ route('discover') }}" class="text-link">View all products <span aria-hidden="true">→</span></a>
                 </div>
                 <div class="product-grid">
                     @forelse ($products->take(4) as $product)
                         <a href="{{ route('product.show', $product->slug) }}" class="product-card">
                             <div class="product-card-image">
-                                <img src="{{ $product->product_image }}" alt="{{ $product->title }}" loading="lazy" />
+                                <img src="{{ $product->product_card_image }}" alt="{{ $product->title }}" loading="lazy" />
                                 <span class="product-arrow" aria-hidden="true">↗</span>
                             </div>
                             <div class="product-card-meta">
@@ -86,7 +86,7 @@
                     @auth
                         <a href="{{ route('product.create') }}" class="button button-dark">Create your first product <span aria-hidden="true">↗</span></a>
                     @else
-                        <a href="{{ route('explore', ['auth' => 'login']) }}" class="button button-dark" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in to start creating <span aria-hidden="true">↗</span></a>
+                        <a href="{{ route('home', ['auth' => 'login']) }}" class="button button-dark" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in to start creating <span aria-hidden="true">↗</span></a>
                     @endauth
                 </div>
             </div>

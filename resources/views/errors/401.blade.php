@@ -15,7 +15,7 @@
                 <h1>401</h1>
                 <h2>Unauthorized Access</h2>
             </div>
-            <a href="{{ route('explore') }}">Back to Safety</a>
+            <a href="{{ route('home') }}">Back to Safety</a>
         </div>
     </div>
 </body>

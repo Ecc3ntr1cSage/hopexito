@@ -103,7 +103,7 @@
                 <div class="manage-archive-grid">
                     @foreach ($archives as $archive)
                         <article class="manage-archive-card">
-                            <div class="manage-archive-frame"><div class="manage-archive-media"><img src="{{ $archive->product_image }}" alt="{{ $archive->title }}"><span>Archived / {{ str_pad((string) $archive->id, 3, '0', STR_PAD_LEFT) }}</span></div></div>
+                            <div class="manage-archive-frame"><div class="manage-archive-media"><img src="{{ $archive->product_card_image }}" alt="{{ $archive->title }}"><span>Archived / {{ str_pad((string) $archive->id, 3, '0', STR_PAD_LEFT) }}</span></div></div>
                             <div class="manage-product-details"><div><span class="manage-product-type">{{ $archive->category }}</span><h3>{{ $archive->title }}</h3></div><strong>RM{{ number_format($archive->price, 2) }}</strong></div>
                             <div class="manage-product-metrics"><span><b>{{ $archive->sold }}</b> sold</span><span>RM{{ number_format($archive->commission, 2) }} commission</span></div>
                             <button type="button" class="manage-restore-button" wire:click="unarchiveProduct('{{ $archive->id }}')">Restore to catalogue <span aria-hidden="true">&nearr;</span></button>

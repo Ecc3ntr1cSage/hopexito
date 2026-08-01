@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 
 class ProductsController extends Controller
@@ -27,7 +28,7 @@ class ProductsController extends Controller
             'catalog' => $catalog,
             'geometry' => $geometry->normalizedPositions($catalog),
             'initialType' => $initialType,
-            'initialPreviewColor' => old('preview_color', 'White'),
+            'initialPreviewColor' => old('preview_color', $catalog[$initialType]['colors'][0] ?? 'White'),
             'assetBase' => asset('mockups'),
         ]);
     }
@@ -84,7 +85,18 @@ class ProductsController extends Controller
                 'transforms.back.rotation' => ['required', 'numeric', 'between:-180,180'],
             ]);
         }
-        $previewSide = $hasBackDesign && (! $hasFrontDesign || ($validated['preview_side'] ?? 'front') === 'back') ? 1 : 0;
+        $requestedPreviewSide = $validated['preview_side'] ?? ($hasBackDesign && ! $hasFrontDesign ? 'back' : 'front');
+        if ($requestedPreviewSide === 'front' && ! $hasFrontDesign) {
+            throw ValidationException::withMessages([
+                'preview_side' => 'Upload front artwork before choosing Front image for the card preview.',
+            ]);
+        }
+        if ($requestedPreviewSide === 'back' && ! $hasBackDesign) {
+            throw ValidationException::withMessages([
+                'preview_side' => 'Upload back artwork before choosing Back image for the card preview.',
+            ]);
+        }
+        $previewSide = $requestedPreviewSide === 'back' ? 1 : 0;
 
         $product = DB::transaction(function () use ($request, $validated, $catalog, $mockups, $geometry, $previewColor, $hasFrontDesign, $hasBackDesign, $previewSide) {
             $product = Product::create([

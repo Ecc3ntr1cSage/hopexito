@@ -15,7 +15,7 @@
                 <h1>404</h1>
                 <h2>Page not found</h2>
             </div>
-            <a href="{{ route('explore') }}">continue shopping</a>
+            <a href="{{ route('discover') }}">continue shopping</a>
         </div>
     </div>
 </body>

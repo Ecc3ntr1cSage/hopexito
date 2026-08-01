@@ -49,6 +49,17 @@ export default function productStudio(config) {
             return Boolean(this.files.front || this.files.back);
         },
 
+        get previewHasArtwork() {
+            return Boolean(this.files[this.previewSide]);
+        },
+
+        get previewValidationMessage() {
+            if (this.previewHasArtwork) return '';
+            return this.previewSide === 'front'
+                ? 'Upload front artwork or choose Back image for the card preview.'
+                : 'Upload back artwork or choose Front image for the card preview.';
+        },
+
         get artworkUrl() {
             return this.previews[this.activeSide];
         },
@@ -64,6 +75,7 @@ export default function productStudio(config) {
         get canPublish() {
             return Boolean(
                 this.hasAnyArtwork
+                && this.previewHasArtwork
                 && this.title.trim()
                 && this.tags.trim()
                 && this.rightsAccepted
@@ -216,7 +228,7 @@ export default function productStudio(config) {
             if (this.previews[side]) URL.revokeObjectURL(this.previews[side]);
             this.files[side] = file;
             this.previews[side] = URL.createObjectURL(file);
-            if (side === 'front') this.previewSide = 'front';
+            if (side === 'front' || !this.files.front) this.previewSide = side;
             this.activeSide = side;
             this.artworkSelected = true;
             this.markDirty();
@@ -340,6 +352,8 @@ export default function productStudio(config) {
                 if (!this.hasAnyArtwork) {
                     this.fileError = 'Upload artwork on the front or back before publishing.';
                     this.setTab('design');
+                } else if (!this.previewHasArtwork) {
+                    this.setTab('publish');
                 } else if (!this.title.trim() || !this.tags.trim()) {
                     this.setTab('product');
                 } else {
