@@ -94,8 +94,8 @@ class CheckoutFlowTest extends TestCase
         ProductVariant::create([
             'product_id' => $product->id,
             'color' => 'White',
-            'image_front_path' => 'mockups/white-shirt-front.png',
-            'image_back_path' => 'mockups/white-shirt-back.png',
+            'image_front_path' => 'mockups/shirt/white-shirt-front.png',
+            'image_back_path' => 'mockups/shirt/white-shirt-back.png',
         ]);
 
         return $product;

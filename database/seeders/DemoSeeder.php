@@ -9,6 +9,7 @@ use App\Models\ProductVariant;
 use App\Models\Profile;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Support\MockupAssets;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -56,12 +57,12 @@ class DemoSeeder extends Seeder
                 ]
             );
 
-            foreach (config('catalog.colors') as $color) {
+            foreach ($catalog['colors'] ?? config('catalog.colors') as $color) {
                 ProductVariant::updateOrCreate(
                     ['product_id' => $product->id, 'color' => $color],
                     [
-                        'image_front_path' => 'mockups/'.strtolower($color).'-'.$type.'-front.png',
-                        'image_back_path' => 'mockups/'.strtolower($color).'-'.$type.'-back.png',
+                        'image_front_path' => MockupAssets::path($type, $color, 'front'),
+                        'image_back_path' => MockupAssets::path($type, $color, 'back'),
                     ]
                 );
             }

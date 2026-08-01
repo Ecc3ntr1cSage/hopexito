@@ -2,7 +2,9 @@
 @section('thumbnail', $product->product_image)
 
 @php
-    $initialColor = $colors->first() ?? 'White';
+    $initialColor = $colors->contains($product->preview_color)
+        ? $product->preview_color
+        : ($colors->first() ?? 'White');
     $hasBack = filled($product->product_image_2);
     $isShirt = $product->category === 'Shirt';
     $tags = collect(explode(',', (string) $product->tags))->map(fn ($tag) => trim($tag))->filter();

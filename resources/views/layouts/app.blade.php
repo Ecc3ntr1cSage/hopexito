@@ -100,7 +100,7 @@
         <x-auth-modal :initial-mode="request()->query('auth', 'login')" />
     @endunless
     @stack('modals')
-    @livewireScripts
+    @livewireScriptConfig
     {{-- Global Footer --}}
     @unless($isStudio)
         <x-jet-footer></x-jet-footer>

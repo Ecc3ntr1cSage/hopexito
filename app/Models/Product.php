@@ -23,6 +23,7 @@ class Product extends Model
         'status',
         'sold',
         'preview',
+        'preview_color',
     ];
 
     protected $casts = [
@@ -44,12 +45,16 @@ class Product extends Model
 
     public function getProductImageAttribute(): ?string
     {
-        return $this->variants->first()?->image_front_url;
+        $variant = $this->variants->firstWhere('color', $this->preview_color) ?? $this->variants->first();
+
+        return $variant?->image_front_url;
     }
 
     public function getProductImage2Attribute(): ?string
     {
-        return $this->variants->first()?->image_back_url;
+        $variant = $this->variants->firstWhere('color', $this->preview_color) ?? $this->variants->first();
+
+        return $variant?->image_back_url;
     }
 
     public function getShopnameAttribute(): ?string

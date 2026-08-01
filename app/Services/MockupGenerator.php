@@ -165,6 +165,7 @@ class MockupGenerator
             'black' => '#111111',
             'gray', 'grey' => '#808080',
             'navy' => '#1f2a44',
+            'green' => '#2f6848',
             'red' => '#b91c1c',
             'blue' => '#2563eb',
             default => '#ffffff',

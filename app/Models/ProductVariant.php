@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MockupAssets;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,9 +24,7 @@ class ProductVariant extends Model
 
     public function getImageFrontUrlAttribute(): string
     {
-        return str_starts_with($this->image_front_path, 'mockups/')
-            ? asset($this->image_front_path)
-            : asset('storage/'.$this->image_front_path);
+        return $this->imageUrl($this->image_front_path);
     }
 
     public function getImageBackUrlAttribute(): ?string
@@ -33,8 +32,23 @@ class ProductVariant extends Model
         if (! $this->image_back_path) {
             return null;
         }
-        return str_starts_with($this->image_back_path, 'mockups/')
-            ? asset($this->image_back_path)
-            : asset('storage/'.$this->image_back_path);
+        return $this->imageUrl($this->image_back_path);
+    }
+
+    private function imageUrl(?string $path): string
+    {
+        if (! $path || ! str_starts_with($path, 'mockups/')) {
+            return asset('storage/'.$path);
+        }
+
+        if (is_file(public_path($path))) {
+            return asset($path);
+        }
+
+        $migratedPath = MockupAssets::migrateLegacyPath($path);
+
+        return $migratedPath && is_file(public_path($migratedPath))
+            ? asset($migratedPath)
+            : asset($path);
     }
 }

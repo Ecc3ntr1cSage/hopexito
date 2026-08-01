@@ -1,7 +1,7 @@
 @section('title', 'Create a product | HopeXito')
 <x-app-layout>
     <form method="POST" action="{{ route('product.store') }}" enctype="multipart/form-data"
-        x-data="productStudio({ catalog: @js($catalog), colors: @js($colors), canvas: @js($canvas), initialType: @js($initialType), initialTitle: @js(old('title', '')), initialTags: @js(old('tags', '')), assetBase: @js($assetBase) })"
+        x-data="productStudio({ catalog: @js($catalog), geometry: @js($geometry), initialType: @js($initialType), initialPreviewColor: @js($initialPreviewColor), initialTitle: @js(old('title', '')), initialTags: @js(old('tags', '')), assetBase: @js($assetBase) })"
         x-ref="form" x-on:submit="submitForm" class="product-studio" data-product-studio>
         @csrf
 
@@ -112,11 +112,24 @@
                 <div class="studio-panel-scroll">
                     <section x-show="activeTab === 'design'" role="tabpanel" x-cloak>
                         <div class="studio-section-intro">
+                            <p class="studio-section-label">01 / Build the product</p>
+                            <p>Choose a garment, then shape the front or back design.</p>
+                        </div>
+
+                        <div class="studio-type-grid" role="radiogroup" aria-label="Product type">
+                            <template x-for="(type, key) in catalog" :key="key">
+                                <button type="button" role="radio" :aria-checked="productType === key" class="studio-type-option" :class="{ 'is-active': productType === key }" x-on:click="setProductType(key)">
+                                    <span x-text="type.label"></span><strong x-text="`RM${Number(type.price).toFixed(0)}`"></strong>
+                                </button>
+                            </template>
+                        </div>
+
+                        <div class="studio-section-intro studio-section-intro-compact">
                             <p class="studio-section-label">Artwork</p>
                             <p>Set the artwork for the side currently on the canvas.</p>
                         </div>
 
-                        <input x-ref="frontFile" id="front-design" name="image_front" type="file" accept="image/*" required
+                        <input x-ref="frontFile" id="front-design" name="image_front" type="file" accept="image/*"
                             class="sr-only" x-on:change="chooseFile('front', $event)">
                         <input x-ref="backFile" id="back-design" name="image_back" type="file" accept="image/*"
                             class="sr-only" x-on:change="chooseFile('back', $event)">
@@ -129,15 +142,16 @@
                             </div>
                             <button type="button" class="studio-text-button" x-on:click="openFilePicker" x-text="files[activeSide] ? 'Replace' : 'Upload'"></button>
                         </div>
-                        <button type="button" x-show="files[activeSide] && activeSide === 'back'" x-on:click="removeArtwork" class="studio-remove-button" x-cloak>Remove back artwork</button>
+                        <button type="button" x-show="files[activeSide]" x-on:click="removeArtwork" class="studio-remove-button" x-cloak>Remove <span x-text="activeSide"></span> artwork</button>
+                        <p class="studio-control-hint studio-delete-hint" x-show="files[activeSide]" x-cloak>Tip: select the artwork on canvas and press Delete to remove it.</p>
                         @error('image_front')<p class="studio-error">{{ $message }}</p>@enderror
                         @error('image_back')<p class="studio-error">{{ $message }}</p>@enderror
                         <p x-show="fileError" x-text="fileError" class="studio-error" x-cloak></p>
 
-                        <div class="studio-control-block">
-                            <div class="studio-control-heading"><span>Preview color</span><span class="studio-mono" x-text="`${colors.length} variants included`"></span></div>
+                        <div class="studio-control-block studio-color-control">
+                            <div class="studio-control-heading"><span>Preview color</span><span class="studio-mono" x-text="`${typeColors.length} variants included`"></span></div>
                             <div class="studio-color-row" role="radiogroup" aria-label="Preview color">
-                                <template x-for="color in colors" :key="color">
+                                <template x-for="color in typeColors" :key="color">
                                     <button type="button" role="radio" :aria-checked="previewColor === color" class="studio-color-swatch"
                                         :class="`color-${color.toLowerCase()} ${previewColor === color ? 'is-active' : ''}`" :title="color"
                                         x-on:click="previewColor = color; markDirty()"><span x-text="color"></span></button>
@@ -156,14 +170,7 @@
                     </section>
 
                     <section x-show="activeTab === 'product'" role="tabpanel" x-cloak>
-                        <div class="studio-section-intro"><p class="studio-section-label">Product details</p><p>Choose a garment and give your design a name.</p></div>
-                        <div class="studio-type-grid" role="radiogroup" aria-label="Product type">
-                            <template x-for="(type, key) in catalog" :key="key">
-                                <button type="button" role="radio" :aria-checked="productType === key" class="studio-type-option" :class="{ 'is-active': productType === key }" x-on:click="setProductType(key)">
-                                    <span x-text="type.label"></span><strong x-text="`RM${Number(type.price).toFixed(0)}`"></strong>
-                                </button>
-                            </template>
-                        </div>
+                        <div class="studio-section-intro"><p class="studio-section-label">02 / Name the product</p><p>Add the details customers will see on the listing.</p></div>
                         <label class="studio-field-label" for="title">Title</label>
                         <input id="title" name="title" type="text" class="studio-field" placeholder="Give this design a name" required x-model="title" x-on:input="markDirty">
                         @error('title')<p class="studio-error">{{ $message }}</p>@enderror
@@ -199,7 +206,7 @@
                     <button type="button" class="studio-footer-next" x-show="activeTab !== 'publish'" x-on:click="nextTab">Continue <span aria-hidden="true">→</span></button>
                     <button type="submit" class="studio-create-button" x-show="activeTab === 'publish'" :disabled="!canPublish || submitting" x-cloak>
                         <span x-show="!submitting">Create product <span aria-hidden="true">↗</span></span>
-                        <span x-show="submitting">Generating six mockups…</span>
+                        <span x-show="submitting">Generating product mockups…</span>
                     </button>
                 </footer>
             </aside>

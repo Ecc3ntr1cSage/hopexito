@@ -40,22 +40,22 @@
             <a href="{{ route('product.show', $product->slug) }}" x-data="{ open: false }">
                 <div
                     class="relative p-1 transition shadow-lg cursor-pointer group rounded-xl hover:shadow-fuchsia-500/50 bg-white/5 backdrop-filter backdrop-blur-3xl">
-                    <div class="w-full overflow-hidden rounded-lg min-h-75" x-on:mouseenter="open = true"
+                    <div class="product-media-frame rounded-lg" x-on:mouseenter="open = true"
                         x-on:mouseleave="open = false">
                         @if ($product->product_image_2 && $product->preview == 0)
                             <img src="{{ $product->product_image }}" alt="{{ $product->title }}" x-show="open == false"
-                                class="w-full h-full transition ease-in-out rounded-t-lg">
+                                class="product-media-image transition ease-in-out rounded-t-lg">
 
                             <img x-cloak src="{{ $product->product_image_2 }}" alt="{{ $product->title }}"
-                                x-show="open == true" class="w-full h-full transition ease-in-out rounded-t-lg">
+                                x-show="open == true" class="product-media-image transition ease-in-out rounded-t-lg">
                         @elseif($product->product_image_2 && $product->preview == 1)
                             <img src="{{ $product->product_image_2 }}" alt="{{ $product->title }}"
-                                x-show="open == false" class="w-full h-full transition ease-in-out rounded-t-lg">
+                                x-show="open == false" class="product-media-image transition ease-in-out rounded-t-lg">
                             <img x-cloak src="{{ $product->product_image }}" alt="{{ $product->title }}"
-                                x-show="open == true" class="w-full h-full transition ease-in-out rounded-t-lg">
+                                x-show="open == true" class="product-media-image transition ease-in-out rounded-t-lg">
                         @else
                             <img src="{{ $product->product_image }}" alt="{{ $product->title }}"
-                                class="w-full h-full transition ease-in-out rounded-t-lg">
+                                class="product-media-image transition ease-in-out rounded-t-lg">
                         @endif
                     </div>
                     <div class="flex flex-col justify-between gap-1 px-2 py-1 tracking-wider md:px-4 md:py-2">

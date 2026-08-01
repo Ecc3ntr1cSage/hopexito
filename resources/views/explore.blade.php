@@ -16,32 +16,28 @@
                             <a href="{{ route('explore', ['auth' => 'login']) }}" class="button button-quiet" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in to start creating</a>
                         @endauth
                     </div>
-                    <div class="landing-proof" aria-label="HopeXito community highlights">
-                        <div class="proof-avatars">
-                            @foreach ($users->take(3) as $user)
-                                <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" />
-                            @endforeach
-                            @if ($users->isEmpty())
-                                <span class="proof-avatar-fallback">H</span><span class="proof-avatar-fallback">X</span><span class="proof-avatar-fallback">O</span>
-                            @endif
-                        </div>
-                        <p><strong>{{ $users->count() ? 'New work, every day.' : 'Your next idea belongs here.' }}</strong><br>Made by the HopeXito community.</p>
-                    </div>
                 </div>
 
-                <div class="hero-stage" aria-label="A preview of community-made designs">
+                <div class="hero-stage" aria-label="A visual study of independent ideas">
                     <div class="stage-note stage-note-top">01 / discover</div>
                     <div class="stage-grid-lines" aria-hidden="true"></div>
-                    @forelse ($products->take(3) as $index => $product)
-                        <a href="{{ route('product.show', $product->slug) }}" class="hero-product hero-product-{{ $index + 1 }}">
-                            <img src="{{ $product->product_image }}" alt="{{ $product->title }} by {{ $product->shopname }}" />
-                            <span>{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                        </a>
-                    @empty
-                        <div class="hero-product hero-product-1 placeholder-product"><span>01</span><b>YOUR<br>IDEA</b></div>
-                        <div class="hero-product hero-product-2 placeholder-product"><span>02</span><b>YOUR<br>VOICE</b></div>
-                        <div class="hero-product hero-product-3 placeholder-product"><span>03</span><b>YOUR<br>WORLD</b></div>
-                    @endforelse
+                    <div class="hero-poster hero-poster-1">
+                        <span class="hero-poster-index">01 / point of view</span>
+                        <div class="hero-poster-signal hero-poster-signal-one" aria-hidden="true"></div>
+                        <strong>MAKE<br>NOISE</strong>
+                        <span class="hero-poster-caption">ideas with a pulse</span>
+                    </div>
+                    <div class="hero-poster hero-poster-2">
+                        <span class="hero-poster-index">02 / signal study</span>
+                        <div class="hero-poster-signal hero-poster-signal-two" aria-hidden="true"></div>
+                        <strong>STAY<br>CURIOUS</strong>
+                        <span class="hero-poster-caption">wear the unexpected</span>
+                    </div>
+                    <div class="hero-poster hero-poster-3">
+                        <span class="hero-poster-index">03</span>
+                        <div class="hero-poster-signal hero-poster-signal-three" aria-hidden="true"></div>
+                        <strong>YOUR<br>WORLD</strong>
+                    </div>
                     <div class="stage-note stage-note-bottom">people-made / 2026</div>
                     <div class="stage-orbit" aria-hidden="true">✳</div>
                 </div>

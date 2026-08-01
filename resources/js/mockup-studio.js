@@ -5,13 +5,12 @@ const freshTransform = () => ({ x: 50, y: 50, scale: 1, rotation: 0 });
 export default function productStudio(config) {
     return {
         catalog: config.catalog,
-        colors: config.colors,
-        canvas: config.canvas,
+        geometry: config.geometry,
         assetBase: config.assetBase,
         productType: config.initialType,
         activeSide: 'front',
         activeTab: 'design',
-        previewColor: 'White',
+        previewColor: config.initialPreviewColor || 'White',
         previewSide: 'front',
         title: config.initialTitle || '',
         tags: config.initialTags || '',
@@ -34,6 +33,10 @@ export default function productStudio(config) {
             return this.catalog[this.productType];
         },
 
+        get typeColors() {
+            return this.typeConfig.colors || ['White', 'Black', 'Gray'];
+        },
+
         get activeTransform() {
             return this.transforms[this.activeSide];
         },
@@ -42,12 +45,16 @@ export default function productStudio(config) {
             return Boolean(this.files[this.activeSide]);
         },
 
+        get hasAnyArtwork() {
+            return Boolean(this.files.front || this.files.back);
+        },
+
         get artworkUrl() {
             return this.previews[this.activeSide];
         },
 
         get mockupUrl() {
-            return `${this.assetBase}/${this.previewColor.toLowerCase()}-${this.productType}-${this.activeSide}.png`;
+            return `${this.assetBase}/${this.productType}/${this.previewColor.toLowerCase()}-${this.productType}-${this.activeSide}.png`;
         },
 
         get tabIndex() {
@@ -56,7 +63,7 @@ export default function productStudio(config) {
 
         get canPublish() {
             return Boolean(
-                this.files.front
+                this.hasAnyArtwork
                 && this.title.trim()
                 && this.tags.trim()
                 && this.rightsAccepted
@@ -70,12 +77,12 @@ export default function productStudio(config) {
         },
 
         get printAreaStyle() {
-            const position = this.typeConfig[`${this.activeSide}_position`];
+            const position = this.geometry[this.productType][this.activeSide];
             return {
-                left: `${(position.x / this.canvas.width) * 100}%`,
-                top: `${(position.y / this.canvas.height) * 100}%`,
-                width: `${(position.w / this.canvas.width) * 100}%`,
-                height: `${(position.h / this.canvas.height) * 100}%`,
+                left: `${position.x}%`,
+                top: `${position.y}%`,
+                width: `${position.w}%`,
+                height: `${position.h}%`,
             };
         },
 
@@ -89,11 +96,20 @@ export default function productStudio(config) {
         },
 
         init() {
+            if (!this.typeColors.includes(this.previewColor)) this.previewColor = this.typeColors[0];
             if (window.innerWidth < 768) this.sheetOpen = false;
             this.onGlobalKeydown = (event) => {
                 if (event.code === 'Space' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) {
                     event.preventDefault();
                     this.spacePressed = true;
+                }
+                if ((event.key === 'Delete' || event.key === 'Backspace')
+                    && this.artworkSelected
+                    && this.files[this.activeSide]
+                    && !['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)
+                    && !event.target.isContentEditable) {
+                    event.preventDefault();
+                    this.removeArtwork();
                 }
             };
             this.onGlobalKeyup = (event) => {
@@ -128,8 +144,8 @@ export default function productStudio(config) {
 
         nextTab() {
             if (this.activeTab === 'design') {
-                if (!this.files.front) {
-                    this.fileError = 'Upload front artwork before continuing.';
+                if (!this.hasAnyArtwork) {
+                    this.fileError = 'Upload artwork on the front or back before continuing.';
                     this.$refs.frontFile?.focus();
                     return;
                 }
@@ -155,6 +171,7 @@ export default function productStudio(config) {
         setProductType(type) {
             if (this.catalog[type]) {
                 this.productType = type;
+                if (!this.typeColors.includes(this.previewColor)) this.previewColor = this.typeColors[0];
                 this.markDirty();
             }
         },
@@ -206,12 +223,14 @@ export default function productStudio(config) {
         },
 
         removeArtwork() {
-            if (this.activeSide !== 'back') return;
-            if (this.previews.back) URL.revokeObjectURL(this.previews.back);
-            this.files.back = null;
-            this.previews.back = null;
-            this.$refs.backFile.value = '';
-            this.previewSide = 'front';
+            const side = this.activeSide;
+            if (!this.files[side]) return;
+            if (this.previews[side]) URL.revokeObjectURL(this.previews[side]);
+            this.files[side] = null;
+            this.previews[side] = null;
+            const input = side === 'front' ? this.$refs.frontFile : this.$refs.backFile;
+            if (input) input.value = '';
+            if (this.previewSide === side) this.previewSide = this.files.front ? 'front' : 'back';
             this.artworkSelected = false;
             this.markDirty();
         },
@@ -318,8 +337,8 @@ export default function productStudio(config) {
         submitForm(event) {
             if (!this.canPublish) {
                 event.preventDefault();
-                if (!this.files.front) {
-                    this.fileError = 'Upload front artwork before publishing.';
+                if (!this.hasAnyArtwork) {
+                    this.fileError = 'Upload artwork on the front or back before publishing.';
                     this.setTab('design');
                 } else if (!this.title.trim() || !this.tags.trim()) {
                     this.setTab('product');
