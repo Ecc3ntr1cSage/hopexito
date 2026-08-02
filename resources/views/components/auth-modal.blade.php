@@ -194,6 +194,34 @@
                     <button type="button" @click="mode = 'login'">Log in</button>
                 </p>
             </div>
+
+            @if (! app()->environment('production'))
+                <aside
+                    x-cloak
+                    x-show="open && mode === 'login'"
+                    x-transition
+                    class="demo-credentials-panel demo-credentials-mobile"
+                    aria-label="Demo login accounts"
+                >
+                    <div class="demo-credentials-heading">
+                        <span class="demo-credentials-kicker">Quick access</span>
+                        <span class="demo-credentials-dot" aria-hidden="true"></span>
+                    </div>
+                    <p class="demo-credentials-title">Try the demo</p>
+                    <p class="demo-credentials-copy">Select an account to fill the login form.</p>
+                    <div class="demo-credentials-list">
+                        <button type="button" class="demo-credential-option" @click="fillCredentials('user@demo.com')">
+                            <span><strong>DemoUser</strong><small>Creator account</small></span>
+                            <b aria-hidden="true">&nearr;</b>
+                        </button>
+                        <button type="button" class="demo-credential-option" @click="fillCredentials('user@test.com')">
+                            <span><strong>TestUser</strong><small>Test account</small></span>
+                            <b aria-hidden="true">&nearr;</b>
+                        </button>
+                    </div>
+                    <span class="demo-credentials-password">Password for both: <b>password</b></span>
+                </aside>
+            @endif
         </section>
     </div>
 </div>

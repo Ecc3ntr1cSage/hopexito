@@ -82,7 +82,7 @@
                             <b>&rarr;</b>
                         </button>
                     </div>
-                    <p class="payment-terms">By continuing, you agree to the <a href="{{ route('terms.show') }}">Terms of Services</a>. Demo only, no real payment is processed.</p>
+                    <p class="payment-terms">Demo only, no real payment is processed.</p>
                 </form>
             </section>
 
