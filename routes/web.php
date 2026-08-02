@@ -7,7 +7,6 @@ use App\Http\Controllers\MockupController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\StorefrontController;
-use App\Http\Controllers\UploadController;
 use App\Http\Livewire\DeliveryInformation;
 use App\Http\Livewire\Manage\ManageOrder;
 use App\Http\Livewire\Manage\ManageProduct;
@@ -22,9 +21,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('mockup/standard-tee', [MockupController::class, 'redirectToStudio'])->defaults('type', 'shirt')->name('mockup.shirt');
     Route::get('mockup/sweatshirt', [MockupController::class, 'redirectToStudio'])->defaults('type', 'sweat')->name('mockup.sweat');
     Route::get('mockup/hoodie', [MockupController::class, 'redirectToStudio'])->defaults('type', 'hoodie')->name('mockup.hoodie');
-    // artwork upload controller
-    Route::post('upload', [UploadController::class, 'store'])->name('upload');
-    // order controller
     Route::get('product/manage', ManageProduct::class)->name('product.manage');
     Route::get('product/create', [ProductsController::class, 'create'])->name('product.create');
     Route::post('product', [ProductsController::class, 'store'])->name('product.store');
@@ -34,7 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 Route::get('product/{product}', [ProductsController::class, 'show'])->name('product.show');
 // cart controller
-Route::resource('cart', CartController::class);
+Route::get('cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('cart', [CartController::class, 'store'])->name('cart.store');
 Route::middleware('auth')->group(function () {
     Route::get('checkout', DeliveryInformation::class)->name('guest.checkout');
     Route::get('billplz', [PaymentController::class, 'createBill'])->name('billplz-create');

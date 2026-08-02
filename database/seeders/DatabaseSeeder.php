@@ -38,7 +38,6 @@ class DatabaseSeeder extends Seeder
             'product_variants',
             'products',
             'searches',
-            'temporary_files',
             'password_resets',
             'personal_access_tokens',
             'failed_jobs',

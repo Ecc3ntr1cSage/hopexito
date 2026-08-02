@@ -57,3 +57,6 @@ Thumbs.db
 !public/mockups/*/*.png
 
 nul
+
+# PHPUnit runtime cache
+.phpunit.result.cache
