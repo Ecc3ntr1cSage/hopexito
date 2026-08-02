@@ -24,6 +24,10 @@ export default function productStudio(config) {
         dirty: false,
         fileError: '',
         sheetOpen: true,
+        sheetDragging: false,
+        sheetDragOffset: 0,
+        sheetDrag: null,
+        suppressSheetToggle: false,
         spacePressed: false,
         interaction: null,
         viewport: { zoom: 1, pan: { x: 0, y: 0 } },
@@ -104,6 +108,14 @@ export default function productStudio(config) {
                 left: `${transform.x}%`,
                 top: `${transform.y}%`,
                 transform: `translate(-50%, -50%) rotate(${transform.rotation}deg) scale(${transform.scale})`,
+            };
+        },
+
+        get sheetStyle() {
+            if (!this.sheetDragging) return {};
+            return {
+                transform: `translateY(${this.sheetDragOffset}px)`,
+                transition: 'none',
             };
         },
 
@@ -342,7 +354,63 @@ export default function productStudio(config) {
         zoomOut() { this.viewport.zoom = clamp(this.viewport.zoom - 0.1, 0.5, 2.5); },
         resetViewport() { this.viewport = { zoom: 1, pan: { x: 0, y: 0 } }; },
 
+        startSheetDrag(event) {
+            if (window.innerWidth >= 768) return;
+            if (event.button !== undefined && event.button !== 0) return;
+            if (event.target.closest('.studio-panel-heading button, input, select, textarea, a')) return;
+
+            const maxOffset = Math.max(0, this.$refs.sheet.offsetHeight - 70);
+            this.sheetDrag = {
+                pointerId: event.pointerId,
+                startY: event.clientY,
+                lastY: event.clientY,
+                startOffset: this.sheetOpen ? 0 : maxOffset,
+                maxOffset,
+                startedAt: performance.now(),
+                moved: false,
+            };
+            this.sheetDragOffset = this.sheetDrag.startOffset;
+            event.currentTarget?.setPointerCapture?.(event.pointerId);
+        },
+
+        moveSheetDrag(event) {
+            const drag = this.sheetDrag;
+            if (!drag || event.pointerId !== drag.pointerId) return;
+
+            const deltaY = event.clientY - drag.startY;
+            if (!drag.moved && Math.abs(deltaY) < 5) return;
+
+            drag.moved = true;
+            drag.lastY = event.clientY;
+            this.sheetDragging = true;
+            this.sheetDragOffset = clamp(drag.startOffset + deltaY, 0, drag.maxOffset);
+            event.preventDefault();
+        },
+
+        endSheetDrag(event) {
+            const drag = this.sheetDrag;
+            if (!drag || event.pointerId !== drag.pointerId) return;
+
+            if (drag.moved) {
+                const deltaY = event.clientY - drag.startY;
+                const elapsed = Math.max(performance.now() - drag.startedAt, 1);
+                const velocity = deltaY / elapsed;
+                const intentionalSwipe = Math.abs(deltaY) > 34 || Math.abs(velocity) > 0.35;
+
+                if (intentionalSwipe) this.sheetOpen = deltaY < 0;
+                else this.sheetOpen = this.sheetDragOffset < drag.maxOffset / 2;
+
+                this.suppressSheetToggle = true;
+                window.setTimeout(() => { this.suppressSheetToggle = false; }, 0);
+            }
+
+            this.sheetDragging = false;
+            this.sheetDrag = null;
+            this.sheetDragOffset = 0;
+        },
+
         toggleSheet() {
+            if (this.suppressSheetToggle) return;
             this.sheetOpen = !this.sheetOpen;
         },
 

@@ -11,7 +11,6 @@ use App\Http\Controllers\UploadController;
 use App\Http\Livewire\DeliveryInformation;
 use App\Http\Livewire\Manage\ManageOrder;
 use App\Http\Livewire\Manage\ManageProduct;
-use App\Http\Livewire\Manage\ManageSales;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
@@ -27,7 +26,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('upload', [UploadController::class, 'store'])->name('upload');
     // order controller
     Route::get('product/manage', ManageProduct::class)->name('product.manage');
-    Route::get('sales', ManageSales::class)->name('product.sales');
     Route::get('product/create', [ProductsController::class, 'create'])->name('product.create');
     Route::post('product', [ProductsController::class, 'store'])->name('product.store');
     Route::get('product/{product}/edit', [ProductsController::class, 'edit'])->name('product.edit');

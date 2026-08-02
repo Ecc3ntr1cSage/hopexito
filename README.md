@@ -26,11 +26,11 @@ Print-on-demand marketplace demo built with Laravel 11. Users upload artwork, ge
 - **Public/private visibility** — publish products to profiles and discovery or keep them private for owner-only purchasing
 - **Sales dashboard** — view total items sold, commission earnings, and individual order lines
 - **Wallet** — track commission income, manage bank details, and request withdrawals
-- **Profile customization** — bio and social links (Facebook, Twitter, Instagram, Dribbble, Behance, Pinterest, DeviantArt, TikTok, website)
+- **Account settings** — manage identity, delivery details, security, profile photo, and wallet access
 - **Order management** — mark orders as received, view full order history
 
 - **Product discovery** — explore feed, filtered Shirt/Sweatshirt/Hoodie shops, and searchable catalog
-- **User profiles** — view a user's bio, social links, and public product catalog
+- **User profiles** — view a user's public product catalog and creator workspace
 - **Cart** — add to cart with size/color variants, adjust quantities, apply discounts
 - **Guest checkout** — fill in delivery information without an account
 - **Mocked payment flow** — immediately creates a paid order, order lines, wallet commissions, and clears the cart

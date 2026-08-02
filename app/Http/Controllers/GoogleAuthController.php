@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Profile;
 use App\Models\User;
 use App\Models\Wallet;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleAuthController extends Controller
@@ -15,6 +15,7 @@ class GoogleAuthController extends Controller
     {
         return Socialite::driver('google')->redirect();
     }
+
     public function callbackGoogle(Request $request)
     {
         try {
@@ -23,7 +24,8 @@ class GoogleAuthController extends Controller
             $findUser = User::where('google_id', $user->id)->first();
 
             if ($findUser) {
-               Auth::login($findUser);
+                Auth::login($findUser);
+
                 return redirect()->intended(route('home'));
             } else {
                 $user = User::create([
@@ -31,9 +33,8 @@ class GoogleAuthController extends Controller
                     'email' => $user->getEmail(),
                     'google_id' => $user->getId(),
                 ]);
-                Profile::create(['user_id' => $user->id]);
                 Wallet::create([
-                    'id' => (string) \Illuminate\Support\Str::uuid(),
+                    'id' => (string) Str::uuid(),
                     'name' => $user->name,
                     'commission' => 0,
                     'balance' => 0,
@@ -41,6 +42,7 @@ class GoogleAuthController extends Controller
                     'user_id' => $user->id,
                 ]);
                 Auth::login($user);
+
                 return redirect()->intended(route('home'));
             }
         } catch (\Throwable $th) {

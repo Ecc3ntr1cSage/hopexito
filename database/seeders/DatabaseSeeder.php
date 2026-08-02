@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -38,7 +37,6 @@ class DatabaseSeeder extends Seeder
             'wallets',
             'product_variants',
             'products',
-            'profiles',
             'searches',
             'temporary_files',
             'password_resets',
@@ -94,48 +92,6 @@ class DatabaseSeeder extends Seeder
                 'two_factor_confirmed_at' => null,
             ],
         ]);
-
-        $profileRows = [
-            [
-                'id' => 1,
-                'user_id' => self::DEMO_USER_ID,
-                'bio' => 'A demo user.',
-                'facebook' => null,
-                'twitter' => null,
-                'instagram' => null,
-                'dribble' => null,
-                'behance' => null,
-                'pinterest' => null,
-                'deviantart' => null,
-                'tiktok' => null,
-                'website' => null,
-                'created_at' => '2026-08-01 14:47:28',
-                'updated_at' => '2026-08-01 14:47:28',
-            ],
-            [
-                'id' => 2,
-                'user_id' => self::TEST_USER_ID,
-                'bio' => 'A tester user.',
-                'facebook' => null,
-                'twitter' => null,
-                'instagram' => null,
-                'dribble' => null,
-                'behance' => null,
-                'pinterest' => null,
-                'deviantart' => null,
-                'tiktok' => null,
-                'website' => null,
-                'created_at' => '2026-08-01 14:51:23',
-                'updated_at' => '2026-08-01 14:51:23',
-            ],
-        ];
-
-        if (Schema::hasColumn('profiles', 'cover_image')) {
-            $profileRows[0]['cover_image'] = null;
-            $profileRows[1]['cover_image'] = null;
-        }
-
-        DB::table('profiles')->insert($profileRows);
 
         DB::table('wallets')->insert([
             [
@@ -344,7 +300,7 @@ class DatabaseSeeder extends Seeder
             'name' => $buyer->name,
             'description' => 'Demo payment completed',
             'delivery' => 7.00,
-            'status' => 1,
+            'status' => 4,
             'amount' => round($price + 7.00, 2),
             'tracking_number' => null,
             'paid' => 'true',

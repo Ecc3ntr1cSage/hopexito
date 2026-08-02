@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
@@ -28,7 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var string[]
      */
     protected $fillable = [
-        'name', 'email', 'password', 'google_id', 'phone', 'address', 'postcode', 'state','email_verified_at'
+        'name', 'email', 'password', 'google_id', 'phone', 'address', 'postcode', 'state', 'email_verified_at',
     ];
 
     /**
@@ -79,14 +79,11 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-    public function profile()
-    {
-        return $this->hasOne(Profile::class);
-    }
     public function wallet()
     {
         return $this->hasOne(Wallet::class, 'user_id', 'id');
     }
+
     public function products()
     {
         return $this->hasMany(Product::class);

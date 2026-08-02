@@ -9,7 +9,7 @@ This notice is written for the current HopeXito product and is intended to be re
 Depending on how you use HopeXito, we may collect:
 
 - **Account data:** your name, email address, password credentials, verification status, and profile photo.
-- **Profile and creator data:** biography, public profile details, product titles, tags, artwork, product images, prices, and publishing settings.
+- **Profile and creator data:** display name, profile photo, product titles, tags, artwork, product images, prices, and publishing settings.
 - **Order data:** recipient name, email, phone number, delivery address, postcode, state, selected size and colour, order history, and fulfilment status.
 - **Technical data:** IP address, browser and device information, session data, pages visited, and basic diagnostic logs.
 - **Communication data:** messages or requests you send to support and records needed to respond to them.
@@ -32,7 +32,7 @@ We do not sell your personal data. We do not use private artwork or delivery det
 
 ## 04 / What is public
 
-If you publish a creator profile or product, the information needed to present that work may be visible to other visitors. This can include your display name, profile photo, biography, product title, tags, product images, product type, price, and published status.
+If you publish a creator profile or product, the information needed to present that work may be visible to other visitors. This can include your display name, profile photo, product title, tags, product images, product type, price, and published status.
 
 Your email address, password, phone number, delivery address, and order details are not displayed as part of a public product page.
 

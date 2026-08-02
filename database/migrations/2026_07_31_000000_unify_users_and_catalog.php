@@ -9,46 +9,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasTable('profiles')) {
-            Schema::create('profiles', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
-                $table->longText('bio')->nullable();
-                $table->string('facebook')->nullable();
-                $table->string('twitter')->nullable();
-                $table->string('instagram')->nullable();
-                $table->string('dribble')->nullable();
-                $table->string('behance')->nullable();
-                $table->string('pinterest')->nullable();
-                $table->string('deviantart')->nullable();
-                $table->string('tiktok')->nullable();
-                $table->string('website')->nullable();
-                $table->timestamps();
-            });
-        }
-
-        if (Schema::hasTable('artists')) {
-            foreach (DB::table('artists')->get() as $artist) {
-                DB::table('profiles')->updateOrInsert(
-                    ['user_id' => $artist->id],
-                    [
-                        'bio' => $artist->bio,
-                        'facebook' => $artist->facebook,
-                        'twitter' => $artist->twitter,
-                        'instagram' => $artist->instagram,
-                        'dribble' => $artist->dribble,
-                        'behance' => $artist->behance,
-                        'pinterest' => $artist->pinterest,
-                        'deviantart' => $artist->deviantart,
-                        'tiktok' => $artist->tiktok,
-                        'website' => $artist->website ?? null,
-                        'created_at' => $artist->created_at ?? now(),
-                        'updated_at' => $artist->updated_at ?? now(),
-                    ]
-                );
-            }
-        }
-
         if (Schema::hasTable('users') && Schema::hasColumn('users', 'role_id')) {
             Schema::table('users', fn (Blueprint $table) => $table->dropColumn('role_id'));
         }

@@ -2,17 +2,6 @@
 
 @php
     $isOwner = Auth::check() && Auth::id() === $user->id;
-    $profile = $user->profile;
-    $socialLinks = collect([
-        ['label' => 'Instagram', 'value' => $profile?->instagram],
-        ['label' => 'Behance', 'value' => $profile?->behance],
-        ['label' => 'Website', 'value' => $profile?->website],
-        ['label' => 'TikTok', 'value' => $profile?->tiktok],
-    ])->filter(fn ($link) => filled($link['value']))->map(function ($link) {
-        $value = trim($link['value']);
-        $link['href'] = str_starts_with($value, 'http') ? $value : 'https://'.$value;
-        return $link;
-    });
 @endphp
 
 <x-app-layout>
@@ -26,12 +15,8 @@
                     <div class="profile-identity-copy">
                         <span class="profile-eyebrow"><i></i> Creator profile</span>
                         <h1>{{ $user->name }}</h1>
-                        <p>{{ $profile?->bio ?: 'A maker building things worth keeping.' }}</p>
                         <div class="profile-links">
                             <a href="{{ route('discover') }}">Marketplace <span aria-hidden="true">&nearr;</span></a>
-                            @foreach ($socialLinks as $social)
-                                <a href="{{ $social['href'] }}" target="_blank" rel="noreferrer">{{ $social['label'] }} <span aria-hidden="true">&nearr;</span></a>
-                            @endforeach
                         </div>
                     </div>
                 </div>

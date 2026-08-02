@@ -8,7 +8,7 @@
             <div class="settings-container">
                 <div class="settings-topline settings-reveal">
                     <span class="settings-kicker"><i></i> Account / private workspace</span>
-                    <span class="settings-index">01 — 05</span>
+                    <span class="settings-index">01 — 04</span>
                 </div>
 
                 <div class="settings-hero-grid">
@@ -40,9 +40,7 @@
                 <nav class="settings-anchor-nav settings-reveal settings-delay-three" aria-label="Profile settings sections">
                     <a href="#identity"><span>01</span> Identity</a>
                     <a href="#security"><span>02</span> Security</a>
-                    <a href="#presence"><span>03</span> Presence</a>
-                    <a href="#links"><span>04</span> Links</a>
-                    <a href="#wallet"><span>05</span> Wallet</a>
+                    <a href="#wallet"><span>03</span> Wallet</a>
                 </nav>
             </div>
         </header>
@@ -90,32 +88,10 @@
                         @endif
                     </section>
 
-                    <section id="presence" class="settings-section settings-reveal settings-delay-three">
-                        <div class="settings-section-heading">
-                            <div>
-                                <span class="settings-section-number">03 / Presence</span>
-                                <h2>Give the page a point of view.</h2>
-                            </div>
-                            <p>Give visitors a concise sense of the work and ideas behind your profile.</p>
-                        </div>
-                        <div class="settings-livewire-card">@livewire('profile-bio')</div>
-                    </section>
-
-                    <section id="links" class="settings-section settings-reveal settings-delay-one">
-                        <div class="settings-section-heading">
-                            <div>
-                                <span class="settings-section-number">04 / Links</span>
-                                <h2>Leave a trail worth following.</h2>
-                            </div>
-                            <p>Connect the places where your ideas already live.</p>
-                        </div>
-                        <div class="settings-livewire-card">@livewire('social-links')</div>
-                    </section>
-
                     <section id="wallet" class="settings-section settings-section-wallet settings-reveal settings-delay-two">
                         <div class="settings-section-heading">
                             <div>
-                                <span class="settings-section-number">05 / Wallet</span>
+                                <span class="settings-section-number">03 / Wallet</span>
                                 <h2>See the work move.</h2>
                             </div>
                             <p>Track your balance, commissions, and withdrawal history.</p>
@@ -127,7 +103,7 @@
                         <section class="settings-section settings-danger-section settings-reveal settings-delay-three">
                             <div class="settings-section-heading">
                                 <div>
-                                    <span class="settings-section-number">06 / Exit</span>
+                                    <span class="settings-section-number">04 / Exit</span>
                                     <h2>Leave with intention.</h2>
                                 </div>
                                 <p>Account deletion is permanent. Download anything you want to keep first.</p>

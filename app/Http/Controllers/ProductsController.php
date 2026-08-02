@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Models\User;
 use App\Services\MockupGenerator;
 use App\Support\MockupAssets;
 use App\Support\MockupGeometry;
@@ -12,9 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Str;
 
 class ProductsController extends Controller
 {
@@ -159,6 +158,7 @@ class ProductsController extends Controller
         });
 
         session()->flash('message', 'Product Created');
+
         return redirect()->route('product.show', $product);
     }
 
@@ -166,7 +166,7 @@ class ProductsController extends Controller
     {
         abort_unless($product->canBeViewedBy(Auth::user()), 404);
 
-        $product->load('variants', 'owner.profile');
+        $product->load('variants');
         $user = $product->owner;
         $products = Product::available()
             ->where('user_id', $product->user_id)
@@ -191,6 +191,7 @@ class ProductsController extends Controller
     public function edit(Product $product)
     {
         abort_unless($product->isOwnedBy(Auth::user()), 403);
+
         return redirect()->route('product.manage');
     }
 
@@ -205,6 +206,7 @@ class ProductsController extends Controller
         ]);
 
         $product->update($validated);
+
         return redirect()->route('product.manage')->with('message', 'Product Updated');
     }
 
@@ -212,6 +214,7 @@ class ProductsController extends Controller
     {
         abort_unless($product->isOwnedBy(Auth::user()), 403);
         $product->delete();
+
         return redirect()->route('product.manage')->with('message', 'Product Deleted');
     }
 }

@@ -90,14 +90,23 @@
                 </div>
             </main>
 
-            <aside class="studio-panel" :class="{ 'is-open': sheetOpen }" aria-label="Product controls">
-                <div class="studio-sheet-grabber" x-on:pointerdown="toggleSheet" aria-label="Toggle studio controls"></div>
-                <div class="studio-panel-heading">
-                    <div>
-                        <p class="studio-kicker">Create a listing</p>
-                        <h1>Make it yours.</h1>
+            <aside class="studio-panel" x-ref="sheet" :class="{ 'is-open': sheetOpen, 'is-dragging': sheetDragging }"
+                :style="sheetStyle" aria-label="Product controls"
+                x-on:pointermove.window="moveSheetDrag($event)" x-on:pointerup.window="endSheetDrag($event)"
+                x-on:pointercancel.window="endSheetDrag($event)">
+                <div class="studio-sheet-drag-region" x-on:pointerdown="startSheetDrag($event)">
+                    <button type="button" class="studio-sheet-toggle" :aria-expanded="sheetOpen"
+                        :aria-label="sheetOpen ? 'Collapse studio controls' : 'Expand studio controls'"
+                        x-on:click.stop="toggleSheet">
+                        <span class="studio-sheet-grabber" aria-hidden="true"></span>
+                    </button>
+                    <div class="studio-panel-heading">
+                        <div>
+                            <p class="studio-kicker">Create a listing</p>
+                            <h1>Make it yours.</h1>
+                        </div>
+                        <span class="studio-panel-price" x-text="`RM${Number(typeConfig.price).toFixed(2)}`"></span>
                     </div>
-                    <span class="studio-panel-price" x-text="`RM${Number(typeConfig.price).toFixed(2)}`"></span>
                 </div>
 
                 <nav class="studio-tabs" role="tablist" aria-label="Product creation steps">

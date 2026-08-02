@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Http\Livewire\ProfileBio;
-use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
@@ -22,12 +20,14 @@ class ProfileInformationTest extends TestCase
             ->assertOk()
             ->assertSee('Shape the way')
             ->assertSee('Save identity')
-            ->assertSee('Save bio')
+            ->assertDontSee('Save bio')
+            ->assertDontSee('Save links')
+            ->assertDontSee('Signal directory')
             ->assertDontSee('Cover image')
             ->assertSee('See the work move.');
     }
 
-    public function test_profile_presence_only_exposes_bio(): void
+    public function test_profile_settings_no_longer_require_a_profile_record(): void
     {
         $user = User::factory()->create();
 
@@ -37,14 +37,7 @@ class ProfileInformationTest extends TestCase
             ->assertDontSee('cover_image')
             ->assertDontSee('settings-cover');
 
-        $this->assertTrue(Schema::hasTable('profiles'));
-        $this->assertFalse(Schema::hasColumn('profiles', 'cover_image'));
-
-        Livewire::test(ProfileBio::class)
-            ->set('bio', 'A small studio making useful things.')
-            ->call('updateBio');
-
-        $this->assertSame('A small studio making useful things.', Profile::where('user_id', $user->id)->value('bio'));
+        $this->assertFalse(Schema::hasTable('profiles'));
     }
 
     public function test_current_profile_information_is_available()
