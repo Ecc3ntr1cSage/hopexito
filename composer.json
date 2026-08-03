@@ -7,12 +7,10 @@
     "require": {
         "ext-gd": "*",
         "php": "^8.2",
-        "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^2.7",
         "laravel/framework": "^11.0",
         "laravel/jetstream": "^5.0",
         "laravel/sanctum": "^4.0",
-        "laravel/socialite": "^5.5",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.5"
     },

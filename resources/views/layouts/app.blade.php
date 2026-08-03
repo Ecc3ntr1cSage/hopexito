@@ -18,19 +18,7 @@
   gtag('config', 'G-6PQ7GHF3Y3');
 </script>
     <link rel="shortcut icon" href="{{ asset('image/xito-icon.png') }}">
-    {{-- Swiper --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
-    {{-- Filepond --}}
-    <link href="https://unpkg.com/filepond@^4/dist/filepond.css" rel="stylesheet" />
-    <link href="https://unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css"
-        rel="stylesheet">
-    {{-- Animate CSS --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <!-- Scripts -->
-    <script src="https://cdn.lordicon.com/xdjxvujz.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@marcreichel/alpine-typewriter@latest/dist/alpine-typewriter.min.js" defer>
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Styles -->
@@ -54,28 +42,6 @@
         /* Hide AlpineJS Component */
         [x-cloak] {
             display: none;
-        }
-
-        /* Filepond Customization */
-        .filepond--panel-root {
-            background-color: #262626;
-        }
-
-        .filepond--drop-label {
-            color: white;
-        }
-
-        .filepond--label-action {
-            color: #6366f1;
-            text-decoration: none;
-        }
-
-        .filepond--item-panel {
-            background-color: #6366f1;
-        }
-
-        [data-filepond-item-state='processing-complete'] .filepond--item-panel {
-            background-color: #22c55e;
         }
 
         /* html range customization */

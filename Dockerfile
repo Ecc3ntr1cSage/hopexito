@@ -16,6 +16,7 @@ RUN apt-get update \
         libjpeg62-turbo-dev \
         libpng-dev \
         libpq-dev \
+        libsqlite3-dev \
         libxml2-dev \
         libzip-dev \
         unzip \
@@ -27,6 +28,7 @@ RUN apt-get update \
         intl \
         pdo_mysql \
         pdo_pgsql \
+        pdo_sqlite \
         zip \
     && a2enmod expires headers rewrite \
     && sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \

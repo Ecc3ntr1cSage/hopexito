@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\MockupController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductsController;
@@ -16,7 +15,7 @@ Route::get('/', [StorefrontController::class, 'home'])->name('home');
 // billplz controller
 Route::get('billplz-callback', [PaymentController::class, 'callback'])->name('billplz-callback');
 Route::get('order/index', ManageOrder::class)->name('order.index');
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('dashboard', [Controller::class, 'redirectUser'])->name('dashboard');
     Route::get('mockup/standard-tee', [MockupController::class, 'redirectToStudio'])->defaults('type', 'shirt')->name('mockup.shirt');
     Route::get('mockup/sweatshirt', [MockupController::class, 'redirectToStudio'])->defaults('type', 'sweat')->name('mockup.sweat');
@@ -43,6 +42,3 @@ Route::redirect('explore', '/');
 Route::get('shop', [StorefrontController::class, 'search'])->name('search');
 Route::get('discover', [StorefrontController::class, 'discover'])->name('discover');
 Route::get('{shopname}', [StorefrontController::class, 'people'])->name('people');
-// google auth
-Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google-auth');
-Route::get('auth/google/call-back', [GoogleAuthController::class, 'callbackGoogle']);

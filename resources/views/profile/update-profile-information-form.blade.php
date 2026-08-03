@@ -45,17 +45,6 @@
                 <span class="settings-field-label">Email address</span>
                 <x-jet-input id="email" type="email" wire:model.defer="state.email" disabled autocomplete="email" />
                 <x-jet-input-error for="email" />
-                @if (Laravel\Fortify\Features::enabled(Laravel\Fortify\Features::emailVerification()) && $this->user->hasVerifiedEmail())
-                    <span class="settings-field-hint settings-hint-success">Email address verified.</span>
-                @else
-                    <span class="settings-field-hint settings-hint-warning">
-                        Email address unverified.
-                        <button type="button" wire:click.prevent="sendEmailVerification">Send verification email</button>
-                    </span>
-                    @if ($this->verificationLinkSent)
-                        <span class="settings-field-hint settings-hint-success">A new verification link has been sent.</span>
-                    @endif
-                @endif
             </label>
 
             <label class="settings-field">

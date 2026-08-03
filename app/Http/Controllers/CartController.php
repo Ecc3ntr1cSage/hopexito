@@ -61,6 +61,7 @@ class CartController extends Controller
             event(new AddedToCart($cart));
 
             session()->flash('message', 'Successfully added to cart');
+
             return $request->has('buy_now')
                 ? redirect()->route('billplz-create')
                 : redirect()->route('cart.index');
@@ -76,14 +77,9 @@ class CartController extends Controller
         ]);
 
         session()->flash('message', $request->has('buy_now') ? 'Fill in delivery information' : 'Successfully added to cart');
+
         return $request->has('buy_now')
             ? redirect()->route('guest.checkout')
             : redirect()->route('cart.index');
     }
-
-    public function create() {}
-    public function show(Cart $cart) {}
-    public function edit(Cart $cart) {}
-    public function update(Cart $cart, $rowId) {}
-    public function destroy($rowId) {}
 }

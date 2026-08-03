@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Events\PurchaseCompleted;
-use App\Facades\SessionCart;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
@@ -29,6 +28,7 @@ class PaymentController extends Controller
     {
         $delivery = Config::get('shipping.price')[Auth::user()->state] ?? 10;
         $weight = $this->weight();
+
         return $weight > 8000 ? $delivery + 8 : ($weight > 1500 ? $delivery + 6 : ($weight > 1000 ? $delivery + 3 : $delivery));
     }
 
@@ -36,6 +36,7 @@ class PaymentController extends Controller
     {
         $product = Product::find($cart->product_id);
         $multiplier = $product && $product->isOwnedBy(Auth::user()) ? 0.85 : 1;
+
         return round((float) $product->price * $cart->quantity * $multiplier, 2);
     }
 
@@ -56,6 +57,7 @@ class PaymentController extends Controller
         $user = User::findOrFail(Auth::id());
         if (! $user->state || ! $user->phone || ! $user->address) {
             session()->flash('message', 'Please complete delivery address');
+
             return redirect()->route('profile.show');
         }
 
@@ -65,6 +67,7 @@ class PaymentController extends Controller
         $subtotal = $this->subtotal();
         $total = $this->total();
         $state = $user->state;
+
         return view('cart.show', compact('cart', 'delivery', 'state', 'subtotal', 'total'));
     }
 
@@ -77,17 +80,26 @@ class PaymentController extends Controller
 
         if ($paymentResult === 'failed') {
             session()->flash('message', 'Payment was not completed. Review your delivery details and try again.');
+
             return redirect()->route('guest.checkout');
         }
 
         $order = $this->completeAuthenticatedOrder();
         session()->put('last_order_id', $order->id);
         session()->flash('message', 'Demo payment successful. Order '.$order->id.' is paid.');
+
         return redirect()->route('order.index');
     }
 
-    public function callback(Request $request) { return response()->json(['status' => 'demo-payment']); }
-    public function redirect(Request $request) { return redirect()->route('billplz-create'); }
+    public function callback()
+    {
+        return response()->json(['status' => 'demo-payment']);
+    }
+
+    public function redirect()
+    {
+        return redirect()->route('billplz-create');
+    }
 
     private function completeAuthenticatedOrder(): Order
     {
@@ -117,36 +129,9 @@ class PaymentController extends Controller
                 $cart->delete();
             }
             event(new PurchaseCompleted($order));
+
             return $order;
         });
-    }
-
-    private function completeGuestOrder(): Order
-    {
-        $details = session('delivery_info');
-        $contents = SessionCart::instance('cart')->content();
-        $state = $details['state'];
-        $delivery = Config::get('shipping.price')[$state] ?? 10;
-        $subtotal = SessionCart::instance('cart')->subtotal();
-        $order = Order::create([
-            'id' => (string) Str::uuid(), 'email' => $details['email'],
-            'name' => $details['name'].' (G)', 'description' => 'Demo payment completed', 'delivery' => $delivery,
-            'status' => 1, 'amount' => $subtotal + $delivery, 'paid' => 'true', 'paid_at' => Carbon::now(),
-            'address' => $details['address'], 'postcode' => $details['postcode'], 'state' => $state, 'phone' => $details['phone'],
-        ]);
-
-        foreach ($contents as $cart) {
-            $product = Product::findOrFail($cart['id']);
-            abort_unless($product->status !== 2 && $product->canBeViewedBy(null), 404);
-            ProductOrder::create([
-                'id' => (string) Str::uuid(), 'billplz_id' => $order->id, 'product_id' => $product->id,
-                'title' => $product->title, 'price' => $product->price, 'quantity' => $cart['qty'],
-                'size' => $cart['options']['size'], 'color' => $cart['options']['color'], 'is_owner_purchase' => false,
-            ]);
-            $this->recordSale($product, $cart['qty'], false);
-        }
-        SessionCart::instance('cart')->destroy();
-        return $order;
     }
 
     private function recordSale(Product $product, int $quantity, bool $ownerPurchase): void
