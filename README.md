@@ -155,11 +155,8 @@ vendor/bin/pint
 
 Verified baseline on 2026-08-03:
 
+- `php artisan test` passes: 34 tests, 175 assertions.
 - `npm run build` passes; Vite reports an outdated `caniuse-lite` database.
-- `php artisan test` reports 34 passed, 2 failed, and 5 skipped/warned (41 tests, 159 assertions).
-- The stale `tests/Feature/ExampleTest.php` hits the database-backed home page without `RefreshDatabase`.
-- One `UnifiedCatalogTest` product-generation test fails because the fake public disk lacks the expected shared `mockups/shirt` directory during cleanup.
-- Five Jetstream API-token/account-deletion tests are skipped because those features are disabled.
 - PHPUnit warns that `phpunit.xml` uses a deprecated XML schema.
 
 See [`AGENTS.md`](AGENTS.md) for the current working conventions, known security/correctness risks, and change recipes.
@@ -183,6 +180,8 @@ The full codebase analysis is in the Dev Obsidian vault under `Projects/Hopexito
 - `08 Repository Map and Working Conventions`
 
 When those notes disagree with the current route list, file tree, migrations, or tests, the repository is the source of truth.
+
+The 2026-08-03 cleanup removed disabled API-token/account-deletion UI and tests, no-op broadcasting scaffolding/events, unused providers/config, unused pagination templates, and generated example tests. Historical migrations were retained.
 
 ## License
 

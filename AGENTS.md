@@ -13,10 +13,11 @@ This is a portfolio/demo application, not a production payment, fulfillment, or 
 - PHP 8.2+; Docker builds with PHP 8.3 Apache.
 - Laravel 11, Livewire 3.5, Blade, Alpine.js, Tailwind CSS 3.1, Vite 3.
 - Laravel Fortify and Jetstream for session authentication, registration, profile/password settings, browser sessions, and two-factor authentication.
-- Laravel Sanctum exposes only the authenticated `GET /api/user` endpoint; Jetstream API-token management, teams, and account deletion are disabled.
+- Laravel Sanctum exposes only the authenticated `GET /api/user` endpoint; Jetstream API-token management, teams, and account deletion are disabled and their unused UI/tests have been removed.
 - Intervention Image 2.7 with GD is the normal mockup backend. `MockupGenerator` has an FFmpeg fallback when GD is unavailable; FFmpeg is not a Composer dependency.
 - MySQL is the documented default. PHPUnit uses in-memory SQLite and array sessions.
 - There is no SPA, repository/domain package, queue worker, payment-provider integration, Socialite/Google OAuth flow, or full JSON API.
+- Application-level broadcasting is not configured; the old no-op broadcast events/provider/channel file were removed.
 
 ## Essential commands
 
@@ -126,7 +127,7 @@ The active checkout is authenticated despite the legacy `guest.checkout` and `bi
 1. `/checkout` stores delivery information in the session; authenticated users are prefilled from their profile.
 2. `/billplz` recomputes cart lines, subtotal, delivery, and total.
 3. `POST /billplz` accepts only `success` or `failed`.
-4. A success transaction creates the order and order lines, revalidates products, increments sold quantities, records external commissions, deletes cart lines, dispatches `PurchaseCompleted`, and stores `last_order_id`.
+4. A success transaction creates the order and order lines, revalidates products, increments sold quantities, records external commissions, deletes cart lines, and stores `last_order_id`.
 
 Base delivery rates are RM7 for most Malaysian states and RM16 for Sabah, Sarawak, and Labuan. Authenticated checkout adds RM3 above 1000g, RM6 above 1500g, and RM8 above 8000g; each item contributes 500g. There is no active guest order-completion path.
 
@@ -176,18 +177,13 @@ Avoid new abstractions, packages, or compatibility shims unless the existing cod
 
 ## Testing baseline (verified 2026-08-03)
 
-`php artisan test` currently reports 34 passed, 2 failed, and 5 skipped/warned (41 tests, 159 assertions):
-
-- `tests/Feature/ExampleTest.php` is the stale generated home-page smoke test. It does not use `RefreshDatabase`, so `/` queries missing in-memory `users`/`products` tables.
-- `tests/Feature/UnifiedCatalogTest.php::test_a_user_can_create_a_fixed_price_product_with_hoodie_color_variants` fails while the fake public disk lacks the expected shared `mockups/shirt` directory during filesystem cleanup.
-- Five Jetstream API-token/account-deletion tests are skipped because those features are disabled.
-- PHPUnit warns that `phpunit.xml` uses a deprecated XML schema.
+`php artisan test` currently reports 34 passed (175 assertions). The only output warning is that `phpunit.xml` uses a deprecated XML schema.
 
 `npm run build` passes. Vite warns that `caniuse-lite` is outdated. Report these baseline results explicitly; do not hide or “fix” them while making an unrelated change.
 
 ## Removed legacy code
 
-The current tree intentionally does not contain the old Searchbar, Wishlist, Inventory, TemporaryFile/upload endpoint, OrderController, PostPolicy, UserHasCheckout event, custom Pagination component, old standard-tee/oversized shop views, custom preview view, order-confirmation mail, or duplicate custom email notification. Historical migrations remain. Do not document or revive these as active extension points.
+The current tree intentionally does not contain the old Searchbar, Wishlist, Inventory, TemporaryFile/upload endpoint, OrderController, PostPolicy, UserHasCheckout event, custom Pagination component, old standard-tee/oversized shop views, custom preview view, order-confirmation mail, duplicate custom email notification, API-token/account-deletion UI and tests, no-op broadcast provider/events/channels, empty auth provider, Scout config, or generated example tests. Historical migrations remain because they are upgrade history. Do not document or revive removed code as active extension points.
 
 ## Obsidian project notes
 

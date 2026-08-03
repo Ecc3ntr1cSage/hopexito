@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\PurchaseCompleted;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
@@ -128,8 +127,6 @@ class PaymentController extends Controller
                 $this->recordSale($product, $cart->quantity, $ownerPurchase);
                 $cart->delete();
             }
-            event(new PurchaseCompleted($order));
-
             return $order;
         });
     }

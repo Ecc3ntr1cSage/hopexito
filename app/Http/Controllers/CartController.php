@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\AddedToCart;
 use App\Facades\SessionCart;
 use App\Models\Cart;
 use App\Models\Product;
@@ -58,8 +57,6 @@ class CartController extends Controller
                 'size' => $validated['size'],
                 'color' => $validated['color'],
             ]);
-            event(new AddedToCart($cart));
-
             session()->flash('message', 'Successfully added to cart');
 
             return $request->has('buy_now')

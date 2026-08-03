@@ -99,18 +99,6 @@
                         <div class="settings-wallet-slot">@livewire('wallet')</div>
                     </section>
 
-                    @if (Laravel\Jetstream\Jetstream::hasAccountDeletionFeatures())
-                        <section class="settings-section settings-danger-section settings-reveal settings-delay-three">
-                            <div class="settings-section-heading">
-                                <div>
-                                    <span class="settings-section-number">04 / Exit</span>
-                                    <h2>Leave with intention.</h2>
-                                </div>
-                                <p>Account deletion is permanent. Download anything you want to keep first.</p>
-                            </div>
-                            <div class="settings-livewire-card settings-danger-slot">@livewire('profile.delete-user-form')</div>
-                        </section>
-                    @endif
                 </div>
             </div>
         </div>
