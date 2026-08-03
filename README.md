@@ -1,59 +1,51 @@
 # Hopexito
 
-Hopexito is a Laravel 11 print-on-demand marketplace demo. Users create garment designs, generate color variants and mockups, publish products, discover other creators, buy products through a simulated checkout, manage orders, and earn commissions from external sales.
+Hopexito is a Laravel 11 print-on-demand marketplace demo. Users create garment designs, generate color variants and mockups, publish products, discover creators, add products to a cart, complete a simulated checkout, manage orders, sell designs, and earn creator commissions.
 
-> **Demo scope:** payment completion is simulated locally. This project is suitable for portfolio/demo use and is not a production-ready payment, fulfillment, or payout system.
+> Demo scope: payment completion is local and simulated. This is a portfolio/demo application, not a production payment, fulfillment, or payout system.
 
-[![Laravel](https://img.shields.io/badge/Laravel-11-red)](https://laravel.com)
-[![Livewire](https://img.shields.io/badge/Livewire-3-green)](https://livewire.laravel.com)
-[![Tailwind](https://img.shields.io/badge/Tailwind-3.1-blue)](https://tailwindcss.com)
+[![Laravel](https://img.shields.io/badge/Laravel-11-red)](https://laravel.com) [![Livewire](https://img.shields.io/badge/Livewire-3-green)](https://livewire.laravel.com) [![Tailwind](https://img.shields.io/badge/Tailwind-3.1-blue)](https://tailwindcss.com)
 
 ## Features
 
-- Product studio for Shirt, Sweatshirt, and Hoodie designs.
+- Product studio for shirts, sweatshirts, and hoodies.
 - Front-only, back-only, or two-sided artwork uploads.
-- Server-side mockup generation with Intervention Image/GD and an FFmpeg fallback path.
-- Fixed catalog prices and color variants.
-- Public or private products.
-- Product discovery, type filters, creator pages, and search history.
-- Guest session cart and authenticated database cart.
-- Login-time guest-cart merge.
-- Size/color selection, quantity management, and owner purchase discount.
-- Simulated successful/failed payment flow.
-- Order history and received-order status.
-- Creator sales dashboard and wallet commission ledger.
-- Google OAuth through Laravel Socialite.
-- Jetstream profile, email verification, password, browser-session, and two-factor flows.
-- Docker deployment image with Apache, PHP 8.3, Composer, and a production Vite build.
+- Server-side PNG mockup generation with Intervention Image/GD and an FFmpeg fallback.
+- Fixed catalog prices, configured colors, sizes, and public/private visibility.
+- Creator discovery, product-type filtering, creator pages, and search history.
+- Guest session cart and authenticated database cart with login-time merge.
+- Size/color selection, quantity changes, owner purchase discount, and simulated success/failure payment.
+- Order history, received status, creator sales, wallet commissions, and withdrawal UI.
+- Fortify/Jetstream registration, profile/password settings, browser sessions, and two-factor authentication.
+- Docker image with PHP 8.3 Apache and a production Vite build.
 
-## Catalog
+There is no active Google OAuth flow, email verification middleware, full product/order API, wishlist, inventory, or live payment integration.
 
-Defined in [`config/catalog.php`](config/catalog.php):
+## Catalog and business rules
 
-| Product | Price | Colors |
-|---|---:|---|
-| Shirt | RM35.00 | White, Black, Gray |
-| Sweatshirt | RM50.00 | White, Black, Gray |
-| Hoodie | RM70.00 | Black, Gray, Navy, Green |
+| Product | Key | Price | Colors |
+|---|---|---:|---|
+| Shirt | `shirt` | RM35.00 | White, Black, Gray |
+| Sweatshirt | `sweat` | RM50.00 | White, Black, Gray |
+| Hoodie | `hoodie` | RM70.00 | Black, Gray, Navy, Green |
 
-Available sizes are `XS`, `S`, `M`, `L`, `XL`, and `2XL`.
+Sizes are `XS`, `S`, `M`, `L`, `XL`, and `2XL`. The default creator commission is 15% and the editor canvas is 850×900.
 
-Business rules:
+- External buyers pay the fixed product price.
+- Owners pay 85% for their own products.
+- Owner purchases increase sold quantity but create no creator commission.
+- External purchases credit `product.price × product.commission_rate × quantity` to the creator wallet.
+- Product status `1` is active, `2` archived, and `3` pinned.
 
-- External purchases use the fixed catalog price.
-- Owners pay 85% of the fixed price for their own products.
-- External purchases credit the creator with the configured commission rate, normally 15%.
-- Owner purchases increase sold quantity but do not create creator earnings.
-- Products use status `1` active, `2` archived, and `3` pinned.
+Catalog values live in [`config/catalog.php`](config/catalog.php). Malaysian base shipping rates live in [`config/shipping.php`]; authenticated checkout adds weight surcharges in `PaymentController`.
 
 ## Requirements
 
-- PHP 8.2+.
-- Composer.
+- PHP 8.2+ and Composer.
 - Node.js and npm.
-- PHP GD extension for normal mockup generation.
-- MySQL for the documented local configuration, or SQLite for tests/local alternatives.
-- FFmpeg only when using the mockup generator fallback without GD.
+- PHP GD for normal mockup generation.
+- MySQL for the documented default, or SQLite for tests/local alternatives.
+- FFmpeg only when using the mockup fallback without GD.
 
 ## Installation
 
@@ -66,162 +58,119 @@ php artisan storage:link
 php artisan migrate --seed
 ```
 
-Configure the database and other services in `.env`. The example configuration targets MySQL and uses database-backed sessions.
+On PowerShell, use `Copy-Item .env.example .env`. Configure the database and other environment values in `.env`. The example configuration uses MySQL and database-backed sessions.
 
-Start the application:
+Start the app:
 
 ```bash
 php artisan serve
 ```
 
-Open [http://localhost:8000](http://localhost:8000).
+Open [http://localhost:8000](http://localhost:8000). Run `npm run dev` in another terminal for Vite hot reload.
 
-For frontend development with Vite hot reload, use a second terminal:
+Reset the deterministic demo database with:
 
 ```bash
-npm run dev
+php artisan migrate:fresh --seed
 ```
 
 ## Demo accounts
-
-The seeded demo database creates:
 
 | Account | Email | Password |
 |---|---|---|
 | Demo user | `user@demo.com` | `password` |
 | Test user | `user@test.com` | `password` |
 
-Reset the demo database with:
-
-```bash
-php artisan migrate:fresh --seed
-```
-
 ## Typical demo flow
 
-1. Open the home page or `/discover`.
-2. Search for a product or browse a creator page.
-3. Open a product, choose a size and color, then select **Add to bag** or **Buy now**.
-4. Review the cart and complete delivery information.
-5. On the payment page, choose the simulated success or failure result.
-6. A successful demo payment creates an order, order lines, sold-count updates, and creator commission records, then clears the authenticated cart.
-7. Log in as a creator to open the product workbench, sales page, or wallet.
+1. Browse `/` or `/discover`, search `/shop`, or open a creator page.
+2. Open a product, choose a size and color, then select **Add to bag** or **Buy now**.
+3. Review the cart and complete `/checkout` delivery information.
+4. On `/billplz`, choose the local simulated success or failure result.
+5. A successful result creates the order and lines, increments sold counts, records external commissions, and clears the authenticated cart.
+6. Open `/product/manage` for products, `/order/index` for orders/sales, or the dashboard wallet surface for commissions.
 
-To create a product:
+To create a product, log in, open `/product/create` (or a `/mockup/*` compatibility redirect), choose a garment and preview color, upload artwork, position/scale/rotate it, accept the rights confirmation, and submit. Hopexito generates one variant per configured color and redirects to the product page.
 
-1. Log in with a verified account.
-2. Open `/product/create` or one of the compatibility routes under `/mockup`.
-3. Select a garment type and preview color.
-4. Upload front and/or back artwork.
-5. Position, scale, and rotate the artwork in the studio.
-6. Accept the rights confirmation and submit.
-7. Hopexito creates one variant per configured garment color and redirects to the product page.
+## Current route surface
 
-## Application structure
+- Public: `/`, `/product/{product}`, `GET|POST /cart`, `/shop`, `/discover`, `/explore`, and `/{shopname}`.
+- Authenticated: `/dashboard`, `/mockup/standard-tee`, `/mockup/sweatshirt`, `/mockup/hoodie`, `/product/manage`, `/product/create`, product mutations, `/checkout`, `/billplz`, and `/billplz-redirect`.
+- Orders: `/order/index` is a Livewire page supporting authenticated history and the session’s last order.
+- API: authenticated `GET /api/user` only.
 
-```text
-app/
-├── Http/Controllers/       Page requests and commerce mutations
-├── Http/Livewire/          Cart, checkout, product, order, wallet, search UI
-├── Models/                 Users, products, variants, carts, orders, wallets
-├── Services/               SessionCart and MockupGenerator
-├── Support/                Mockup asset and geometry helpers
-├── Events/                 Cart and purchase domain events
-└── Listeners/              Login guest-cart merge
+Billplz route names remain for compatibility; they do not call Billplz.
 
-config/
-├── catalog.php             Product types, prices, colors, sizes, geometry
-└── shipping.php            Malaysia delivery rates
-
-database/
-├── migrations/             Legacy-to-unified schema history
-└── seeders/DatabaseSeeder.php
-
-public/mockups/             Shared garment templates
-resources/views/             Blade layouts, pages, Livewire, auth, vendor UI
-resources/js/                App and mockup-studio JavaScript
-resources/css/               Tailwind/application styles
-routes/web.php              Main web routes (active cart index/store routes only)
-routes/api.php              Minimal Sanctum user endpoint
-tests/                      PHPUnit feature and unit tests
-Dockerfile                  Multi-stage production image
-AGENTS.md                   Project-specific coding-agent guide
-```
-
-## Architecture notes
+## Architecture
 
 Hopexito is a server-rendered Laravel monolith:
 
-- Blade renders pages and layouts.
-- Livewire provides interactive server-backed components.
-- Controllers coordinate request validation and domain workflows.
-- Eloquent models persist application state.
+- Controllers coordinate requests, validation, and commerce mutations.
+- Livewire provides interactive cart, delivery, product-management, order/sales, and wallet surfaces.
+- Blade renders layouts and pages.
+- Eloquent stores users, products, variants, carts, orders, order lines, wallets, wallet transactions, and searches.
 - `SessionCart` stores unauthenticated cart contents in the session.
 - `MockupGenerator` composites artwork onto shared garment templates.
-- Authenticated cart lines, orders, order lines, wallets, and wallet transactions are database records.
+- `routes/web.php` and `routes/api.php` define the active application surface.
 
-The primary application is a web UI. The API currently contains only the Sanctum-authenticated `/api/user` route. Obsolete wishlist, inventory, legacy upload, old searchbar, empty order-controller, and unused view/component files have been removed; see the project notes for the cleanup record.
+Important files:
+
+| File | Responsibility |
+|---|---|
+| `config/catalog.php` | Catalog, pricing, colors, sizes, commission, geometry |
+| `config/shipping.php` | Malaysian state shipping prices |
+| `app/Http/Controllers/ProductsController.php` | Product studio and product mutations |
+| `app/Services/MockupGenerator.php` | Image composition and generated PNGs |
+| `app/Http/Controllers/CartController.php` | Cart input validation and price calculation |
+| `app/Http/Controllers/PaymentController.php` | Demo orders, sold counts, and commissions |
+| `app/Services/SessionCart.php` | Guest session cart |
+| `app/Listeners/MergeGuestCartIntoUserCart.php` | Login cart merge |
+| `app/Models/Product.php` | Visibility, image accessors, and media cleanup |
+| `database/migrations/` | Schema history |
+| `database/seeders/DatabaseSeeder.php` | Demo data |
 
 ## Storage and media
 
-- Shared mockups are committed under `public/mockups/{shirt|sweat|hoodie}`.
-- Generated product images are stored on Laravel's public disk under `products/{product_id}/...`.
-- Run `php artisan storage:link` so generated images are available through `public/storage`.
-- Product deletion removes generated files but preserves shared `public/mockups` templates.
+- Shared templates are committed under `public/mockups/{shirt|sweat|hoodie}`.
+- Generated images are stored under `storage/app/public/products/{product_id}`.
+- Run `php artisan storage:link` to expose generated images through `public/storage`.
+- Product deletion removes generated files but preserves paths beginning with `mockups/`.
 
 ## Docker
-
-Build and run the production image with your platform's database environment configured:
 
 ```bash
 docker build -t hopexito .
 docker run --env-file .env -p 10000:10000 hopexito
 ```
 
-The image:
-
-- Uses PHP 8.3 Apache with the document root set to `public`.
-- Installs GD, bcmath, DOM, intl, PDO MySQL/PostgreSQL, and zip.
-- Builds frontend assets in a Node 22 stage.
-- Runs migrations, caches config/routes/views, creates the storage link, and starts Apache from `docker/entrypoint.sh`.
-- Expects the database to be reachable during container startup.
-
-The container does not run the demo seeder.
+The multi-stage image uses PHP 8.3 Apache, Node 22 for the Vite build, and a runtime entrypoint that creates the storage link, runs `php artisan migrate --force`, caches config/routes/views, and starts Apache. It expects database connectivity at startup and does not run the demo seeder.
 
 ## Tests and build
 
-Run the test suite:
-
 ```bash
 php artisan test
-```
-
-Build production frontend assets:
-
-```bash
 npm run build
+vendor/bin/pint
 ```
 
-Current repository baseline: the core feature tests pass, but the untouched generated `tests/Feature/ExampleTest.php` fails because it requests the database-backed home page without using `RefreshDatabase`. Five Jetstream tests are skipped because API tokens and account deletion are disabled in `config/jetstream.php`. See [`AGENTS.md`](AGENTS.md) and the project notes for details.
+Verified baseline on 2026-08-03:
 
-## Configuration reference
+- `npm run build` passes; Vite reports an outdated `caniuse-lite` database.
+- `php artisan test` reports 34 passed, 2 failed, and 5 skipped/warned (41 tests, 159 assertions).
+- The stale `tests/Feature/ExampleTest.php` hits the database-backed home page without `RefreshDatabase`.
+- One `UnifiedCatalogTest` product-generation test fails because the fake public disk lacks the expected shared `mockups/shirt` directory during cleanup.
+- Five Jetstream API-token/account-deletion tests are skipped because those features are disabled.
+- PHPUnit warns that `phpunit.xml` uses a deprecated XML schema.
 
-| File | Responsibility |
-|---|---|
-| `config/catalog.php` | Garment types, fixed prices, colors, sizes, commission, geometry. |
-| `config/shipping.php` | Malaysian state rates and weight rules. |
-| `config/auth.php` | Web session guard and Eloquent user provider. |
-| `config/jetstream.php` | Livewire stack and enabled Jetstream features. |
-| `config/services.php` | Google OAuth and other external service settings. |
-| `.env` | Environment, database, mail, session, filesystem, and credentials. |
+See [`AGENTS.md`](AGENTS.md) for the current working conventions, known security/correctness risks, and change recipes.
 
-## Legacy compatibility
+## Migration note
 
-Billplz-named routes remain for old links, but current order completion is local and simulated. Several old migration/model/view files remain because the project was consolidated from an earlier artist/custom-product design. The 2026 migrations unify creator identity and catalog products around `users`, `products`, and `product_variants`.
+The migration history contains destructive cleanup of the old artist/catalog schema. The current tree includes a pending `2026_08_03_000001_remove_google_and_mail_columns.php` migration that removes legacy Google/email-verification/password-reset columns. Run migrations before using an existing database and do not edit historical migrations.
 
 ## Documentation
 
-A comprehensive codebase analysis is stored in the **Dev** Obsidian vault under `Projects/Hopexito`:
+The full codebase analysis is in the Dev Obsidian vault under `Projects/Hopexito`:
 
 - `00 Project Overview`
 - `01 Architecture`
@@ -233,8 +182,8 @@ A comprehensive codebase analysis is stored in the **Dev** Obsidian vault under 
 - `07 Testing and Known Issues`
 - `08 Repository Map and Working Conventions`
 
-Start with [`AGENTS.md`](AGENTS.md) when making code changes.
+When those notes disagree with the current route list, file tree, migrations, or tests, the repository is the source of truth.
 
-## License and attribution
+## License
 
-This project is licensed under the MIT license. Original project attribution: [SuPatee](https://github.com/supatee).
+MIT. Original project attribution: [SuPatee](https://github.com/supatee).
