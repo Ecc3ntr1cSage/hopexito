@@ -103,11 +103,11 @@
                     </a>
                     <p class="cart-summary-note">Secure demo checkout. You will choose a simulated payment result on the next step.</p>
                 @else
-                    <button class="cart-primary-action cart-checkout-action" type="button" @click="$dispatch('open-auth', { mode: 'login' })" aria-haspopup="dialog">
+                    <button class="cart-primary-action cart-checkout-action" type="button" @click="$dispatch('open-auth')" aria-haspopup="dialog">
                         Log in to continue
                         <span aria-hidden="true">&rarr;</span>
                     </button>
-                    <p class="cart-summary-note">Log in or create an account before continuing to checkout.</p>
+                    <p class="cart-summary-note">Log in before continuing to checkout.</p>
                 @endauth
                 <div class="cart-trust-row">
                     <span>01</span><span>Small-batch pieces</span>

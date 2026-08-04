@@ -62,8 +62,8 @@
     {{-- Global Nav Menu --}}
     @livewire('navigation-menu')
     {{ $slot }}
-    @unless(request()->routeIs('login') || request()->routeIs('register'))
-        <x-auth-modal :initial-mode="request()->query('auth', 'login')" />
+    @unless(request()->routeIs('login'))
+        <x-auth-modal />
     @endunless
     @stack('modals')
     @livewireScriptConfig

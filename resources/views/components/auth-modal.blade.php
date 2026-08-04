@@ -1,19 +1,15 @@
 @props([
-    'initialMode' => 'login',
     'forceOpen' => false,
 ])
 
 @php
-    $requestedMode = request()->query('auth');
-    $open = $forceOpen || $requestedMode === 'login';
+    $open = $forceOpen || request()->query('auth') === 'login';
 @endphp
 
 <div
     x-data="{
         open: @js($open),
-        mode: @js($initialMode),
-        openAuth(detail = {}) {
-            this.mode = detail.mode || 'login';
+        openAuth() {
             this.open = true;
             this.$nextTick(() => this.$refs.authDialog?.focus());
         },
@@ -21,7 +17,6 @@
             this.open = false;
         },
         fillCredentials(email) {
-            this.mode = 'login';
             this.open = true;
             this.$nextTick(() => {
                 this.$refs.loginEmail.value = email;
@@ -30,19 +25,18 @@
             });
         }
     }"
-    x-on:open-auth.window="openAuth($event.detail)"
+    x-on:open-auth.window="openAuth()"
     x-on:keydown.escape.window="if (open) closeAuth()"
     x-effect="document.body.classList.toggle('auth-modal-open', open)"
     class="auth-modal-root"
     >
-    @if (! app()->environment('production'))
-        <aside
-            x-cloak
-            x-show="open && mode === 'login'"
-            x-transition
-            class="demo-credentials-panel"
-            aria-label="Demo login accounts"
-        >
+    <aside
+        x-cloak
+        x-show="open"
+        x-transition
+        class="demo-credentials-panel"
+        aria-label="Demo login accounts"
+    >
             <div class="demo-credentials-heading">
                 <span class="demo-credentials-kicker">Quick access</span>
                 <span class="demo-credentials-dot" aria-hidden="true"></span>
@@ -60,8 +54,7 @@
                 </button>
             </div>
             <span class="demo-credentials-password">Password for both: <b>password</b></span>
-        </aside>
-    @endif
+    </aside>
 
     <div
         x-cloak
@@ -107,11 +100,9 @@
 
                 <div class="auth-modal-heading">
                     <h1 id="auth-modal-title">
-                        <span x-show="mode === 'login'">Log in to HopeXito</span>
-                        <span x-show="mode === 'register'" x-cloak>Create your HopeXito account</span>
+                        Log in to HopeXito
                     </h1>
-                    <p x-show="mode === 'login'">Pick up where you left off.</p>
-                    <p x-show="mode === 'register'" x-cloak>Join the marketplace before you place an order.</p>
+                    <p>Pick up where you left off.</p>
                 </div>
 
                 @if (session('status'))
@@ -129,7 +120,7 @@
                     </div>
                 @endif
 
-                <form x-show="mode === 'login'" method="POST" action="{{ route('login') }}" class="auth-modal-form">
+                <form method="POST" action="{{ route('login') }}" class="auth-modal-form">
                     @csrf
                     <div class="auth-field">
                         <label for="auth-login-email">Email</label>
@@ -156,53 +147,15 @@
                     <button type="submit" class="auth-submit">Log in <span aria-hidden="true">↗</span></button>
                 </form>
 
-                <form x-show="mode === 'register'" x-cloak method="POST" action="{{ route('register.store') }}" class="auth-modal-form">
-                    @csrf
-                    <div class="auth-field">
-                        <label for="auth-register-name">Name</label>
-                        <input id="auth-register-name" type="text" name="name" value="{{ old('name') }}" autocomplete="name" required>
-                        @error('name') <span class="auth-field-error">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="auth-field">
-                        <label for="auth-register-email">Email</label>
-                        <input id="auth-register-email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required>
-                        @error('email') <span class="auth-field-error">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="auth-field-pair">
-                        <div class="auth-field">
-                            <label for="auth-register-password">Password</label>
-                            <input id="auth-register-password" type="password" name="password" autocomplete="new-password" required>
-                        </div>
-                        <div class="auth-field">
-                            <label for="auth-register-password-confirmation">Confirm password</label>
-                            <input id="auth-register-password-confirmation" type="password" name="password_confirmation" autocomplete="new-password" required>
-                        </div>
-                    </div>
-                    @error('password') <span class="auth-field-error">{{ $message }}</span> @enderror
-
-                    <button type="submit" class="auth-submit">Create account <span aria-hidden="true">&rarr;</span></button>
-                </form>
-
-                <p class="auth-modal-switch" x-show="mode === 'login'">
-                    New to HopeXito?
-                    <button type="button" @click="mode = 'register'">Create an account</button>
-                </p>
-                <p class="auth-modal-switch" x-show="mode === 'register'" x-cloak>
-                    Already have an account?
-                    <button type="button" @click="mode = 'login'">Log in</button>
-                </p>
             </div>
 
-            @if (! app()->environment('production'))
-                <aside
-                    x-cloak
-                    x-show="open && mode === 'login'"
-                    x-transition
-                    class="demo-credentials-panel demo-credentials-mobile"
-                    aria-label="Demo login accounts"
-                >
+            <aside
+                x-cloak
+                x-show="open"
+                x-transition
+                class="demo-credentials-panel demo-credentials-mobile"
+                aria-label="Demo login accounts"
+            >
                     <div class="demo-credentials-heading">
                         <span class="demo-credentials-kicker">Quick access</span>
                         <span class="demo-credentials-dot" aria-hidden="true"></span>
@@ -220,8 +173,7 @@
                         </button>
                     </div>
                     <span class="demo-credentials-password">Password for both: <b>password</b></span>
-                </aside>
-            @endif
+            </aside>
         </section>
     </div>
 </div>

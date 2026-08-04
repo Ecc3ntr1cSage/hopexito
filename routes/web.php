@@ -12,6 +12,7 @@ use App\Http\Livewire\Manage\ManageProduct;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StorefrontController::class, 'home'])->name('home');
+Route::redirect('register', '/')->name('register');
 // billplz controller
 Route::get('billplz-callback', [PaymentController::class, 'callback'])->name('billplz-callback');
 Route::get('order/index', ManageOrder::class)->name('order.index');

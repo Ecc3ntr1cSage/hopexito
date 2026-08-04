@@ -130,7 +130,6 @@ return [
     */
 
     'features' => [
-        Features::registration(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),
         Features::twoFactorAuthentication([

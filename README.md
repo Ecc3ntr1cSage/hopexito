@@ -16,7 +16,7 @@ Hopexito is a Laravel 11 print-on-demand marketplace demo. Users create garment 
 - Guest session cart and authenticated database cart with login-time merge.
 - Size/color selection, quantity changes, owner purchase discount, and simulated success/failure payment.
 - Order history, received status, creator sales, wallet commissions, and withdrawal UI.
-- Fortify/Jetstream registration, profile/password settings, browser sessions, and two-factor authentication.
+- Fortify/Jetstream authentication, profile/password settings, browser sessions, and two-factor authentication.
 - Docker image with PHP 8.3 Apache and a production Vite build.
 
 There is no active Google OAuth flow, email verification middleware, full product/order API, wishlist, inventory, or live payment integration.

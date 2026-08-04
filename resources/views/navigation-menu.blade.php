@@ -6,7 +6,7 @@
             @auth
                 <a href="{{ route('product.create') }}" class="nav-create">Create <span aria-hidden="true">&nearr;</span></a>
             @else
-                <a href="{{ route('home', ['auth' => 'login']) }}" class="nav-create" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Create now <span aria-hidden="true">&nearr;</span></a>
+                <a href="{{ route('home', ['auth' => 'login']) }}" class="nav-create" @click.prevent="$dispatch('open-auth')">Create now <span aria-hidden="true">&nearr;</span></a>
             @endauth
         </div>
         <div class="site-nav-account">
@@ -31,7 +31,7 @@
                 </div>
                 @livewire('cart.cart-counter')
             @else
-                <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in</a>
+                <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="$dispatch('open-auth')">Log in</a>
                 @livewire('cart.cart-counter')
             @endauth
         </div>
@@ -53,8 +53,8 @@
                 </form>
             </div>
         @else
-            <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth', { mode: 'login' })">Create now <span aria-hidden="true">&nearr;</span></a>
-            <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth', { mode: 'login' })">Log in</a>
+            <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth')">Create now <span aria-hidden="true">&nearr;</span></a>
+            <a href="{{ route('home', ['auth' => 'login']) }}" @click.prevent="open = false; $dispatch('open-auth')">Log in</a>
         @endauth
     </div>
 </nav>

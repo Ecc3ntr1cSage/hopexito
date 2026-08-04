@@ -311,16 +311,14 @@
 .auth-field input::placeholder { color: #73766f; }
 .auth-field input:focus { background: #151816; border-color: #ff82b8; box-shadow: 0 0 0 3px rgba(255, 130, 184, .12); }
 .auth-field-label-row { align-items: center; display: flex; justify-content: space-between; }
-.auth-field-label-row a, .auth-modal-switch button { background: none; border: 0; color: #ff82b8; cursor: pointer; font-size: 11px; padding: 0; text-decoration: none; }
-.auth-field-label-row a:hover, .auth-modal-switch button:hover { text-decoration: underline; }
+.auth-field-label-row a { color: #ff82b8; font-size: 11px; text-decoration: none; }
+.auth-field-label-row a:hover { text-decoration: underline; }
 .auth-field-error { color: #ff9fc7; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; line-height: 1.4; }
-.auth-field-pair { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
 .auth-check { align-items: center; color: #9b9d98; display: flex; gap: 9px; line-height: 1.4; }
 .auth-check input { accent-color: #ff82b8; height: 16px; margin: 0; width: 16px; }
 .auth-submit { align-items: center; background: #ff82b8; border: 1px solid #ff82b8; color: #171a18; cursor: pointer; display: flex; font-size: 13px; font-weight: 600; justify-content: space-between; min-height: 50px; padding: 0 16px; transition: background .2s ease, transform .2s ease; }
 .auth-submit:hover { background: #ffb1d2; }
 .auth-submit:active { transform: translateY(1px); }
-.auth-modal-switch { color: #9b9d98; font-size: 12px; margin: 24px 0 0; text-align: center; }
 .auth-modal-root :focus-visible { outline: 2px solid #ff82b8; outline-offset: 3px; }
 .auth-modal-enter, .auth-modal-leave { transition: opacity .2s ease; }
 .auth-modal-enter-start, .auth-modal-leave-end { opacity: 0; }
@@ -351,7 +349,6 @@ body.auth-modal-open { overflow: hidden; }
     .auth-modal-aside { display: none; }
     .auth-modal-main { padding: 22px 20px 26px; }
     .auth-modal-heading { margin: 35px 0 24px; }
-    .auth-field-pair { grid-template-columns: 1fr; }
     .demo-credentials-panel { bottom: auto; left: 12px; right: 12px; top: 12px; width: auto; }
     .demo-credentials-panel:not(.demo-credentials-mobile) { display: none; }
     .demo-credentials-mobile { display: block; left: auto; margin: 0 20px 22px; position: static; right: auto; width: auto; }

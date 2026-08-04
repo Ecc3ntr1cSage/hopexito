@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -30,7 +29,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Fortify::createUsersUsing(CreateNewUser::class);
+        Fortify::loginView(fn () => redirect()->route('home'));
         Fortify::updateUserProfileInformationUsing(UpdateUserProfileInformation::class);
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
 

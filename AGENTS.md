@@ -12,7 +12,7 @@ This is a portfolio/demo application, not a production payment, fulfillment, or 
 
 - PHP 8.2+; Docker builds with PHP 8.3 Apache.
 - Laravel 11, Livewire 3.5, Blade, Alpine.js, Tailwind CSS 3.1, Vite 3.
-- Laravel Fortify and Jetstream for session authentication, registration, profile/password settings, browser sessions, and two-factor authentication.
+- Laravel Fortify and Jetstream for session authentication, profile/password settings, browser sessions, and two-factor authentication.
 - Laravel Sanctum exposes only the authenticated `GET /api/user` endpoint; Jetstream API-token management, teams, and account deletion are disabled and their unused UI/tests have been removed.
 - Intervention Image 2.7 with GD is the normal mockup backend. `MockupGenerator` has an FFmpeg fallback when GD is unavailable; FFmpeg is not a Composer dependency.
 - MySQL is the documented default. PHPUnit uses in-memory SQLite and array sessions.

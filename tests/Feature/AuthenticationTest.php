@@ -11,19 +11,19 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_login_screen_can_be_rendered()
+    public function test_login_route_redirects_home()
     {
         $response = $this->get('/login');
 
-        $response->assertStatus(200)
-            ->assertSee('DemoUser')
-            ->assertSee('TestUser')
-            ->assertSee('user@demo.com')
-            ->assertSee('user@test.com')
-            ->assertSee('fillCredentials');
+        $response->assertRedirect(route('home'));
     }
 
-    public function test_users_can_authenticate_using_the_login_screen()
+    public function test_register_route_redirects_home()
+    {
+        $this->get('/register')->assertRedirect(route('home'));
+    }
+
+    public function test_users_can_authenticate()
     {
         $user = User::factory()->create();
 

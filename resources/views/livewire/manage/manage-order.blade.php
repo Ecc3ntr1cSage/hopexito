@@ -233,7 +233,7 @@
                     <span class="orders-empty-mark" aria-hidden="true">/</span>
                     <h2>Sign in to see your sales</h2>
                     <p>Your creator sales and earnings are available from your account.</p>
-                    <a href="{{ route('home', ['auth' => 'login']) }}" class="orders-empty-action" @click.prevent="$dispatch('open-auth', { mode: 'login' })">Log in <span aria-hidden="true">&nearr;</span></a>
+                    <a href="{{ route('home', ['auth' => 'login']) }}" class="orders-empty-action" @click.prevent="$dispatch('open-auth')">Log in <span aria-hidden="true">&nearr;</span></a>
                 </div>
             @endauth
         </section>
