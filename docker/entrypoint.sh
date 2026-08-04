@@ -17,7 +17,7 @@ if [ ! -e public/storage ]; then
     php artisan storage:link
 fi
 
-php artisan migrate --force
+php artisan migrate:fresh --seed --force
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
